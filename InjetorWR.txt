@@ -41,8 +41,9 @@ local function findNearestEnemy()
 end
 
 -- Adiciona um botão para teleportar para o inimigo no UI
-local teleportToEnemyButton = UI:Button{
+local teleportToEnemyButton = QuitDivider:Button{
     Name = "Teleportar para o Inimigo",
+    Size = UDim2.new(0, 200, 0, 50), -- Defina o tamanho desejado
     Callback = function()
         local nearestEnemy = findNearestEnemy()
 
