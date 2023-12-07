@@ -1,48 +1,75 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
 
 local UI = Lib:Create{
     Theme = "Dark", -- ou qualquer outro tema
-    Size = UDim2.new(0, 1, 0, 1) -- padrão
+    Size = UDim2.new(0, 555, 0, 400) -- padrão
 }
 
 local QuitDivider = UI:Tab{
     Name = "Sair"
 }
 
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
 
--- Variável para controlar se o teleporte está ativado
-local teleportEnabled = false
-
--- Função para teleportar o jogador para a posição do clique ou toque
-local function teleportToInputPosition(input)
-    local player = Players.LocalPlayer
-
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        local inputPosition = input.Position
-        local ray = workspace.CurrentCamera:ScreenPointToRay(inputPosition.X, inputPosition.Y)
-        local hitResult = workspace:Raycast(ray.Origin, ray.Direction * 1000)
-
-        -- Se atingir algo, teleportar o jogador para a posição do clique ou toque
-        if hitResult then
-            player.Character:SetPrimaryPartCFrame(CFrame.new(hitResult.Position + Vector3.new(0, 5, 0)))
-        end
-    end
+-- Função para verificar se um jogador é um inimigo
+local function isEnemy(otherPlayer)
+    return otherPlayer.TeamColor ~= player.TeamColor
 end
 
--- Adiciona um botão de ativação no UI
-local teleportButton = UI:Button{
-    Name = "Ativar Teleporte",
+-- Função para encontrar o inimigo mais próximo
+local function findNearestEnemy()
+    local closestEnemy = nil
+    local shortestDistance = math.huge
+
+    for _, otherPlayer in pairs(Players:GetPlayers()) do
+        if otherPlayer ~= player and isEnemy(otherPlayer) then
+            local distance = (player.Character and player.Character:FindFirstChild("HumanoidRootPart") and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart")) and
+                             (player.Character.HumanoidRootPart.Position - otherPlayer.Character.HumanoidRootPart.Position).Magnitude or math.huge
+
+            if distance < shortestDistance then
+                shortestDistance = distance
+                closestEnemy = otherPlayer
+            end
+        end
+    end
+
+    return closestEnemy
+end
+
+-- Adiciona um botão para teleportar para o inimigo no UI
+local teleportToEnemyButton = UI:Button{
+    Name = "Teleportar para o Inimigo",
     Callback = function()
-        teleportEnabled = not teleportEnabled
-        print("Teleporte ativado: " .. tostring(teleportEnabled))
+        local nearestEnemy = findNearestEnemy()
+
+        if nearestEnemy then
+            -- Teleportar para o inimigo (a um metro de distância)
+            player.Character:SetPrimaryPartCFrame(CFrame.new(nearestEnemy.Character.HumanoidRootPart.Position + Vector3.new(0, 1, 0)))
+            print("Teleportado para o inimigo: " .. nearestEnemy.Name)
+        else
+            print("Nenhum inimigo próximo encontrado.")
+        end
     end
 }
 
 -- Manipulador de eventos para o clique do mouse ou toque
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     if not gameProcessedEvent then
-        teleportToInputPosition(input)
+        -- Verifique se o input foi para teleportar para o inimigo
+        if input.UserInputType == Enum.UserInputType.MouseButton2 or input.UserInputType == Enum.UserInputType.Touch then
+            local nearestEnemy = findNearestEnemy()
+
+            if nearestEnemy then
+                -- Teleportar para o inimigo (a um metro de distância)
+                player.Character:SetPrimaryPartCFrame(CFrame.new(nearestEnemy.Character.HumanoidRootPart.Position + Vector3.new(0, 1, 0)))
+                print("Teleportado para o inimigo: " .. nearestEnemy.Name)
+            else
+                print("Nenhum inimigo próximo encontrado.")
+            end
+        end
     end
 end)
