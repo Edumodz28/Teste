@@ -2,13 +2,10 @@ local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwar
 
 local UI = Lib:Create{
     Theme = "Dark", -- ou qualquer outro tema
-    Size = UDim2.new(0, 555, 0, 400) -- padrão
+    Size = UDim2.new(0, 0, 0, 0) -- padrão
 }
 
-local UI = Lib:Create{
-    Theme = "Dark", -- or any other theme
-    Size = UDim2.new(0, 555, 0, 400) -- default
- }
+
  
  
  local QuitDivider = Main:Divider{
