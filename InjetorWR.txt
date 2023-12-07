@@ -69,7 +69,3 @@ game:GetService("UserInputService").InputBegan:Connect(function(Input, GameProce
         end
     end
 end)
-
-        end
-    end
-end)
