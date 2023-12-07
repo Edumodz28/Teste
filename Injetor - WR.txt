@@ -1,53 +1,100 @@
-Hora do crash: 2023/11/03-22:33:57
-Fabricante do celular: Xiaomi
-Modelo do celular: M2101K7AI
-CPU arquitetura: armeabi-v7a
-Android versão: 12
-Android SDK versão: 31
-App versão: L2.0
+--Abaixo estará Lib da nossa Ui
 
-java.lang.IllegalStateException: The content of the adapter has changed but ListView did not receive a notification. Make sure the content of your adapter is not modified from a background thread, but only from the UI thread. Make sure your adapter calls notifyDataSetChanged() when its content changes. [in ListView(-1, class android.widget.ListView) with Adapter(class com.DCPC.SetPro.GdumpList)]
-	at android.widget.ListView.layoutChildren(ListView.java:1717)
-	at android.widget.AbsListView.onLayout(AbsListView.java:2218)
-	at android.view.View.layout(View.java:23565)
-	at android.view.ViewGroup.layout(ViewGroup.java:6452)
-	at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1829)
-	at android.widget.LinearLayout.layoutHorizontal(LinearLayout.java:1818)
-	at android.widget.LinearLayout.onLayout(LinearLayout.java:1584)
-	at android.view.View.layout(View.java:23565)
-	at android.view.ViewGroup.layout(ViewGroup.java:6452)
-	at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1829)
-	at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1673)
-	at android.widget.LinearLayout.onLayout(LinearLayout.java:1582)
-	at android.view.View.layout(View.java:23565)
-	at android.view.ViewGroup.layout(ViewGroup.java:6452)
-	at android.widget.FrameLayout.layoutChildren(FrameLayout.java:332)
-	at android.widget.FrameLayout.onLayout(FrameLayout.java:270)
-	at android.view.View.layout(View.java:23565)
-	at android.view.ViewGroup.layout(ViewGroup.java:6452)
-	at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1829)
-	at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1673)
-	at android.widget.LinearLayout.onLayout(LinearLayout.java:1582)
-	at android.view.View.layout(View.java:23565)
-	at android.view.ViewGroup.layout(ViewGroup.java:6452)
-	at android.widget.FrameLayout.layoutChildren(FrameLayout.java:332)
-	at android.widget.FrameLayout.onLayout(FrameLayout.java:270)
-	at com.android.internal.policy.DecorView.onLayout(DecorView.java:865)
-	at android.view.View.layout(View.java:23565)
-	at android.view.ViewGroup.layout(ViewGroup.java:6452)
-	at android.view.ViewRootImpl.performLayout(ViewRootImpl.java:3849)
-	at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:3299)
-	at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:2263)
-	at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:8990)
-	at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1144)
-	at android.view.Choreographer.doCallbacks(Choreographer.java:948)
-	at android.view.Choreographer.doFrame(Choreographer.java:877)
-	at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:1129)
-	at android.os.Handler.handleCallback(Handler.java:938)
-	at android.os.Handler.dispatchMessage(Handler.java:99)
-	at android.os.Looper.loopOnce(Looper.java:210)
-	at android.os.Looper.loop(Looper.java:299)
-	at android.app.ActivityThread.main(ActivityThread.java:8302)
-	at java.lang.reflect.Method.invoke(Native Method)
-	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:556)
-	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1037)
+local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Team = LocalPlayer.TeamColor
+
+local UI = Lib:Create{
+    Theme = "Dark", -- or any other theme
+    Size = UDim2.new(0, 555, 0, 400) -- default
+ }
+ 
+ local Main = UI:Tab{
+    Name = "Inicio"
+ }
+ 
+ local Divider = Main:Divider{
+    Name = "Inicio shit"
+ }
+ 
+ local QuitDivider = Main:Divider{
+    Name = "Sair"
+ }
+
+ local KillAll = Divider:Button{
+    Name = "ESP",
+    Description = "ESP ATIVADO",
+    Callback = local function ESP(Player)
+        if Player.TeamColor ~= Team then
+            local Box = Instance.new("BoxHandleAdornment")
+            Box.Size = Player.Character.HumanoidRootPart.Size + Vector3.new(0.1, 0.1, 0.1)
+            Box.Adornee = Player.Character.HumanoidRootPart
+            Box.AlwaysOnTop = true
+            Box.ZIndex = 5
+            Box.Transparency = 0.5
+            Box.Color3 = Color3.new(1, 0, 0)
+            Box.Parent = Player.Character.HumanoidRootPart
+        end
+    end
+ }
+
+ local KillAll = Divider:Button{
+    Name = "FOV ESP",
+    Description = "FOV ESP ATIVADO!",
+    Callback = local function FOV(Player)
+        if Player.TeamColor ~= Team then
+            local FOV = Instance.new("SelectionBox")
+            FOV.LineThickness = 0.05
+            FOV.Color3 = Color3.new(1, 0, 0)
+            FOV.Transparency = 0.5
+            FOV.Adornee = Player.Character.HumanoidRootPart
+            FOV.Parent = Player.Character.HumanoidRootPart
+        end
+    end
+    
+    local function DisableESP()
+        for _, Player in pairs(Players:GetPlayers()) do
+            if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment"):Destroy()
+            end
+        end
+    end
+    
+    local function DisableFOV()
+        for _, Player in pairs(Players:GetPlayers()) do
+            if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox"):Destroy()
+            end
+        end
+    end
+    end
+ }
+
+ ESP(LocalPlayer)
+FOV(LocalPlayer)
+
+Players.PlayerAdded:Connect(function(Player)
+    ESP(Player)
+    FOV(Player)
+end)
+
+Players.PlayerRemoving:Connect(function(Player)
+    if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+        Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment"):Destroy()
+        Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox"):Destroy()
+    end
+end)
+
+game:GetService("UserInputService").InputBegan:Connect(function(Input, GameProcessed)
+    if Input.KeyCode == Enum.KeyCode.P then
+        if ESPEnabled then
+            DisableESP()
+            DisableFOV()
+            ESPEnabled = false
+        else
+            ESPEnabled = true
+        end
+    end
+end)
