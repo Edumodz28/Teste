@@ -9,7 +9,7 @@ local UI = Lib:Create{
  
  
  local QuitDivider = Main:Divider{
-    Name = "Sair"
+    Name = "Sai r"
  }
 
 local Players = game:GetService("Players")
