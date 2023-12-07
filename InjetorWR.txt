@@ -5,20 +5,15 @@ local UI = Lib:Create{
     Size = UDim2.new(0, 555, 0, 400) -- padrão
 }
 
-local QuitDivider
-
--- Adicione as guias e dividers conforme necessário
-local Main = UI:Tab{
-    Name = "Inicio"
-}
-
-local Divider = Main:Divider{
-    Name = "Inicio shit"
-}
-
-QuitDivider = Main:Divider{
+local UI = Lib:Create{
+    Theme = "Dark", -- or any other theme
+    Size = UDim2.new(0, 555, 0, 400) -- default
+ }
+ 
+ 
+ local QuitDivider = Main:Divider{
     Name = "Sair"
-}
+ }
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
