@@ -29,19 +29,10 @@ local function FOV(Player)
     end
 end
 
-local function DisableESP()
-    for _, Player in pairs(Players:GetPlayers()) do
-        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment"):Destroy()
-        end
-    end
-end
-
-local function DisableFOV()
-    for _, Player in pairs(Players:GetPlayers()) do
-        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox"):Destroy()
-        end
+local function DisableESP(Player)
+    if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+        Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment"):Destroy()
+        Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox"):Destroy()
     end
 end
 
@@ -51,10 +42,7 @@ Players.PlayerAdded:Connect(function(Player)
 end)
 
 Players.PlayerRemoving:Connect(function(Player)
-    if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-        Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment"):Destroy()
-        Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox"):Destroy()
-    end
+    DisableESP(Player)
 end)
 
 -- Ativando ESP ao iniciar o script
@@ -75,8 +63,13 @@ game:GetService("UserInputService").InputBegan:Connect(function(Input, GameProce
                 FOV(Player)
             end
         else
-            DisableESP()
-            DisableFOV()
+            for _, Player in pairs(Players:GetPlayers()) do
+                DisableESP(Player)
+            end
+        end
+    end
+end)
+
         end
     end
 end)
