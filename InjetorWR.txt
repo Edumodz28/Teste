@@ -1,37 +1,49 @@
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
 
 local UI = Lib:Create{
-    Theme = "Dark", -- ou qualquer outro tema
-    Size = UDim2.new(0, 0, 0, 0) -- padrão
-}
-
+    Theme = "Dark", -- or any other theme
+    Size = UDim2.new(0, 555, 0, 400) -- default
+ }
+ 
 
  
  
  local QuitDivider = Main:Divider{
-    Name = "Sai r"
+    Name = "Sair"
  }
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
+-- Variável para controlar se o teleporte está ativado
+local teleportEnabled = false
 
-local speeds = {16, 32, 64, 128, 256, 512, 1024, 2048}
-local currentSpeedIndex = 1
+-- Função para teleportar o jogador para a posição do clique
+local function teleportToMouseClick()
+	local player = Players.LocalPlayer
+	local mouse = player:GetMouse()
 
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.V then
-        currentSpeedIndex = currentSpeedIndex % #speeds + 1
-        local newSpeed = speeds[currentSpeedIndex]
-        humanoid.WalkSpeed = newSpeed
-        print("Velocidade Alterada para " .. newSpeed)
-    elseif input.KeyCode == Enum.KeyCode.L then
-        UI:Close()
-    end
+	-- Raycast do mouse para o chão
+	local ray = workspace.CurrentCamera:ScreenPointToRay(mouse.X, mouse.Y)
+	local hitResult = workspace:Raycast(ray.Origin, ray.Direction * 1000)
+
+	-- Se atingir algo, teleportar o jogador para a posição do clique
+	if hitResult then
+		player.Character:SetPrimaryPartCFrame(CFrame.new(hitResult.Position + Vector3.new(0, 5, 0)))
+	end
+end
+
+-- Manipulador de eventos para o clique do mouse
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+	if not gameProcessedEvent and teleportEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 then
+		teleportToMouseClick()
+	end
 end)
 
--- Configuração inicial da velocidade
-humanoid.WalkSpeed = speeds[currentSpeedIndex]
+-- Manipulador de eventos para a tecla "T"
+UserInputService.InputBegan:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.T then
+		teleportEnabled = not teleportEnabled
+		print("Teleporte ativado: " .. tostring(teleportEnabled))
+	end
+end)
