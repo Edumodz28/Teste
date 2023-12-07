@@ -1,16 +1,13 @@
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
 
 local UI = Lib:Create{
-    Theme = "Dark", -- or any other theme
-    Size = UDim2.new(0, 555, 0, 400) -- default
- }
- 
+    Theme = "Dark", -- ou qualquer outro tema
+    Size = UDim2.new(0, 555, 0, 400) -- padrão
+}
 
- 
- 
- local QuitDivider = Main:Divider{
+local QuitDivider = UI:Tab{
     Name = "Sair"
- }
+}
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -18,32 +15,34 @@ local UserInputService = game:GetService("UserInputService")
 -- Variável para controlar se o teleporte está ativado
 local teleportEnabled = false
 
--- Função para teleportar o jogador para a posição do clique
-local function teleportToMouseClick()
-	local player = Players.LocalPlayer
-	local mouse = player:GetMouse()
+-- Função para teleportar o jogador para a posição do clique ou toque
+local function teleportToInputPosition(input)
+    local player = Players.LocalPlayer
 
-	-- Raycast do mouse para o chão
-	local ray = workspace.CurrentCamera:ScreenPointToRay(mouse.X, mouse.Y)
-	local hitResult = workspace:Raycast(ray.Origin, ray.Direction * 1000)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        local inputPosition = input.Position
+        local ray = workspace.CurrentCamera:ScreenPointToRay(inputPosition.X, inputPosition.Y)
+        local hitResult = workspace:Raycast(ray.Origin, ray.Direction * 1000)
 
-	-- Se atingir algo, teleportar o jogador para a posição do clique
-	if hitResult then
-		player.Character:SetPrimaryPartCFrame(CFrame.new(hitResult.Position + Vector3.new(0, 5, 0)))
-	end
+        -- Se atingir algo, teleportar o jogador para a posição do clique ou toque
+        if hitResult then
+            player.Character:SetPrimaryPartCFrame(CFrame.new(hitResult.Position + Vector3.new(0, 5, 0)))
+        end
+    end
 end
 
--- Manipulador de eventos para o clique do mouse
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-	if not gameProcessedEvent and teleportEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 then
-		teleportToMouseClick()
-	end
-end)
+-- Adiciona um botão de ativação no UI
+local teleportButton = UI:Button{
+    Name = "Ativar Teleporte",
+    Callback = function()
+        teleportEnabled = not teleportEnabled
+        print("Teleporte ativado: " .. tostring(teleportEnabled))
+    end
+}
 
--- Manipulador de eventos para a tecla "T"
-UserInputService.InputBegan:Connect(function(input)
-	if input.KeyCode == Enum.KeyCode.T then
-		teleportEnabled = not teleportEnabled
-		print("Teleporte ativado: " .. tostring(teleportEnabled))
-	end
+-- Manipulador de eventos para o clique do mouse ou toque
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if not gameProcessedEvent then
+        teleportToInputPosition(input)
+    end
 end)
