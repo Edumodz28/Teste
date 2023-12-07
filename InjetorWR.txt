@@ -7,7 +7,7 @@ local UI = Lib:Create{
     Size = UDim2.new(0, 555, 0, 400) -- default
  }
  
- local Main = UI:Tab{
+ local QuitDivider = UI:Tab{
     Name = "Inicio"
  }
  
