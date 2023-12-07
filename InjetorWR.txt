@@ -1,14 +1,6 @@
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
 
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
 
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-
-local speeds = {16, 32, 64, 128, 256, 512, 1024, 2048}
-local currentSpeedIndex = 1
 
 local UI = Lib:Create{
     Theme = "Dark", -- or any other theme
@@ -26,7 +18,15 @@ local UI = Lib:Create{
  local QuitDivider = Main:Divider{
     Name = "Sair"
  }
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+local speeds = {16, 32, 64, 128, 256, 512, 1024, 2048}
+local currentSpeedIndex = 1
 
 UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.V then
