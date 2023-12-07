@@ -1,76 +1,63 @@
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
 
 local UI = Lib:Create{
-    Theme = "Dark", -- ou qualquer outro tema
-    Size = UDim2.new(0, 1, 0, 1) -- padrão
+    Theme = "Dark",
+    Size = UDim2.new(0, 1, 0, 1)
 }
 
-local QuitDivider = UI:Tab{
-    Name = "Sair"
-}
+local function createESP(player)
+    local Box = Instance.new("BoxHandleAdornment")
+    Box.Size = player.Character.HumanoidRootPart.Size + Vector3.new(0.1, 0.1, 0.1)
+    Box.Adornee = player.Character.HumanoidRootPart
+    Box.AlwaysOnTop = true
+    Box.ZIndex = 5
+    Box.Transparency = 0.5
+    Box.Color3 = Color3.new(1, 0, 0)
+    Box.Parent = player.Character.HumanoidRootPart
 
-local player = Players.LocalPlayer
+    local Line = Instance.new("LineHandleAdornment")
+    Line.Adornee = player.Character.HumanoidRootPart
+    Line.AlwaysOnTop = true
+    Line.Transparency = 0.5
+    Line.Color3 = Color3.new(1, 0, 0)
+    Line.ZIndex = 5
+    Line.Thickness = 2
+    Line.Parent = player.Character.HumanoidRootPart
 
--- Função para verificar se um jogador é um inimigo
-local function isEnemy(otherPlayer)
-    return otherPlayer.TeamColor ~= player.TeamColor
-end
+    RunService.RenderStepped:Connect(function()
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            Box.Size = player.Character.HumanoidRootPart.Size + Vector3.new(0.1, 0.1, 0.1)
+            Box.CFrame = player.Character.HumanoidRootPart.CFrame
 
--- Função para encontrar o inimigo mais próximo
-local function findNearestEnemy()
-    local closestEnemy = nil
-    local shortestDistance = math.huge
-
-    for _, otherPlayer in pairs(Players:GetPlayers()) do
-        if otherPlayer ~= player and isEnemy(otherPlayer) then
-            local distance = (player.Character and player.Character:FindFirstChild("HumanoidRootPart") and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart")) and
-                             (player.Character.HumanoidRootPart.Position - otherPlayer.Character.HumanoidRootPart.Position).Magnitude or math.huge
-
-            if distance < shortestDistance then
-                shortestDistance = distance
-                closestEnemy = otherPlayer
-            end
-        end
-    end
-
-    return closestEnemy
-end
-
--- Adiciona um botão para teleportar para o inimigo no UI
-local teleportToEnemyButton = QuitDivider:Button{
-    Name = "Teleportar para o Inimigo",
-    Size = UDim2.new(0, 200, 0, 50), -- Defina o tamanho desejado
-    Callback = function()
-        local nearestEnemy = findNearestEnemy()
-
-        if nearestEnemy then
-            -- Teleportar para o inimigo (a um metro de distância)
-            player.Character:SetPrimaryPartCFrame(CFrame.new(nearestEnemy.Character.HumanoidRootPart.Position + Vector3.new(0, 1, 0)))
-            print("Teleportado para o inimigo: " .. nearestEnemy.Name)
-        else
-            print("Nenhum inimigo próximo encontrado.")
-        end
-    end
-}
-
--- Manipulador de eventos para o clique do mouse ou toque
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-    if not gameProcessedEvent then
-        -- Verifique se o input foi para teleportar para o inimigo
-        if input.UserInputType == Enum.UserInputType.MouseButton2 or input.UserInputType == Enum.UserInputType.Touch then
-            local nearestEnemy = findNearestEnemy()
-
-            if nearestEnemy then
-                -- Teleportar para o inimigo (a um metro de distância)
-                player.Character:SetPrimaryPartCFrame(CFrame.new(nearestEnemy.Character.HumanoidRootPart.Position + Vector3.new(0, 1, 0)))
-                print("Teleportado para o inimigo: " .. nearestEnemy.Name)
+            local screenPosition, onScreen = workspace.CurrentCamera:WorldToScreenPoint(player.Character.HumanoidRootPart.Position)
+            if onScreen then
+                Line.From = Vector3.new(screenPosition.X, screenPosition.Y, 0)
+                Line.To = Vector3.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y, 0)
             else
-                print("Nenhum inimigo próximo encontrado.")
+                Line.From = Vector3.new(0, workspace.CurrentCamera.ViewportSize.Y, 0)
+                Line.To = Vector3.new(0, workspace.CurrentCamera.ViewportSize.Y, 0)
             end
+        else
+            Box:Destroy()
+            Line:Destroy()
+        end
+    end)
+end
+
+Players.PlayerAdded:Connect(function(player)
+    createESP(player)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    local character = player.Character
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment"):Destroy()
+            humanoidRootPart:FindFirstChildOfClass("LineHandleAdornment"):Destroy()
         end
     end
 end)
