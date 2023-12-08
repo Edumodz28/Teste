@@ -23,7 +23,8 @@ local function takeDamageContinuously(player)
     while wait(1) do
         for _, otherPlayer in pairs(game.Players:GetPlayers()) do
             if otherPlayer ~= player then
-                applyDamage(otherPlayer)
+                -- Chamar a função do servidor para causar dano
+                applyDamage:InvokeServer(otherPlayer)
             end
         end
     end
@@ -40,4 +41,3 @@ for _, player in pairs(game.Players:GetPlayers()) do
         takeDamageContinuously(player)
     end)
 end
-
