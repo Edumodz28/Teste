@@ -10,58 +10,20 @@ local UI = Lib:Create{
 }
 
 
+local function takeDamageContinuously(player)
+    local function applyDamage(targetPlayer)
+        local targetCharacter = targetPlayer.Character
+        local targetHumanoid = targetCharacter and targetCharacter:FindFirstChildOfClass("Humanoid")
 
-local function applyDamage(player, isRealDamage)
-    local character = player.Character
-    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-
-    if humanoid and humanoid.Health > 0 then
-        local damageAmount = isRealDamage and 100 or 0  -- 100 de dano real, 0 de dano falso
-
-        if isRealDamage and player == game.Players.LocalPlayer then
-            -- Se o dano for real e o jogador for o localPlayer, aplique o dano real (100)
-            humanoid:TakeDamage(damageAmount)
-        else
-            -- Para outros jogadores ou dano falso no jogador local
-            humanoid.Health = math.max(humanoid.Health - damageAmount, 0)
-
-            if humanoid.Health <= 0 and player ~= game.Players.LocalPlayer then
-                -- Se o jogador morreu, exiba um log para outros jogadores
-                print(player.Name .. " morreu!")
-            end
+        if targetHumanoid and targetHumanoid.Health > 0 then
+            targetHumanoid:TakeDamage(100)
         end
     end
-end
-
-local function takeDamageContinuously(player)
-    local isFirstHit = true
 
     while wait(1) do
-        if player ~= game.Players.LocalPlayer then
-            -- Para outros jogadores, aplique dano falso continuamente
-            applyDamage(player, false)
-        else
-            -- Para o jogador local, aplique dano real apenas se não houver outros jogadores por perto
-            local otherPlayers = {}
-            for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-                if otherPlayer ~= player and (player.Character and otherPlayer.Character) then
-                    local distance = (player.Character.HumanoidRootPart.Position - otherPlayer.Character.HumanoidRootPart.Position).Magnitude
-                    if distance < 10 then
-                        table.insert(otherPlayers, otherPlayer)
-                    end
-                end
-            end
-
-            if #otherPlayers == 0 then
-                -- Não há outros jogadores por perto, aplique dano real
-                if isFirstHit then
-                    applyDamage(player, true)  -- Primeiro golpe é de 100
-                    isFirstHit = false
-                else
-                    applyDamage(player, true)  -- Segundo golpe em diante é de 200
-                end
-            else
-                isFirstHit = true  -- Resetar para 100 de dano se houver jogadores por perto
+        for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+            if otherPlayer ~= player then
+                applyDamage(otherPlayer)
             end
         end
     end
@@ -78,3 +40,4 @@ for _, player in pairs(game.Players:GetPlayers()) do
         takeDamageContinuously(player)
     end)
 end
+
