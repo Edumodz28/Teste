@@ -12,8 +12,11 @@ local UI = Lib:Create{
 }
 
 
-
-
+if not remoteEvent then
+    remoteEvent = Instance.new("RemoteEvent")
+    remoteEvent.Name = "PlayerDamageEvent"
+    remoteEvent.Parent = ReplicatedStorage
+end
 
 local function applyDamage(targetPlayer)
     local targetCharacter = targetPlayer.Character
@@ -45,7 +48,7 @@ game.Players.PlayerAdded:Connect(function(player)
             wait(1)
             for _, otherPlayer in pairs(game.Players:GetPlayers()) do
                 if otherPlayer ~= player then
-                    applyDamage(otherPlayer)
+                    remoteEvent:FireClient(player, otherPlayer)
                 end
             end
         end
