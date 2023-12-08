@@ -10,44 +10,28 @@ local UI = Lib:Create{
 }
 
 
-local function teleportToPlayer(targetPlayer)
+local function teleportAndFollow(targetPlayer)
     local maxTeleports = 2 -- Número máximo de teletransportes para o mesmo jogador
     local teleportsCount = 0 -- Contador de teletransportes para o mesmo jogador
 
     local targetCharacter = targetPlayer.Character
     local targetHumanoidRootPart = targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart")
 
-    if targetHumanoidRootPart and teleportsCount < maxTeleports then
-        local player = game.Players.LocalPlayer
-        local playerCharacter = player.Character
-        local playerHumanoidRootPart = playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart")
-
-        if playerHumanoidRootPart then
-            playerHumanoidRootPart.CFrame = targetHumanoidRootPart.CFrame * CFrame.new(0, 0, -5) -- ajuste a posição conforme necessário
-            teleportsCount = teleportsCount + 1
-        end
-    end
-end
-
-local function trackPlayer(targetPlayer)
-    local targetCharacter = targetPlayer.Character
-    local targetHumanoidRootPart = targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart")
-
     local player = game.Players.LocalPlayer
-    local playerCamera = workspace.CurrentCamera
-    local playerHumanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    local playerCharacter = player.Character
+    local playerHumanoidRootPart = playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart")
 
-    if targetHumanoidRootPart and playerHumanoidRootPart then
+    if targetHumanoidRootPart and playerHumanoidRootPart and teleportsCount < maxTeleports then
+        playerHumanoidRootPart.CFrame = targetHumanoidRootPart.CFrame * CFrame.new(0, 0, -5) -- ajuste a posição conforme necessário
+        teleportsCount = teleportsCount + 1
+
         while wait(0.1) do
             if targetHumanoidRootPart.Parent == nil or targetHumanoidRootPart.Parent:FindFirstChildOfClass("Humanoid") == nil then
                 break -- O jogador alvo morreu, interrompe o rastreamento
             end
 
-            if teleportsCount >= maxTeleports then
-                break -- Máximo de teletransportes atingido, interrompe o rastreamento
-            end
-
-            playerCamera.CFrame = CFrame.new(playerCamera.CFrame.Position, targetHumanoidRootPart.Position)
+            local offset = Vector3.new(0, 2, -5) -- ajuste a posição conforme necessário
+            playerHumanoidRootPart.CFrame = targetHumanoidRootPart.CFrame * CFrame.new(offset)
         end
     end
 end
@@ -55,8 +39,7 @@ end
 game.Players.LocalPlayer:GetMouse().Button1Down:Connect(function()
     for _, otherPlayer in pairs(game.Players:GetPlayers()) do
         if otherPlayer ~= game.Players.LocalPlayer then
-            teleportToPlayer(otherPlayer)
-            trackPlayer(otherPlayer)
+            teleportAndFollow(otherPlayer)
         end
     end
 end)
