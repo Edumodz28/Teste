@@ -1,80 +1,73 @@
+--Abaixo estará Lib da nossa Ui
+
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
+
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Team = LocalPlayer.TeamColor
+local RunService = game:GetService("RunService")
+local TeleportDistance = 70
 
-local ESPEnabled = true -- Definindo ESP como ativado por padrão
 
-local function ESP(Player)
-    if Player.TeamColor ~= Team and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-        local Box = Instance.new("BoxHandleAdornment")
-        Box.Size = Player.Character.HumanoidRootPart.Size + Vector3.new(0.1, 0.1, 0.1)
-        Box.Adornee = Player.Character.HumanoidRootPart
-        Box.AlwaysOnTop = true
-        Box.ZIndex = 5
-        Box.Transparency = 0.5
-        Box.Color3 = Color3.new(1, 0, 0)
-        Box.Parent = Player.Character.HumanoidRootPart
-    end
-end
+local UI = Lib:Create{
+    Theme = "Dark", -- or any other theme
+    Size = UDim2.new(0, 1, 0, 1) -- default
+ }
+ 
+ 
+ 
+ local QuitDivider = Main:Divider{
+    Name = "Sair"
+ }
 
-local function FOV(Player)
-    if Player.TeamColor ~= Team and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-        local FOV = Instance.new("SelectionBox")
-        FOV.LineThickness = 0.05
-        FOV.Color3 = Color3.new(1, 0, 0)
-        FOV.Transparency = 0.5
-        FOV.Adornee = Player.Character.HumanoidRootPart
-        FOV.Parent = Player.Character.HumanoidRootPart
-    end
-end
+ 
 
-local function DisableESP(Player)
-    if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-        local humanoidRootPart = Player.Character:FindFirstChild("HumanoidRootPart")
-        local boxAdornment = humanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
-        local selectionBox = humanoidRootPart:FindFirstChildOfClass("SelectionBox")
 
-        if boxAdornment then
-            boxAdornment:Destroy()
-        end
+local function teleportToPlayer(targetPlayer)
+    local player = game.Players.LocalPlayer
+    local character = player.Character
 
-        if selectionBox then
-            selectionBox:Destroy()
+    if character then
+        local targetCharacter = targetPlayer.Character
+
+        if targetCharacter then
+            player.Character:SetPrimaryPartCFrame(CFrame.new(targetCharacter.HumanoidRootPart.Position))
         end
     end
 end
 
-Players.PlayerAdded:Connect(function(Player)
-    ESP(Player)
-    FOV(Player)
-end)
+local function onPlayerAdded(player)
+    player.CharacterAdded:Connect(function()
+        local myHumanoid = player.Character:WaitForChild("Humanoid")
 
-Players.PlayerRemoving:Connect(function(Player)
-    DisableESP(Player)
-end)
-
--- Ativando ESP ao iniciar o script
-if ESPEnabled then
-    for _, Player in pairs(Players:GetPlayers()) do
-        ESP(Player)
-        FOV(Player)
-    end
-end
-
-game:GetService("UserInputService").InputBegan:Connect(function(Input, GameProcessed)
-    -- Alternando estado do ESP quando a tecla P for pressionada
-    if Input.KeyCode == Enum.KeyCode.P and not GameProcessed then
-        ESPEnabled = not ESPEnabled
-        if ESPEnabled then
-            for _, Player in pairs(Players:GetPlayers()) do
-                ESP(Player)
-                FOV(Player)
+        myHumanoid.Died:Connect(function()
+            -- O jogador morreu, teleporte para outro jogador aqui
+            local nearestEnemy = findNearestEnemy()  -- Você pode usar a função findNearestEnemy do exemplo anterior
+            if nearestEnemy then
+                teleportToPlayer(nearestEnemy)
             end
-        else
-            for _, Player in pairs(Players:GetPlayers()) do
-                DisableESP(Player)
+        end)
+    end)
+end
+
+local function findNearestEnemy()
+    local player = game.Players.LocalPlayer
+    local players = game.Players:GetPlayers()
+
+    local closestEnemy = nil
+    local shortestDistance = TeleportDistance
+
+    for _, otherPlayer in pairs(players) do
+        if otherPlayer ~= player then
+            local distance = (player.Character and otherPlayer.Character) and
+                             (player.Character:FindFirstChild("Humanoid").RootPart.Position - otherPlayer.Character:FindFirstChild("Humanoid").RootPart.Position).Magnitude or TeleportDistance
+
+            if distance < shortestDistance then
+                shortestDistance = distance
+                closestEnemy = otherPlayer
             end
         end
     end
-end)
+
+    return closestEnemy
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
