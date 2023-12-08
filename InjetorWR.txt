@@ -1,66 +1,80 @@
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Team = LocalPlayer.TeamColor
 
-local UI = Lib:Create{
-    Theme = "Dark",
-    Size = UDim2.new(0, 1, 0, 1)
-}
+local ESPEnabled = true -- Definindo ESP como ativado por padrão
 
-
-
-
-
-local function createESP(player)
-    local Box = Instance.new("BoxHandleAdornment")
-    Box.Size = player.Character.HumanoidRootPart.Size + Vector3.new(0.1, 0.1, 0.1)
-    Box.Adornee = player.Character.HumanoidRootPart
-    Box.AlwaysOnTop = true
-    Box.ZIndex = 5
-    Box.Transparency = 0.5
-    Box.Color3 = Color3.new(1, 0, 0)
-    Box.Parent = player.Character.HumanoidRootPart
-
-    local Line = Instance.new("LineHandleAdornment")
-    Line.Adornee = player.Character.HumanoidRootPart
-    Line.AlwaysOnTop = true
-    Line.Transparency = 0.5
-    Line.Color3 = Color3.new(1, 0, 0)
-    Line.ZIndex = 5
-    Line.Thickness = 2
-    Line.Parent = player.Character.HumanoidRootPart
-
-    RunService.RenderStepped:Connect(function()
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            Box.Size = player.Character.HumanoidRootPart.Size + Vector3.new(0.1, 0.1, 0.1)
-            Box.CFrame = player.Character.HumanoidRootPart.CFrame
-
-            local screenPosition, onScreen = workspace.CurrentCamera:WorldToScreenPoint(player.Character.HumanoidRootPart.Position)
-            if onScreen then
-                Line.From = Vector3.new(screenPosition.X, screenPosition.Y, 0)
-                Line.To = Vector3.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y, 0)
-            else
-                Line.From = Vector3.new(0, workspace.CurrentCamera.ViewportSize.Y, 0)
-                Line.To = Vector3.new(0, workspace.CurrentCamera.ViewportSize.Y, 0)
-            end
-        else
-            Box:Destroy()
-            Line:Destroy()
-        end
-    end)
+local function ESP(Player)
+    if Player.TeamColor ~= Team and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+        local Box = Instance.new("BoxHandleAdornment")
+        Box.Size = Player.Character.HumanoidRootPart.Size + Vector3.new(0.1, 0.1, 0.1)
+        Box.Adornee = Player.Character.HumanoidRootPart
+        Box.AlwaysOnTop = true
+        Box.ZIndex = 5
+        Box.Transparency = 0.5
+        Box.Color3 = Color3.new(1, 0, 0)
+        Box.Parent = Player.Character.HumanoidRootPart
+    end
 end
 
-Players.PlayerAdded:Connect(function(player)
-    createESP(player)
+local function FOV(Player)
+    if Player.TeamColor ~= Team and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+        local FOV = Instance.new("SelectionBox")
+        FOV.LineThickness = 0.05
+        FOV.Color3 = Color3.new(1, 0, 0)
+        FOV.Transparency = 0.5
+        FOV.Adornee = Player.Character.HumanoidRootPart
+        FOV.Parent = Player.Character.HumanoidRootPart
+    end
+end
+
+local function DisableESP(Player)
+    if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+        local humanoidRootPart = Player.Character:FindFirstChild("HumanoidRootPart")
+        local boxAdornment = humanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
+        local selectionBox = humanoidRootPart:FindFirstChildOfClass("SelectionBox")
+
+        if boxAdornment then
+            boxAdornment:Destroy()
+        end
+
+        if selectionBox then
+            selectionBox:Destroy()
+        end
+    end
+end
+
+Players.PlayerAdded:Connect(function(Player)
+    ESP(Player)
+    FOV(Player)
 end)
 
-Players.PlayerRemoving:Connect(function(player)
-    local character = player.Character
-    if character then
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            humanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment"):Destroy()
-            humanoidRootPart:FindFirstChildOfClass("LineHandleAdornment"):Destroy()
+Players.PlayerRemoving:Connect(function(Player)
+    DisableESP(Player)
+end)
+
+-- Ativando ESP ao iniciar o script
+if ESPEnabled then
+    for _, Player in pairs(Players:GetPlayers()) do
+        ESP(Player)
+        FOV(Player)
+    end
+end
+
+game:GetService("UserInputService").InputBegan:Connect(function(Input, GameProcessed)
+    -- Alternando estado do ESP quando a tecla P for pressionada
+    if Input.KeyCode == Enum.KeyCode.P and not GameProcessed then
+        ESPEnabled = not ESPEnabled
+        if ESPEnabled then
+            for _, Player in pairs(Players:GetPlayers()) do
+                ESP(Player)
+                FOV(Player)
+            end
+        else
+            for _, Player in pairs(Players:GetPlayers()) do
+                DisableESP(Player)
+            end
         end
     end
 end)
