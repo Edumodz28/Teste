@@ -3,29 +3,12 @@
 --Abaixo estará Lib da nossa Ui
 
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local remoteEvent = ReplicatedStorage:WaitForChild("PlayerDamageEvent")
 
 local UI = Lib:Create{
 	Theme = "Dark", -- or any other theme
 	Size = UDim2.new(0, 1, 0, 1) -- default
 }
 
-
-if not remoteEvent then
-    remoteEvent = Instance.new("RemoteEvent")
-    remoteEvent.Name = "PlayerDamageEvent"
-    remoteEvent.Parent = ReplicatedStorage
-end
-
-local function applyDamage(targetPlayer)
-    local targetCharacter = targetPlayer.Character
-    local targetHumanoid = targetCharacter and targetCharacter:FindFirstChildOfClass("Humanoid")
-
-    if targetHumanoid and targetHumanoid.Health > 0 then
-        targetHumanoid:TakeDamage(100)
-    end
-end
 
 local function teleportToPlayer(targetPlayer)
     local targetCharacter = targetPlayer.Character
@@ -42,24 +25,10 @@ local function teleportToPlayer(targetPlayer)
     end
 end
 
-game.Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function()
-        while true do
-            wait(1)
-            for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-                if otherPlayer ~= player then
-                    remoteEvent:FireClient(player, otherPlayer)
-                end
-            end
-        end
-    end)
-end)
-
 game.Players.LocalPlayer:GetMouse().Button1Down:Connect(function()
     for _, otherPlayer in pairs(game.Players:GetPlayers()) do
         if otherPlayer ~= game.Players.LocalPlayer then
             teleportToPlayer(otherPlayer)
-            applyDamage(otherPlayer)
         end
     end
 end)
