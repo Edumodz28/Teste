@@ -2,9 +2,10 @@
 --Abaixo estará Lib da nossa Ui
 
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
+-- Variáveis para controlar as habilidades
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
-local StarterGui = game:GetService("StarterGui")
+
 
 local UI = Lib:Create{
 	Theme = "Dark", -- or any other theme
@@ -12,14 +13,15 @@ local UI = Lib:Create{
 }
 
 
+
 -- Variáveis para controlar as habilidades
 local teleportEnabled = false
 local speedEnabled = false
 local superJumpEnabled = false
 
--- Configurações de velocidade e super pulo
-local speedValue = 50 -- Ajuste para a velocidade desejada
-local superJumpValue = 75 -- Ajuste para a altura desejada do super pulo
+-- Configurações iniciais de velocidade e super pulo
+local speedValue = 16
+local superJumpValue = 50
 
 -- Função para teleportar o jogador para a posição do clique
 local function teleportToMouseClick()
@@ -36,25 +38,27 @@ local function teleportToMouseClick()
 	end
 end
 
--- Função para ativar/desativar velocidade
-local function toggleSpeed()
+-- Função para aumentar velocidade
+local function increaseSpeed()
 	local player = Players.LocalPlayer
 	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 
 	if humanoid then
-		humanoid.WalkSpeed = speedEnabled and 16 or speedValue
-		print("Velocidade alterada para: " .. tostring(humanoid.WalkSpeed))
+		speedValue = speedValue + 5
+		humanoid.WalkSpeed = speedValue
+		print("Velocidade aumentada para: " .. tostring(humanoid.WalkSpeed))
 	end
 end
 
--- Função para ativar/desativar super pulo
-local function toggleSuperJump()
+-- Função para aumentar super pulo
+local function increaseSuperJump()
 	local player = Players.LocalPlayer
 	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 
 	if humanoid then
-		humanoid.JumpPower = superJumpEnabled and 50 or superJumpValue
-		print("Super pulo " .. (superJumpEnabled and "desativado" or "ativado"))
+		superJumpValue = superJumpValue + 5
+		humanoid.JumpPower = superJumpValue
+		print("Super pulo aumentado para: " .. tostring(humanoid.JumpPower))
 	end
 end
 
@@ -63,30 +67,13 @@ local function disableAllFunctions()
 	teleportEnabled = false
 	speedEnabled = false
 	superJumpEnabled = false
-	toggleSpeed()
-	toggleSuperJump()
 end
-
--- Criar botão na tela para desativar funções
-local disableButton = Instance.new("TextButton")
-disableButton.Text = "Desativar Funções"
-disableButton.Size = UDim2.new(0, 150, 0, 30)
-disableButton.Position = UDim2.new(0, 10, 0, 10)
-disableButton.Parent = game.Players.LocalPlayer.PlayerGui
-
-disableButton.MouseButton1Click:Connect(function()
-	disableAllFunctions()
-end)
 
 -- Manipulador de eventos para o clique do mouse
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
 	if not gameProcessedEvent then
 		if teleportEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 then
 			teleportToMouseClick()
-		elseif speedEnabled and input.KeyCode == Enum.KeyCode.Y then
-			toggleSpeed()
-		elseif superJumpEnabled and input.KeyCode == Enum.KeyCode.U then
-			toggleSuperJump()
 		end
 	end
 end)
@@ -94,13 +81,10 @@ end)
 -- Manipulador de eventos para a tecla "T"
 UserInputService.InputBegan:Connect(function(input)
 	if input.KeyCode == Enum.KeyCode.T then
-		teleportEnabled = not teleportEnabled
-		print("Teleporte ativado: " .. tostring(teleportEnabled))
+		teleportToMouseClick()
 	elseif input.KeyCode == Enum.KeyCode.Y then
-		speedEnabled = not speedEnabled
-		toggleSpeed()
+		increaseSpeed()
 	elseif input.KeyCode == Enum.KeyCode.U then
-		superJumpEnabled = not superJumpEnabled
-		toggleSuperJump()
+		increaseSuperJump()
 	end
 end)
