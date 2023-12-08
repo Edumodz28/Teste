@@ -3,6 +3,12 @@
 --Abaixo estará Lib da nossa Ui
 
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local remoteEvent = Instance.new("RemoteEvent")
+remoteEvent.Name = "PlayerDamageEvent"
+remoteEvent.Parent = ReplicatedStorage
 
 local UI = Lib:Create{
 	Theme = "Dark", -- or any other theme
@@ -10,21 +16,19 @@ local UI = Lib:Create{
 }
 
 
+
 local function takeDamageContinuously(player)
-    local function applyDamage(targetPlayer)
-        local targetCharacter = targetPlayer.Character
-        local targetHumanoid = targetCharacter and targetCharacter:FindFirstChildOfClass("Humanoid")
-
-        if targetHumanoid and targetHumanoid.Health > 0 then
-            targetHumanoid:TakeDamage(100)
-        end
-    end
-
     while wait(1) do
-        for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-            if otherPlayer ~= player then
-                -- Chamar a função do servidor para causar dano
-                applyDamage:InvokeServer(otherPlayer)
+        local character = player.Character
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+        if humanoid and humanoid.Health > 0 then
+            local success, errorMsg = pcall(function()
+                humanoid:TakeDamage(100)
+            end)
+
+            if not success then
+                warn("Error applying damage:", errorMsg)
             end
         end
     end
@@ -36,8 +40,17 @@ game.Players.PlayerAdded:Connect(function(player)
     end)
 end)
 
-for _, player in pairs(game.Players:GetPlayers()) do
-    player.CharacterAdded:Connect(function()
-        takeDamageContinuously(player)
-    end)
-end
+remoteEvent.OnServerEvent:Connect(function(player, damage)
+    local character = player.Character
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+    if humanoid and humanoid.Health > 0 then
+        local success, errorMsg = pcall(function()
+            humanoid:TakeDamage(damage)
+        end)
+
+        if not success then
+            warn("Error applying damage:", errorMsg)
+        end
+    end
+end)
