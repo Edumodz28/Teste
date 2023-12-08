@@ -1,70 +1,106 @@
+
 --Abaixo estará Lib da nossa Ui
 
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
-
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TeleportDistance = 70
-
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
 
 local UI = Lib:Create{
-    Theme = "Dark", -- or any other theme
-    Size = UDim2.new(0, 1, 0, 1) -- default
- }
- 
- 
- 
- 
- 
+	Theme = "Dark", -- or any other theme
+	Size = UDim2.new(0, 1, 0, 1) -- default
+}
 
 
-local function teleportToPlayer(targetPlayer)
-    local player = game.Players.LocalPlayer
-    local character = player.Character
+-- Variáveis para controlar as habilidades
+local teleportEnabled = false
+local speedEnabled = false
+local superJumpEnabled = false
 
-    if character then
-        local targetCharacter = targetPlayer.Character
+-- Configurações de velocidade e super pulo
+local speedValue = 50 -- Ajuste para a velocidade desejada
+local superJumpValue = 75 -- Ajuste para a altura desejada do super pulo
 
-        if targetCharacter then
-            player.Character:SetPrimaryPartCFrame(CFrame.new(targetCharacter.HumanoidRootPart.Position))
-        end
-    end
+-- Função para teleportar o jogador para a posição do clique
+local function teleportToMouseClick()
+	local player = Players.LocalPlayer
+	local mouse = player:GetMouse()
+
+	-- Raycast do mouse para o chão
+	local ray = workspace.CurrentCamera:ScreenPointToRay(mouse.X, mouse.Y)
+	local hitResult = workspace:Raycast(ray.Origin, ray.Direction * 1000)
+
+	-- Se atingir algo, teleportar o jogador para a posição do clique
+	if hitResult then
+		player.Character:SetPrimaryPartCFrame(CFrame.new(hitResult.Position + Vector3.new(0, 5, 0)))
+	end
 end
 
-local function onPlayerAdded(player)
-    player.CharacterAdded:Connect(function()
-        local myHumanoid = player.Character:WaitForChild("Humanoid")
+-- Função para ativar/desativar velocidade
+local function toggleSpeed()
+	local player = Players.LocalPlayer
+	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 
-        myHumanoid.Died:Connect(function()
-            -- O jogador morreu, teleporte para outro jogador aqui
-            local nearestEnemy = findNearestEnemy()  -- Você pode usar a função findNearestEnemy do exemplo anterior
-            if nearestEnemy then
-                teleportToPlayer(nearestEnemy)
-            end
-        end)
-    end)
+	if humanoid then
+		humanoid.WalkSpeed = speedEnabled and 16 or speedValue
+		print("Velocidade alterada para: " .. tostring(humanoid.WalkSpeed))
+	end
 end
 
-local function findNearestEnemy()
-    local player = game.Players.LocalPlayer
-    local players = game.Players:GetPlayers()
+-- Função para ativar/desativar super pulo
+local function toggleSuperJump()
+	local player = Players.LocalPlayer
+	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 
-    local closestEnemy = nil
-    local shortestDistance = TeleportDistance
-
-    for _, otherPlayer in pairs(players) do
-        if otherPlayer ~= player then
-            local distance = (player.Character and otherPlayer.Character) and
-                             (player.Character:FindFirstChild("Humanoid").RootPart.Position - otherPlayer.Character:FindFirstChild("Humanoid").RootPart.Position).Magnitude or TeleportDistance
-
-            if distance < shortestDistance then
-                shortestDistance = distance
-                closestEnemy = otherPlayer
-            end
-        end
-    end
-
-    return closestEnemy
+	if humanoid then
+		humanoid.JumpPower = superJumpEnabled and 50 or superJumpValue
+		print("Super pulo " .. (superJumpEnabled and "desativado" or "ativado"))
+	end
 end
 
-Players.PlayerAdded:Connect(onPlayerAdded)
+-- Função para desativar todas as funções
+local function disableAllFunctions()
+	teleportEnabled = false
+	speedEnabled = false
+	superJumpEnabled = false
+	toggleSpeed()
+	toggleSuperJump()
+end
+
+-- Criar botão na tela para desativar funções
+local disableButton = Instance.new("TextButton")
+disableButton.Text = "Desativar Funções"
+disableButton.Size = UDim2.new(0, 150, 0, 30)
+disableButton.Position = UDim2.new(0, 10, 0, 10)
+disableButton.Parent = game.Players.LocalPlayer.PlayerGui
+
+disableButton.MouseButton1Click:Connect(function()
+	disableAllFunctions()
+end)
+
+-- Manipulador de eventos para o clique do mouse
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+	if not gameProcessedEvent then
+		if teleportEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 then
+			teleportToMouseClick()
+		elseif speedEnabled and input.KeyCode == Enum.KeyCode.Y then
+			toggleSpeed()
+		elseif superJumpEnabled and input.KeyCode == Enum.KeyCode.U then
+			toggleSuperJump()
+		end
+	end
+end)
+
+-- Manipulador de eventos para a tecla "T"
+UserInputService.InputBegan:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.T then
+		teleportEnabled = not teleportEnabled
+		print("Teleporte ativado: " .. tostring(teleportEnabled))
+	elseif input.KeyCode == Enum.KeyCode.Y then
+		speedEnabled = not speedEnabled
+		toggleSpeed()
+	elseif input.KeyCode == Enum.KeyCode.U then
+		superJumpEnabled = not superJumpEnabled
+		toggleSuperJump()
+	end
+end)
