@@ -3,6 +3,10 @@
 --Abaixo estará Lib da nossa Ui
 
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
+local clickCount = 0
+local clickThresholdActivate = 7
+local clickThresholdDeactivate = 5
+local clickCooldown = 0.2 -- Tempo em segundos para considerar dois cliques como distintos
 
 local UI = Lib:Create{
 	Theme = "Dark", -- or any other theme
@@ -10,36 +14,44 @@ local UI = Lib:Create{
 }
 
 
-local function teleportAndFollow(targetPlayer)
-    local maxTeleports = 2 -- Número máximo de teletransportes para o mesmo jogador
-    local teleportsCount = 0 -- Contador de teletransportes para o mesmo jogador
 
-    local targetCharacter = targetPlayer.Character
-    local targetHumanoidRootPart = targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart")
+local function arePlayersOnSameTeam(player1, player2)
+    local player1Team = player1.Team
+    local player2Team = player2.Team
 
-    local player = game.Players.LocalPlayer
-    local playerCharacter = player.Character
-    local playerHumanoidRootPart = playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart")
-
-    if targetHumanoidRootPart and playerHumanoidRootPart and teleportsCount < maxTeleports then
-        playerHumanoidRootPart.CFrame = targetHumanoidRootPart.CFrame * CFrame.new(0, 0, -5) -- ajuste a posição conforme necessário
-        teleportsCount = teleportsCount + 1
-
-        while wait(0.1) do
-            if targetHumanoidRootPart.Parent == nil or targetHumanoidRootPart.Parent:FindFirstChildOfClass("Humanoid") == nil then
-                break -- O jogador alvo morreu, interrompe o rastreamento
-            end
-
-            local offset = Vector3.new(0, 2, -5) -- ajuste a posição conforme necessário
-            playerHumanoidRootPart.CFrame = targetHumanoidRootPart.CFrame * CFrame.new(offset)
-        end
+    if player1Team and player2Team then
+        return player1Team == player2Team
     end
+
+    return false
 end
 
-game.Players.LocalPlayer:GetMouse().Button1Down:Connect(function()
-    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-        if otherPlayer ~= game.Players.LocalPlayer then
-            teleportAndFollow(otherPlayer)
-        end
+local function teleportAndFollow(targetPlayer)
+    -- Implemente a função teleportAndFollow aqui, como fornecido na resposta anterior
+end
+
+local function handleMouseClick()
+    clickCount = clickCount + 1
+
+    if clickCount >= clickThresholdActivate then
+        -- Ativar função
+        game.Players.LocalPlayer:GetMouse().Button1Down:Connect(function()
+            for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+                if otherPlayer ~= game.Players.LocalPlayer then
+                    teleportAndFollow(otherPlayer)
+                end
+            end
+        end)
     end
-end)
+
+    if clickCount >= clickThresholdDeactivate then
+        -- Desativar função
+        game.Players.LocalPlayer:GetMouse().Button1Down:Disconnect()
+        clickCount = 0 -- Reiniciar contagem após desativar
+    end
+
+    wait(clickCooldown) -- Aguardar um tempo para considerar dois cliques como distintos
+    clickCount = 0 -- Reiniciar contagem após o tempo de espera
+end
+
+game.Players.LocalPlayer:GetMouse().Button1Down:Connect(handleMouseClick)
