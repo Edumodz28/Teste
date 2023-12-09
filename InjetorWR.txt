@@ -1,11 +1,13 @@
 
 
+
 --Abaixo estará Lib da nossa Ui
 
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local playerDamageEvent = Instance.new("RemoteEvent")
+playerDamageEvent.Name = "PlayerDamageEvent"
+playerDamageEvent.Parent = ReplicatedStorage
 local UI = Lib:Create{
 	Theme = "Dark", -- or any other theme
 	Size = UDim2.new(0, 1, 0, 1) -- default
@@ -13,47 +15,23 @@ local UI = Lib:Create{
 
 
 
-local function teleportAndAimbot(targetPlayer)
-    local player = game.Players.LocalPlayer
-    local camera = workspace.CurrentCamera
-    local mouse = player:GetMouse()
+-- Função para lidar com o evento no servidor
+local function handlePlayerDamage(player, targetPlayer)
+    -- Aqui você replica o dano para outros jogadores, excluindo o jogador que está causando o dano
+    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+        if otherPlayer ~= player then
+            -- Verifique se otherPlayer está próximo de targetPlayer e, se sim, cause dano a otherPlayer
+            local distance = (otherPlayer.Character and targetPlayer.Character) and (otherPlayer.Character.HumanoidRootPart.Position - targetPlayer.Character.HumanoidRootPart.Position).Magnitude or 0
 
-    local function trackTarget()
-        local targetCharacter = targetPlayer.Character
-        local targetHead = targetCharacter and targetCharacter:FindFirstChild("Head")
-
-        if targetHead then
-            local screenPosition, onScreen = camera:WorldToScreenPoint(targetHead.Position)
-            
-            if onScreen then
-                mouse.Target = targetHead
+            if distance < 10 then
+                local humanoid = otherPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid:TakeDamage(50) -- Ajuste o valor conforme necessário
+                end
             end
         end
     end
-
-    local function teleport()
-        local playerCharacter = player.Character
-        local playerHumanoidRootPart = playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart")
-
-        if targetPlayer and playerHumanoidRootPart then
-            playerHumanoidRootPart.CFrame = targetPlayer.Character:WaitForChild("HumanoidRootPart").CFrame * CFrame.new(0, 0, -5)
-        end
-    end
-
-    UserInputService.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            trackTarget()
-        end
-    end)
-
-    RunService.RenderStepped:Connect(function()
-        trackTarget()
-    end)
-
-    -- Ativar o teleporte e aimbot
-    teleport()
 end
 
--- Exemplo de uso (após o teleporte)
--- Substitua "targetPlayer" pela variável que representa o jogador alvo após o teleporte
-teleportAndAimbot(targetPlayer)
+-- Conecte a função ao evento
+playerDamageEvent.OnServerEvent:Connect(handlePlayerDamage)
