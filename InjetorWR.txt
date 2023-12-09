@@ -3,55 +3,57 @@
 --Abaixo estará Lib da nossa Ui
 
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
-
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local UI = Lib:Create{
 	Theme = "Dark", -- or any other theme
 	Size = UDim2.new(0, 1, 0, 1) -- default
 }
 
-local function arePlayersOnSameTeam(player1, player2)
-    local player1Team = player1.Team
-    local player2Team = player2.Team
 
-    -- Verifica se ambos os jogadores têm uma equipe definida
-    if player1Team and player2Team then
-        return player1Team == player2Team
-    end
 
-    return false -- Se pelo menos um jogador não tiver uma equipe, considera que não estão na mesma equipe
-end
-
-local function teleportAndFollow(targetPlayer)
-    local maxTeleports = 2 -- Número máximo de teletransportes para o mesmo jogador
-    local teleportsCount = 0 -- Contador de teletransportes para o mesmo jogador
-
-    local targetCharacter = targetPlayer.Character
-    local targetHumanoidRootPart = targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart")
-
+local function teleportAndAimbot(targetPlayer)
     local player = game.Players.LocalPlayer
-    local playerCharacter = player.Character
-    local playerHumanoidRootPart = playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart")
+    local camera = workspace.CurrentCamera
+    local mouse = player:GetMouse()
 
-    if targetHumanoidRootPart and playerHumanoidRootPart and teleportsCount < maxTeleports
-        and not arePlayersOnSameTeam(player, targetPlayer) then
-        playerHumanoidRootPart.CFrame = targetHumanoidRootPart.CFrame * CFrame.new(0, 0, -5) -- ajuste a posição conforme necessário
-        teleportsCount = teleportsCount + 1
+    local function trackTarget()
+        local targetCharacter = targetPlayer.Character
+        local targetHead = targetCharacter and targetCharacter:FindFirstChild("Head")
 
-        while wait(0.1) do
-            if targetHumanoidRootPart.Parent == nil or targetHumanoidRootPart.Parent:FindFirstChildOfClass("Humanoid") == nil then
-                break -- O jogador alvo morreu, interrompe o rastreamento
+        if targetHead then
+            local screenPosition, onScreen = camera:WorldToScreenPoint(targetHead.Position)
+            
+            if onScreen then
+                mouse.Target = targetHead
             end
-
-            local offset = Vector3.new(0, 2, -5) -- ajuste a posição conforme necessário
-            playerHumanoidRootPart.CFrame = targetHumanoidRootPart.CFrame * CFrame.new(offset)
         end
     end
+
+    local function teleport()
+        local playerCharacter = player.Character
+        local playerHumanoidRootPart = playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart")
+
+        if targetPlayer and playerHumanoidRootPart then
+            playerHumanoidRootPart.CFrame = targetPlayer.Character:WaitForChild("HumanoidRootPart").CFrame * CFrame.new(0, 0, -5)
+        end
+    end
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            trackTarget()
+        end
+    end)
+
+    RunService.RenderStepped:Connect(function()
+        trackTarget()
+    end)
+
+    -- Ativar o teleporte e aimbot
+    teleport()
 end
 
-game.Players.LocalPlayer:GetMouse().Button1Down:Connect(function()
-    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-        if otherPlayer ~= game.Players.LocalPlayer then
-            teleportAndFollow(otherPlayer)
-        end
-    end
-end)
+-- Exemplo de uso (após o teleporte)
+-- Substitua "targetPlayer" pela variável que representa o jogador alvo após o teleporte
+teleportAndAimbot(targetPlayer)
