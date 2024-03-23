@@ -10,21 +10,19 @@ local UI = Lib:Create{
 
 
 
-local function handlePlayerAction(player, action, parameter)
+playerActionEvent.OnServerEvent:Connect(function(player, action, parameter)
     if action == "SetSpeed" then
-        -- Ajustar a velocidade do jogador
         local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
         if humanoid then
-            humanoid.WalkSpeed = parameter -- Ajuste o valor conforme necessário
+            humanoid.WalkSpeed = parameter
         end
     elseif action == "TeleportToNearestPlayer" then
-        -- Encontrar o jogador mais próximo
         local nearestPlayer = nil
         local shortestDistance = math.huge
 
         for _, otherPlayer in pairs(game.Players:GetPlayers()) do
             if otherPlayer ~= player then
-                local distance = (otherPlayer.Character and player.Character) and (otherPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude or math.huge
+                local distance = (otherPlayer.Character and player.Character) and (otherPlayer.Character:WaitForChild("HumanoidRootPart").Position - player.Character:WaitForChild("HumanoidRootPart").Position).Magnitude or math.huge
 
                 if distance < shortestDistance then
                     nearestPlayer = otherPlayer
@@ -33,14 +31,11 @@ local function handlePlayerAction(player, action, parameter)
             end
         end
 
-        -- Teleportar o jogador para o jogador mais próximo
         if nearestPlayer then
-            local targetPosition = nearestPlayer.Character and nearestPlayer.Character.HumanoidRootPart.Position
+            local targetPosition = nearestPlayer.Character and nearestPlayer.Character:WaitForChild("HumanoidRootPart").Position
             if targetPosition then
-                player.Character:SetPrimaryPartCFrame(CFrame.new(targetPosition))
+                player.Character:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(targetPosition)
             end
         end
     end
-end
-
-playerActionEvent.OnServerEvent:Connect(handlePlayerAction)
+end)
