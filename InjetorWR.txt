@@ -1,19 +1,44 @@
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local playerDamageEvent = Instance.new("RemoteEvent")
-playerDamageEvent.Name = "PlayerDamageEvent"
-playerDamageEvent.Parent = ReplicatedStorage
+local playerActionEvent = Instance.new("RemoteEvent")
+playerActionEvent.Name = "PlayerActionEvent"
+playerActionEvent.Parent = ReplicatedStorage
 local UI = Lib:Create{
     Theme = "Dark",
     Size = UDim2.new(0, 1, 0, 1)
 }
 
-local function handlePlayerDamage(player, targetPlayer)
-    -- Ajuste a velocidade do jogador aqui
-    local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        humanoid.WalkSpeed = 50 -- Ajuste o valor conforme necessário
+local function handlePlayerAction(player, action, parameter)
+    if action == "SetSpeed" then
+        -- Ajuste a velocidade do jogador aqui
+        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 80 -- Ajuste o valor conforme necessário
+        end
+    elseif action == "TeleportToNearestPlayer" then
+        -- Encontre o jogador mais próximo
+        local nearestPlayer = nil
+        local shortestDistance = math.huge
+
+        for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+            if otherPlayer ~= player then
+                local distance = (otherPlayer.Character and player.Character) and (otherPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude or math.huge
+
+                if distance < shortestDistance then
+                    nearestPlayer = otherPlayer
+                    shortestDistance = distance
+                end
+            end
+        end
+
+        -- Teleportar o jogador para o jogador mais próximo
+        if nearestPlayer then
+            local targetPosition = nearestPlayer.Character and nearestPlayer.Character.HumanoidRootPart.Position
+            if targetPosition then
+                player.Character:SetPrimaryPartCFrame(CFrame.new(targetPosition))
+            end
+        end
     end
 end
 
-playerDamageEvent.OnServerEvent:Connect(handlePlayerDamage)
+playerActionEvent.OnServerEvent:Connect(handlePlayerAction)
