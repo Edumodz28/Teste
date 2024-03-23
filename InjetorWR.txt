@@ -8,15 +8,17 @@ local UI = Lib:Create{
     Size = UDim2.new(0, 1, 0, 1)
 }
 
+
+
 local function handlePlayerAction(player, action, parameter)
     if action == "SetSpeed" then
-        -- Ajuste a velocidade do jogador aqui
+        -- Ajustar a velocidade do jogador
         local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
         if humanoid then
-            humanoid.WalkSpeed = 80 -- Ajuste o valor conforme necessário
+            humanoid.WalkSpeed = parameter -- Ajuste o valor conforme necessário
         end
     elseif action == "TeleportToNearestPlayer" then
-        -- Encontre o jogador mais próximo
+        -- Encontrar o jogador mais próximo
         local nearestPlayer = nil
         local shortestDistance = math.huge
 
