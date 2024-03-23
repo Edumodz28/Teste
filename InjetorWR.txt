@@ -1,37 +1,19 @@
-
-
-
---Abaixo estará Lib da nossa Ui
-
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local playerDamageEvent = Instance.new("RemoteEvent")
 playerDamageEvent.Name = "PlayerDamageEvent"
 playerDamageEvent.Parent = ReplicatedStorage
 local UI = Lib:Create{
-	Theme = "Dark", -- or any other theme
-	Size = UDim2.new(0, 1, 0, 1) -- default
+    Theme = "Dark",
+    Size = UDim2.new(0, 1, 0, 1)
 }
 
-
-
--- Função para lidar com o evento no servidor
 local function handlePlayerDamage(player, targetPlayer)
-    -- Aqui você replica o dano para outros jogadores, excluindo o jogador que está causando o dano
-    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-        if otherPlayer ~= player then
-            -- Verifique se otherPlayer está próximo de targetPlayer e, se sim, cause dano a otherPlayer
-            local distance = (otherPlayer.Character and targetPlayer.Character) and (otherPlayer.Character.HumanoidRootPart.Position - targetPlayer.Character.HumanoidRootPart.Position).Magnitude or 0
-
-            if distance < 10 then
-                local humanoid = otherPlayer.Character:FindFirstChildOfClass("Humanoid")
-                if humanoid then
-                    humanoid:TakeDamage(50) -- Ajuste o valor conforme necessário
-                end
-            end
-        end
+    -- Ajuste a velocidade do jogador aqui
+    local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 50 -- Ajuste o valor conforme necessário
     end
 end
 
--- Conecte a função ao evento
 playerDamageEvent.OnServerEvent:Connect(handlePlayerDamage)
