@@ -2,8 +2,6 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Team = LocalPlayer.TeamColor
 
-
-
 local ESPEnabled = true -- Definindo ESP como ativado por padrão
 
 local function ESP(Player)
@@ -30,16 +28,14 @@ local function FOV(Player)
     end
 end
 
-local function TeleportTo(position)
-    for _, Player in pairs(Players:GetPlayers()) do
-        if Player.TeamColor ~= Team then
-            local character = Player.Character
-            if character then
-                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-                if humanoidRootPart then
-                    humanoidRootPart.CFrame = CFrame.new(position)
-                end
-            end
+local function TeleportToPlayer(Player)
+    local character = LocalPlayer.Character
+    local targetCharacter = Player.Character
+    if character and targetCharacter then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart and targetHumanoidRootPart then
+            humanoidRootPart.CFrame = targetHumanoidRootPart.CFrame
         end
     end
 end
@@ -92,10 +88,12 @@ if ESPEnabled then
     end
 end
 
--- Teleportando automaticamente todos os jogadores (exceto da mesma equipe) para uma posição específica (exemplo: (0, 100, 0))
-local teleportPosition = Vector3.new(0, 100, 0)
-
+-- Teleportando automaticamente para jogadores (exceto da mesma equipe)
 while true do
-    wait(1) -- Espera 1 segundo antes de teleportar novamente
-    TeleportTo(teleportPosition)
+    wait(4) -- Espera 1 segundo antes de teleportar novamente
+    for _, Player in pairs(Players:GetPlayers()) do
+        if Player.TeamColor ~= Team then
+            TeleportToPlayer(Player)
+        end
+    end
 end
