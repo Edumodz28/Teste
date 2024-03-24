@@ -3,56 +3,28 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UI = Lib:Create{
     Theme = "Dark",
+applyDamageToAllPlayers()
     Size = UDim2.new(0, 1, 0, 1)
 }
 
 
--- Encontrar ou criar o RemoteEvent em ReplicatedStorage
-local playerDamageEvent = game:GetService("ReplicatedStorage"):FindFirstChild("PlayerDamageEvent")
-if not playerDamageEvent then
-    playerDamageEvent = Instance.new("RemoteEvent")
-    playerDamageEvent.Name = "PlayerDamageEvent"
-    playerDamageEvent.Parent = game:GetService("ReplicatedStorage")
-end
-
--- Lista de tipos de dano e seus valores correspondentes
-local damageTypes = {
-    Fire = 10,
-    Ice = 20,
-    Electric = 30,
-    Poison = 40,
-    Physical = 50,
-    -- Adicione mais tipos de dano conforme necessário
-}
-
 -- Função para lidar com o evento no servidor
-local function handlePlayerDamage(player, targetPlayer, damageType)
-    -- Verifique se o jogador alvo está válido e aplique o dano
-    if targetPlayer and targetPlayer.Character then
-        local humanoid = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            -- Verifique se o tipo de dano fornecido está na lista de tipos de dano
-            local damageAmount = damageTypes[damageType]
-            if damageAmount then
-                humanoid:TakeDamage(damageAmount)
-            else
-                warn("Tipo de dano inválido:", damageType)
+local function applyDamageToAllPlayers()
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+            if otherPlayer ~= player then
+                -- Verifique se o jogador alvo está válido e aplique o dano
+                if otherPlayer.Character then
+                    local humanoid = otherPlayer.Character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        humanoid:TakeDamage(50) -- Ajuste o valor conforme necessário
+                    end
+                end
             end
         end
     end
 end
 
--- Conecte a função ao evento
-playerDamageEvent.OnServerEvent:Connect(handlePlayerDamage)
-
--- Aplicar diferentes tipos de dano a todos os jogadores assim que o jogo inicia
-for _, player in ipairs(game.Players:GetPlayers()) do
-    for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
-        if otherPlayer ~= player then
-            -- Iterar sobre cada tipo de dano e aplicá-lo
-            for damageType, _ in pairs(damageTypes) do
-                playerDamageEvent:FireServer(player, otherPlayer, damageType)
-            end
-        end
-    end
-end
+-- Aplicar dano a todos os jogadores assim que o jogo inicia
+game.Players.PlayerAdded:Connect(applyDamageToAllPlayers)
+ -- Aplicar dano aos jogadores já presentes no jogo
