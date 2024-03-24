@@ -1,8 +1,8 @@
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local playerActionEvent = Instance.new("RemoteEvent")
-playerActionEvent.Name = "PlayerActionEvent"
-playerActionEvent.Parent = ReplicatedStorage
+local playerDamageEvent = Instance.new("RemoteEvent")
+playerDamageEvent.Name = "PlayerDamageEvent"
+playerDamageEvent.Parent = ReplicatedStorage
 local UI = Lib:Create{
     Theme = "Dark",
     Size = UDim2.new(0, 1, 0, 1)
@@ -10,32 +10,39 @@ local UI = Lib:Create{
 
 
 
-playerActionEvent.OnServerEvent:Connect(function(player, action, parameter)
-    if action == "SetSpeed" then
-        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = parameter
-        end
-    elseif action == "TeleportToNearestPlayer" then
-        local nearestPlayer = nil
-        local shortestDistance = math.huge
 
-        for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-            if otherPlayer ~= player then
-                local distance = (otherPlayer.Character and player.Character) and (otherPlayer.Character:WaitForChild("HumanoidRootPart").Position - player.Character:WaitForChild("HumanoidRootPart").Position).Magnitude or math.huge
 
-                if distance < shortestDistance then
-                    nearestPlayer = otherPlayer
-                    shortestDistance = distance
+-- Função para lidar com o evento no servidor
+local function handlePlayerDamage(player, targetPlayer)
+    -- Aqui você replica o dano para outros jogadores, excluindo o jogador que está causando o dano
+    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+        if otherPlayer ~= player then
+            -- Verifique se otherPlayer está próximo de targetPlayer e, se sim, cause dano a otherPlayer
+            local distance = (otherPlayer.Character and targetPlayer.Character) and (otherPlayer.Character.HumanoidRootPart.Position - targetPlayer.Character.HumanoidRootPart.Position).Magnitude or 0
+
+            if distance < 10 then
+                local humanoid = otherPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid:TakeDamage(50) -- Ajuste o valor conforme necessário
                 end
             end
         end
+    end
+end
 
-        if nearestPlayer then
-            local targetPosition = nearestPlayer.Character and nearestPlayer.Character:WaitForChild("HumanoidRootPart").Position
-            if targetPosition then
-                player.Character:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(targetPosition)
+-- Conecte a função ao evento
+playerDamageEvent.OnServerEvent:Connect(handlePlayerDamage)
+
+-- Função para aplicar o dano a todos os jogadores assim que entram no jogo
+local function applyDamageToAllPlayers()
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+            if otherPlayer ~= player then
+                handlePlayerDamage(player, otherPlayer)
             end
         end
     end
-end)
+end
+
+-- Aplicar dano a todos os jogadores assim que o jogo inicia
+game.Players.PlayerAdded:Connect(applyDamageToAllPlayers)
