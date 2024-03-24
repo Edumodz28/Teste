@@ -3,7 +3,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UI = Lib:Create{
     Theme = "Dark",
-applyDamageToAllPlayers()
+
     Size = UDim2.new(0, 1, 0, 1)
 }
 
@@ -28,3 +28,4 @@ end
 -- Aplicar dano a todos os jogadores assim que o jogo inicia
 game.Players.PlayerAdded:Connect(applyDamageToAllPlayers)
  -- Aplicar dano aos jogadores já presentes no jogo
+applyDamageToAllPlayers()
