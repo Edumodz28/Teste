@@ -1,18 +1,18 @@
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local playerDamageEvent = Instance.new("RemoteEvent")
-playerDamageEvent.Name = "PlayerDamageEvent"
-playerDamageEvent.Parent = ReplicatedStorage
+
 local UI = Lib:Create{
     Theme = "Dark",
     Size = UDim2.new(0, 1, 0, 1)
 }
 
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local playerDamageEvent = Instance.new("RemoteEvent")
-playerDamageEvent.Name = "PlayerDamageEvent"
-playerDamageEvent.Parent = ReplicatedStorage
+-- Encontrar ou criar o RemoteEvent em ReplicatedStorage
+local playerDamageEvent = game:GetService("ReplicatedStorage"):FindFirstChild("PlayerDamageEvent")
+if not playerDamageEvent then
+    playerDamageEvent = Instance.new("RemoteEvent")
+    playerDamageEvent.Name = "PlayerDamageEvent"
+    playerDamageEvent.Parent = game:GetService("ReplicatedStorage")
+end
 
 -- Lista de tipos de dano e seus valores correspondentes
 local damageTypes = {
