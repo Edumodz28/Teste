@@ -23,6 +23,13 @@ local function ESP(Player)
         Box.Transparency = 0.5
         Box.Color3 = Color3.new(1, 0, 0)
         Box.Parent = Player.Character.HumanoidRootPart
+        
+        -- Desenhar linha do jogador local ao jogador adversário
+        local Line = Instance.new("LineHandleAdornment")
+        Line.From = LocalPlayer.Character.HumanoidRootPart.Position
+        Line.To = Player.Character.HumanoidRootPart.Position
+        Line.Color3 = Color3.new(1, 0, 0)
+        Line.Parent = Player.Character.HumanoidRootPart
     end
 end
 
@@ -48,12 +55,43 @@ local function Fly()
     end
 end
 
+local function OnDamaging()
+    -- Obter a posição do mouse
+    local mouse = LocalPlayer:GetMouse()
+    local target = nil
+    local minDistance = math.huge
+    
+    -- Encontrar o jogador mais próximo
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.TeamColor ~= Team then
+            local distance = (player.Character.HumanoidRootPart.Position - mouse.Hit.p).magnitude
+            if distance < minDistance then
+                minDistance = distance
+                target = player
+            end
+        end
+    end
+    
+    -- Verificar se encontrou um alvo
+    if target then
+        -- Aqui você pode adicionar o código para atingir o alvo
+        print("Atacou o jogador mais próximo: " .. target.Name)
+    else
+        print("Não há jogadores válidos para atacar.")
+    end
+end
+
+
 local function DisableESP()
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
             local espAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
+            local lineAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("LineHandleAdornment")
             if espAdornment then
                 espAdornment:Destroy()
+            end
+            if lineAdornment then
+                lineAdornment:Destroy()
             end
         end
     end
@@ -66,8 +104,12 @@ end)
 Players.PlayerRemoving:Connect(function(Player)
     if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
         local espAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
+        local lineAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("LineHandleAdornment")
         if espAdornment then
             espAdornment:Destroy()
+        end
+        if lineAdornment then
+            lineAdornment:Destroy()
         end
     end
 end)
@@ -93,4 +135,17 @@ end)
 -- Reseta o contador de pulos quando o jogador pousa
 LocalPlayer.Character.Humanoid.FreeFalling:Connect(function()
     jumpCount = 0
+end)
+
+-- Atacar quando o jogador atira ou lança algo
+LocalPlayer.PlayerGui.ChildAdded:Connect(function(child)
+    if child:IsA("Tool") then
+        child.Activated:Connect(function()
+            -- Verificar se a ferramenta está mirando em um jogador
+            local target = LocalPlayer:GetMouse().Target
+            if target and target:IsA("Player") and target.TeamColor ~= Team then
+                OnDamaging(target)
+            end
+        end)
+    end
 end)
