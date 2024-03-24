@@ -1,4 +1,3 @@
-local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Team = LocalPlayer.TeamColor
@@ -32,7 +31,10 @@ end
 local function DisableESP()
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment"):Destroy()
+            local espAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
+            if espAdornment then
+                espAdornment:Destroy()
+            end
         end
     end
 end
@@ -40,7 +42,10 @@ end
 local function DisableFOV()
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox"):Destroy()
+            local fovBox = Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox")
+            if fovBox then
+                fovBox:Destroy()
+            end
         end
     end
 end
@@ -52,8 +57,14 @@ end)
 
 Players.PlayerRemoving:Connect(function(Player)
     if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-        Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment"):Destroy()
-        Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox"):Destroy()
+        local espAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
+        local fovBox = Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox")
+        if espAdornment then
+            espAdornment:Destroy()
+        end
+        if fovBox then
+            fovBox:Destroy()
+        end
     end
 end)
 
