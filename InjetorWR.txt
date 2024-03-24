@@ -4,6 +4,9 @@ local Team = LocalPlayer.TeamColor
 
 local ESPEnabled = true -- Definindo ESP como ativado por padrão
 
+-- Velocidade do jogador (ajuste conforme necessário)
+local PlayerSpeed = 50
+
 local function ESP(Player)
     if Player.TeamColor ~= Team then
         local Box = Instance.new("BoxHandleAdornment")
@@ -17,6 +20,16 @@ local function ESP(Player)
     end
 end
 
+local function SetPlayerSpeed(speed)
+    local character = LocalPlayer.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = speed
+        end
+    end
+end
+
 local function FOV(Player)
     if Player.TeamColor ~= Team then
         local FOV = Instance.new("SelectionBox")
@@ -25,22 +38,6 @@ local function FOV(Player)
         FOV.Transparency = 0.5
         FOV.Adornee = Player.Character.HumanoidRootPart
         FOV.Parent = Player.Character.HumanoidRootPart
-    end
-end
-
-local function TeleportAndDamage(Player)
-    if Player.TeamColor ~= Team then
-        local character = LocalPlayer.Character
-        local targetCharacter = Player.Character
-        if character and targetCharacter then
-            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-            local targetHumanoid = targetCharacter:FindFirstChildOfClass("Humanoid")
-            local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart and targetHumanoidRootPart and targetHumanoid then
-                humanoidRootPart.CFrame = targetHumanoidRootPart.CFrame
-                targetHumanoid:TakeDamage(1000) -- Altere o valor do dano conforme necessário
-            end
-        end
     end
 end
 
@@ -63,6 +60,14 @@ local function DisableFOV()
                 fovBox:Destroy()
             end
         end
+    end
+end
+
+local function OnDamageDealt(damageInfo)
+    local target = damageInfo.Target
+    local damage = damageInfo.Damage
+    if target and target:IsA("Player") and target.TeamColor ~= Team then
+        target:TakeDamage(damage)
     end
 end
 
@@ -92,12 +97,23 @@ if ESPEnabled then
     end
 end
 
--- Teleportando e causando dano automaticamente para jogadores (exceto da mesma equipe)
-while true do
-    wait(1) -- Espera 1 segundo antes de teleportar novamente
-    for _, Player in pairs(Players:GetPlayers()) do
-        if Player.TeamColor ~= Team then
-            TeleportAndDamage(Player)
+-- Ajustando a velocidade do jogador
+SetPlayerSpeed(PlayerSpeed)
+
+-- Lidando com o dano causado pelo jogador
+game:GetService("Workspace").ChildAdded:Connect(function(child)
+    if child:IsA("Model") and child:FindFirstChild("Humanoid") and child:FindFirstChild("creator") then
+        local creator = child.creator.Value
+        if creator == LocalPlayer then
+            child.Humanoid.Died:Connect(function()
+                local damage = child.Humanoid.MaxHealth - child.Humanoid.Health
+                if damage > 0 then
+                    OnDamageDealt({
+                        Target = child,
+                        Damage = damage
+                    })
+                end
+            end)
         end
     end
-end
+end)
