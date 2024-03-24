@@ -38,7 +38,7 @@ local function TeleportAndDamage(Player)
             local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
             if humanoidRootPart and targetHumanoidRootPart and targetHumanoid then
                 humanoidRootPart.CFrame = targetHumanoidRootPart.CFrame
-                targetHumanoid:TakeDamage(10) -- Altere o valor do dano conforme necessário
+                targetHumanoid:TakeDamage(1000) -- Altere o valor do dano conforme necessário
             end
         end
     end
