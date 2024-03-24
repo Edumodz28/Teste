@@ -64,19 +64,3 @@ if ESPEnabled then
         FOV(Player)
     end
 end
-
-game:GetService("UserInputService").InputBegan:Connect(function(Input, GameProcessed)
-    -- Alternando estado do ESP quando a tecla P for pressionada
-    if Input.KeyCode == Enum.KeyCode.P and not GameProcessed then
-        ESPEnabled = not ESPEnabled
-        if ESPEnabled then
-            for _, Player in pairs(Players:GetPlayers()) do
-                ESP(Player)
-                FOV(Player)
-            end
-        else
-            DisableESP()
-            DisableFOV()
-        end
-    end
-end)
