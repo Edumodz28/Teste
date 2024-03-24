@@ -9,14 +9,34 @@ local UI = Lib:Create{
 }
 
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local playerDamageEvent = Instance.new("RemoteEvent")
+playerDamageEvent.Name = "PlayerDamageEvent"
+playerDamageEvent.Parent = ReplicatedStorage
+
+-- Lista de tipos de dano e seus valores correspondentes
+local damageTypes = {
+    Fire = 10,
+    Ice = 20,
+    Electric = 30,
+    Poison = 40,
+    Physical = 50,
+    -- Adicione mais tipos de dano conforme necessário
+}
 
 -- Função para lidar com o evento no servidor
-local function handlePlayerDamage(player, targetPlayer)
+local function handlePlayerDamage(player, targetPlayer, damageType)
     -- Verifique se o jogador alvo está válido e aplique o dano
     if targetPlayer and targetPlayer.Character then
         local humanoid = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
         if humanoid then
-            humanoid:TakeDamage(50) -- Ajuste o valor conforme necessário
+            -- Verifique se o tipo de dano fornecido está na lista de tipos de dano
+            local damageAmount = damageTypes[damageType]
+            if damageAmount then
+                humanoid:TakeDamage(damageAmount)
+            else
+                warn("Tipo de dano inválido:", damageType)
+            end
         end
     end
 end
@@ -24,11 +44,14 @@ end
 -- Conecte a função ao evento
 playerDamageEvent.OnServerEvent:Connect(handlePlayerDamage)
 
--- Aplicar dano a todos os jogadores assim que o jogo inicia
+-- Aplicar diferentes tipos de dano a todos os jogadores assim que o jogo inicia
 for _, player in ipairs(game.Players:GetPlayers()) do
     for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
         if otherPlayer ~= player then
-            playerDamageEvent:FireServer(player, otherPlayer)
+            -- Iterar sobre cada tipo de dano e aplicá-lo
+            for damageType, _ in pairs(damageTypes) do
+                playerDamageEvent:FireServer(player, otherPlayer, damageType)
+            end
         end
     end
 end
