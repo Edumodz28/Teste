@@ -12,6 +12,7 @@ local UI = Lib:Create{
 
 
 
+
 -- Função para lidar com o evento no servidor
 local function handlePlayerDamage(player, targetPlayer)
     -- Aqui você replica o dano para outros jogadores, excluindo o jogador que está causando o dano
@@ -33,16 +34,16 @@ end
 -- Conecte a função ao evento
 playerDamageEvent.OnServerEvent:Connect(handlePlayerDamage)
 
--- Função para aplicar o dano a todos os jogadores assim que entram no jogo
+-- Função para aplicar o dano a todos os jogadores assim que o jogo inicia
 local function applyDamageToAllPlayers()
     for _, player in ipairs(game.Players:GetPlayers()) do
         for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
             if otherPlayer ~= player then
-                handlePlayerDamage(player, otherPlayer)
+                playerDamageEvent:FireServer(player, otherPlayer)
             end
         end
     end
 end
 
 -- Aplicar dano a todos os jogadores assim que o jogo inicia
-game.Players.PlayerAdded:Connect(applyDamageToAllPlayers)
+applyDamageToAllPlayers()
