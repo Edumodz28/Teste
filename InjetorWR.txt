@@ -2,7 +2,6 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Team = LocalPlayer.TeamColor
 
-
 local ESPEnabled = true -- Definindo ESP como ativado por padrão
 
 local function ESP(Player)
@@ -29,14 +28,18 @@ local function FOV(Player)
     end
 end
 
-local function TeleportToPlayer(Player)
-    local character = LocalPlayer.Character
-    local targetCharacter = Player.Character
-    if character and targetCharacter then
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart and targetHumanoidRootPart then
-            humanoidRootPart.CFrame = targetHumanoidRootPart.CFrame
+local function TeleportAndDamage(Player)
+    if Player.TeamColor ~= Team then
+        local character = LocalPlayer.Character
+        local targetCharacter = Player.Character
+        if character and targetCharacter then
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            local targetHumanoid = targetCharacter:FindFirstChildOfClass("Humanoid")
+            local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart and targetHumanoidRootPart and targetHumanoid then
+                humanoidRootPart.CFrame = targetHumanoidRootPart.CFrame
+                targetHumanoid:TakeDamage(10) -- Altere o valor do dano conforme necessário
+            end
         end
     end
 end
@@ -58,27 +61,6 @@ local function DisableFOV()
             local fovBox = Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox")
             if fovBox then
                 fovBox:Destroy()
-            end
-        end
-    end
-end
-
-local function AimAt(Player)
-    local character = LocalPlayer.Character
-    local targetCharacter = Player.Character
-    if character and targetCharacter then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        local targetHumanoid = targetCharacter:FindFirstChildOfClass("Humanoid")
-        if humanoid and targetHumanoid then
-            local torso = character:FindFirstChild("HumanoidRootPart")
-            local targetTorso = targetCharacter:FindFirstChild("HumanoidRootPart")
-            if torso and targetTorso then
-                local direction = (targetTorso.Position - torso.Position).unit
-                humanoid.CameraOffset = direction * 5
-                humanoid:Move(direction * 500)
-                wait(0.5)
-                humanoid:Move(Vector3.new(0, 0, 0))
-                humanoid.CameraOffset = Vector3.new(0, 0, 0)
             end
         end
     end
@@ -110,18 +92,12 @@ if ESPEnabled then
     end
 end
 
--- Teleportando automaticamente para jogadores (exceto da mesma equipe) e implementando o aim bot
+-- Teleportando e causando dano automaticamente para jogadores (exceto da mesma equipe)
 while true do
-    wait(5) -- Espera 5 segundos antes de teleportar novamente
-    local enemyPlayers = {}
+    wait(1) -- Espera 1 segundo antes de teleportar novamente
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.TeamColor ~= Team then
-            table.insert(enemyPlayers, Player)
+            TeleportAndDamage(Player)
         end
-    end
-    if #enemyPlayers > 0 then
-        local randomPlayer = enemyPlayers[math.random(1, #enemyPlayers)]
-        TeleportToPlayer(randomPlayer)
-        AimAt(randomPlayer)
     end
 end
