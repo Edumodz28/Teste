@@ -1,5 +1,6 @@
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
-
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local UI = Lib:Create{
     Theme = "Dark",
     Size = UDim2.new(0, 1, 0, 1)
