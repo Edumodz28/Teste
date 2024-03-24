@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Team = LocalPlayer.TeamColor
 
+
 local ESPEnabled = true -- Definindo ESP como ativado por padrão
 
 local function ESP(Player)
@@ -62,6 +63,27 @@ local function DisableFOV()
     end
 end
 
+local function AimAt(Player)
+    local character = LocalPlayer.Character
+    local targetCharacter = Player.Character
+    if character and targetCharacter then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        local targetHumanoid = targetCharacter:FindFirstChildOfClass("Humanoid")
+        if humanoid and targetHumanoid then
+            local torso = character:FindFirstChild("HumanoidRootPart")
+            local targetTorso = targetCharacter:FindFirstChild("HumanoidRootPart")
+            if torso and targetTorso then
+                local direction = (targetTorso.Position - torso.Position).unit
+                humanoid.CameraOffset = direction * 5
+                humanoid:Move(direction * 500)
+                wait(0.5)
+                humanoid:Move(Vector3.new(0, 0, 0))
+                humanoid.CameraOffset = Vector3.new(0, 0, 0)
+            end
+        end
+    end
+end
+
 Players.PlayerAdded:Connect(function(Player)
     ESP(Player)
     FOV(Player)
@@ -88,12 +110,18 @@ if ESPEnabled then
     end
 end
 
--- Teleportando automaticamente para jogadores (exceto da mesma equipe)
+-- Teleportando automaticamente para jogadores (exceto da mesma equipe) e implementando o aim bot
 while true do
-    wait(4) -- Espera 1 segundo antes de teleportar novamente
+    wait(5) -- Espera 5 segundos antes de teleportar novamente
+    local enemyPlayers = {}
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.TeamColor ~= Team then
-            TeleportToPlayer(Player)
+            table.insert(enemyPlayers, Player)
         end
+    end
+    if #enemyPlayers > 0 then
+        local randomPlayer = enemyPlayers[math.random(1, #enemyPlayers)]
+        TeleportToPlayer(randomPlayer)
+        AimAt(randomPlayer)
     end
 end
