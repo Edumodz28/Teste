@@ -17,6 +17,31 @@ local function ESP(Player)
         Box.Transparency = 0.5
         Box.Color3 = Color3.new(1, 0, 0)
         Box.Parent = Player.Character.HumanoidRootPart
+        
+        -- Desenhar linha do jogador local ao jogador adversário
+        local Line = Instance.new("LineHandleAdornment")
+        Line.From = LocalPlayer.Character.HumanoidRootPart.Position
+        Line.To = Player.Character.HumanoidRootPart.Position
+        Line.Color3 = Color3.new(1, 0, 0)
+        Line.Parent = Player.Character.HumanoidRootPart
+        
+        -- ESP de vida
+        local Billboard = Instance.new("BillboardGui")
+        Billboard.Adornee = Player.Character.Head
+        Billboard.Size = UDim2.new(2, 0, 2, 0)
+        Billboard.StudsOffset = Vector3.new(0, 3, 0)
+        Billboard.AlwaysOnTop = true
+        Billboard.Parent = Player.Character.Head
+        
+        local HealthBar = Instance.new("Frame")
+        HealthBar.Size = UDim2.new(1, 0, 0.2, 0)
+        HealthBar.BackgroundColor3 = Color3.new(0, 1, 0)
+        HealthBar.BorderSizePixel = 0
+        HealthBar.Parent = Billboard
+        
+        Player.Character.Humanoid.HealthChanged:Connect(function(health)
+            HealthBar.Size = UDim2.new(health / Player.Character.Humanoid.MaxHealth, 0, 0.2, 0)
+        end)
     end
 end
 
@@ -27,17 +52,6 @@ local function SetPlayerSpeed(speed)
         if humanoid then
             humanoid.WalkSpeed = speed
         end
-    end
-end
-
-local function FOV(Player)
-    if Player.TeamColor ~= Team then
-        local FOV = Instance.new("SelectionBox")
-        FOV.LineThickness = 0.05
-        FOV.Color3 = Color3.new(1, 0, 0)
-        FOV.Transparency = 0.5
-        FOV.Adornee = Player.Character.HumanoidRootPart
-        FOV.Parent = Player.Character.HumanoidRootPart
     end
 end
 
@@ -81,7 +95,6 @@ end
 
 Players.PlayerAdded:Connect(function(Player)
     ESP(Player)
-    FOV(Player)
 end)
 
 Players.PlayerRemoving:Connect(function(Player)
@@ -101,7 +114,6 @@ end)
 if ESPEnabled then
     for _, Player in pairs(Players:GetPlayers()) do
         ESP(Player)
-        FOV(Player)
     end
 end
 
