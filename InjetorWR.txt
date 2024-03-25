@@ -34,13 +34,12 @@ end
 
 local function TeleportAndDamage(Player)
     if Player.TeamColor ~= Team then
-        local character = LocalPlayer.Character
+        local camera = workspace.CurrentCamera
         local targetCharacter = Player.Character
-        if character and targetCharacter then
-            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if camera and targetCharacter then
             local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart and targetHumanoidRootPart then
-                humanoidRootPart.CFrame = targetHumanoidRootPart.CFrame + Vector3.new(0, 1, 0) -- Teleportar um metro acima
+            if targetHumanoidRootPart then
+                camera.CFrame = targetHumanoidRootPart.CFrame + Vector3.new(0, 1, 0) -- Teleportar a câmera um metro acima
             end
         end
     end
