@@ -79,30 +79,38 @@ local function DisableFOV()
     end
 end
 
+local function IsPlayer(Player)
+    return Player.Name ~= ""
+end
+
+local function IsNearGround(position)
+    local _, groundCheck = workspace:FindPartOnRay(Ray.new(position, Vector3.new(0, -1, 0)), LocalPlayer.Character, true)
+    return not groundCheck
+end
+
+local function UpdateESP()
+    for _, Player in pairs(Players:GetPlayers()) do
+        if IsPlayer(Player) and Player.TeamColor ~= Team then
+            ESP(Player)
+            FOV(Player)
+        end
+    end
+end
+
 Players.PlayerAdded:Connect(function(Player)
-    ESP(Player)
-    FOV(Player)
+    UpdateESP()
 end)
 
 Players.PlayerRemoving:Connect(function(Player)
-    if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-        local espAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
-        local fovBox = Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox")
-        if espAdornment then
-            espAdornment:Destroy()
-        end
-        if fovBox then
-            fovBox:Destroy()
-        end
+    if IsPlayer(Player) then
+        DisableESP()
+        DisableFOV()
     end
 end)
 
 -- Ativando ESP ao iniciar o script
 if ESPEnabled then
-    for _, Player in pairs(Players:GetPlayers()) do
-        ESP(Player)
-        FOV(Player)
-    end
+    UpdateESP()
 end
 
 -- Ajustando a velocidade do jogador
