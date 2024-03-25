@@ -7,6 +7,9 @@ local ESPEnabled = true -- Definindo ESP como ativado por padrão
 -- Velocidade do jogador (ajuste conforme necessário)
 local PlayerSpeed = 50
 
+-- Máximo de vida do jogador
+local MaxHealth = 100
+
 local function ESP(Player)
     if Player.TeamColor ~= Team then
         local Box = Instance.new("BoxHandleAdornment")
@@ -39,8 +42,20 @@ local function ESP(Player)
         HealthBar.BorderSizePixel = 0
         HealthBar.Parent = Billboard
         
+        local HealthLabel = Instance.new("TextLabel")
+        HealthLabel.Size = UDim2.new(1, 0, 1, 0)
+        HealthLabel.Position = UDim2.new(0, 0, 0, 0)
+        HealthLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+        HealthLabel.BackgroundTransparency = 1
+        HealthLabel.TextColor3 = Color3.new(1, 1, 1)
+        HealthLabel.Text = tostring(MaxHealth)
+        HealthLabel.Font = Enum.Font.SourceSans
+        HealthLabel.Parent = HealthBar
+        
+        -- Conectar ao evento HealthChanged
         Player.Character.Humanoid.HealthChanged:Connect(function(health)
-            HealthBar.Size = UDim2.new(health / Player.Character.Humanoid.MaxHealth, 0, 0.2, 0)
+            HealthBar.Size = UDim2.new(health / MaxHealth, 0, 0.2, 0)
+            HealthLabel.Text = tostring(math.floor(health))
         end)
     end
 end
@@ -71,12 +86,20 @@ local function TeleportAndDamage(Player)
     end
 end
 
+local function RecoverHealth()
+    LocalPlayer.Character.Humanoid.Health = MaxHealth
+end
+
 local function DisableESP()
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
             local espAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
+            local billboardGui = Player.Character:FindFirstChildOfClass("BillboardGui")
             if espAdornment then
                 espAdornment:Destroy()
+            end
+            if billboardGui then
+                billboardGui:Destroy()
             end
         end
     end
@@ -93,6 +116,11 @@ local function DisableFOV()
     end
 end
 
+local function OnDamaging(target)
+    -- Aqui você pode adicionar o código para atingir o alvo
+    print("Atacou o jogador: " .. target.Name)
+end
+
 Players.PlayerAdded:Connect(function(Player)
     ESP(Player)
 end)
@@ -100,12 +128,12 @@ end)
 Players.PlayerRemoving:Connect(function(Player)
     if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
         local espAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
-        local fovBox = Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox")
+        local billboardGui = Player.Character:FindFirstChildOfClass("BillboardGui")
         if espAdornment then
             espAdornment:Destroy()
         end
-        if fovBox then
-            fovBox:Destroy()
+        if billboardGui then
+            billboardGui:Destroy()
         end
     end
 end)
@@ -116,9 +144,6 @@ if ESPEnabled then
         ESP(Player)
     end
 end
-
--- Ajustando a velocidade do jogador
-SetPlayerSpeed(PlayerSpeed)
 
 -- Teleportando e causando dano automaticamente para jogadores (exceto da mesma equipe)
 while true do
