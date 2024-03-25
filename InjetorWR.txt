@@ -3,7 +3,7 @@ local LocalPlayer = Players.LocalPlayer
 local Team = LocalPlayer.TeamColor
 
 local ESPEnabled = true -- Definindo ESP como ativado por padrão
-local TeleportCooldown = 2 -- Cooldown de teleporte em segundos
+local TeleportCooldown = 3 -- Cooldown de teleporte em segundos
 local LastTeleportTime = 0 -- Último momento em que ocorreu um teleporte
 
 -- Velocidade do jogador (ajuste conforme necessário)
@@ -34,12 +34,18 @@ end
 
 local function TeleportAndDamage(Player)
     if Player.TeamColor ~= Team then
-        local camera = workspace.CurrentCamera
+        local character = LocalPlayer.Character
         local targetCharacter = Player.Character
-        if camera and targetCharacter then
+        if character and targetCharacter then
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
             local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-            if targetHumanoidRootPart then
-                camera.CFrame = targetHumanoidRootPart.CFrame + Vector3.new(0, 1, 0) -- Teleportar a câmera um metro acima
+            if humanoidRootPart and targetHumanoidRootPart then
+                humanoidRootPart.CFrame = targetHumanoidRootPart.CFrame + Vector3.new(0, 1, 0) -- Teleportar um metro acima
+                -- Atualizar a posição da câmera para seguir o inimigo
+                local camera = workspace.CurrentCamera
+                if camera then
+                    camera.CFrame = CFrame.new(targetHumanoidRootPart.Position + Vector3.new(0, 5, -10), targetHumanoidRootPart.Position)
+                end
             end
         end
     end
