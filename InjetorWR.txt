@@ -5,7 +5,10 @@ local Team = LocalPlayer.TeamColor
 local ESPEnabled = true -- Definindo ESP como ativado por padrão
 local TeleportCooldown = 10 -- Cooldown de teleporte em segundos
 local LastTeleportTime = 0 -- Último momento em que ocorreu um teleporte
-local AimEnabled = true -- Ativar o aim bot
+
+local AimCooldown = 5 -- Tempo que a mira permanece focada em um jogador em segundos
+local LastAimTime = 0 -- Último momento em que a mira foi focada em um jogador
+local LastTeleportTarget = nil -- Último jogador teleportado
 
 -- Velocidade do jogador (ajuste conforme necessário)
 local PlayerSpeed = 50
@@ -47,6 +50,25 @@ local function TeleportAndDamage(Player)
     end
 end
 
+local function AimAtTarget(Player)
+    local camera = workspace.CurrentCamera
+    if camera then
+        local targetCharacter = Player.Character
+        if targetCharacter then
+            local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
+            if targetHumanoidRootPart then
+                local ray = Ray.new(camera.CFrame.Position, (targetHumanoidRootPart.Position - camera.CFrame.Position).unit * 1000)
+                local part, hitPos = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
+                if part and part:IsDescendantOf(targetCharacter) then
+                    if part.Transparency == 0 then
+                        camera.CFrame = CFrame.new(camera.CFrame.Position, hitPos)
+                    end
+                end
+            end
+        end
+    end
+end
+
 local function DisableESP()
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -75,25 +97,6 @@ local function CanTeleport()
     return (currentTime - LastTeleportTime) >= TeleportCooldown
 end
 
-local function AimAtTarget(Player)
-    local camera = workspace.CurrentCamera
-    if camera then
-        local targetCharacter = Player.Character
-        if targetCharacter then
-            local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-            if targetHumanoidRootPart then
-                local ray = Ray.new(camera.CFrame.Position, (targetHumanoidRootPart.Position - camera.CFrame.Position).unit * 1000)
-                local part, hitPos = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
-                if part and part:IsDescendantOf(targetCharacter) then
-                    if part.Transparency == 0 then
-                        camera.CFrame = CFrame.new(camera.CFrame.Position, hitPos)
-                    end
-                end
-            end
-        end
-    end
-end
-
 Players.PlayerAdded:Connect(function(Player)
     UpdateESP()
 end)
@@ -112,18 +115,23 @@ end
 -- Ajustando a velocidade do jogador
 SetPlayerSpeed(PlayerSpeed)
 
--- Verificando a cada segundo
+-- Teleportando e causando dano automaticamente para jogadores (exceto da mesma equipe)
 while true do
-    wait(1)
+    wait(1) -- Espera 1 segundo antes de verificar o teleporte novamente
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.TeamColor ~= Team then
             if CanTeleport() then
                 TeleportAndDamage(Player)
                 LastTeleportTime = os.time()
+                LastTeleportTarget = Player.Character
             end
-            if AimEnabled then
-                AimAtTarget(Player)
-            end
+        end
+    end
+    if LastTeleportTarget then
+        AimAtTarget(LastTeleportTarget.Parent)
+        if os.time() - LastAimTime >= AimCooldown then
+            LastTeleportTarget = nil
+            LastAimTime = os.time()
         end
     end
 end
