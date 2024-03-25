@@ -82,7 +82,11 @@ local function AimAtTarget(Player)
         if targetCharacter then
             local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
             if targetHumanoidRootPart then
-                camera.CFrame = CFrame.new(camera.CFrame.Position, targetHumanoidRootPart.Position)
+                local ray = Ray.new(camera.CFrame.Position, (targetHumanoidRootPart.Position - camera.CFrame.Position).unit * 1000)
+                local part, hitPos = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
+                if part and part:IsDescendantOf(targetCharacter) then
+                    camera.CFrame = CFrame.new(camera.CFrame.Position, hitPos)
+                end
             end
         end
     end
