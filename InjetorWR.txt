@@ -3,6 +3,8 @@ local LocalPlayer = Players.LocalPlayer
 local Team = LocalPlayer.TeamColor
 
 local ESPEnabled = true -- Definindo ESP como ativado por padrão
+local TeleportCooldown = 10 -- Cooldown de teleporte em segundos
+local LastTeleportTime = 0 -- Último momento em que ocorreu um teleporte
 
 -- Velocidade do jogador (ajuste conforme necessário)
 local PlayerSpeed = 50
@@ -30,28 +32,15 @@ local function SetPlayerSpeed(speed)
     end
 end
 
-local function FOV(Player)
-    if Player.TeamColor ~= Team then
-        local FOV = Instance.new("SelectionBox")
-        FOV.LineThickness = 0.05
-        FOV.Color3 = Color3.new(1, 0, 0)
-        FOV.Transparency = 0.5
-        FOV.Adornee = Player.Character.HumanoidRootPart
-        FOV.Parent = Player.Character.HumanoidRootPart
-    end
-end
-
 local function TeleportAndDamage(Player)
     if Player.TeamColor ~= Team then
         local character = LocalPlayer.Character
         local targetCharacter = Player.Character
         if character and targetCharacter then
             local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-            local targetHumanoid = targetCharacter:FindFirstChildOfClass("Humanoid")
             local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart and targetHumanoidRootPart and targetHumanoid then
-                humanoidRootPart.CFrame = targetHumanoidRootPart.CFrame
-                targetHumanoid:TakeDamage(10) -- Altere o valor do dano conforme necessário
+            if humanoidRootPart and targetHumanoidRootPart then
+                humanoidRootPart.CFrame = targetHumanoidRootPart.CFrame + Vector3.new(0, 1, 0) -- Teleportar um metro acima
             end
         end
     end
@@ -68,33 +57,21 @@ local function DisableESP()
     end
 end
 
-local function DisableFOV()
-    for _, Player in pairs(Players:GetPlayers()) do
-        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            local fovBox = Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox")
-            if fovBox then
-                fovBox:Destroy()
-            end
-        end
-    end
-end
-
 local function IsPlayer(Player)
     return Player.Name ~= ""
-end
-
-local function IsNearGround(position)
-    local _, groundCheck = workspace:FindPartOnRay(Ray.new(position, Vector3.new(0, -1, 0)), LocalPlayer.Character, true)
-    return not groundCheck
 end
 
 local function UpdateESP()
     for _, Player in pairs(Players:GetPlayers()) do
         if IsPlayer(Player) and Player.TeamColor ~= Team then
             ESP(Player)
-            FOV(Player)
         end
     end
+end
+
+local function CanTeleport()
+    local currentTime = os.time()
+    return (currentTime - LastTeleportTime) >= TeleportCooldown
 end
 
 Players.PlayerAdded:Connect(function(Player)
@@ -104,7 +81,6 @@ end)
 Players.PlayerRemoving:Connect(function(Player)
     if IsPlayer(Player) then
         DisableESP()
-        DisableFOV()
     end
 end)
 
@@ -118,10 +94,13 @@ SetPlayerSpeed(PlayerSpeed)
 
 -- Teleportando e causando dano automaticamente para jogadores (exceto da mesma equipe)
 while true do
-    wait(1) -- Espera 1 segundo antes de teleportar novamente
+    wait(1) -- Espera 1 segundo antes de verificar o teleporte novamente
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.TeamColor ~= Team then
-            TeleportAndDamage(Player)
+            if CanTeleport() then
+                TeleportAndDamage(Player)
+                LastTeleportTime = os.time()
+            end
         end
     end
 end
