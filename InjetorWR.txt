@@ -7,15 +7,8 @@ local ESPEnabled = true -- Definindo ESP como ativado por padrão
 -- Velocidade do jogador (ajuste conforme necessário)
 local PlayerSpeed = 50
 
--- Máximo de vida do jogador
-local MaxHealth = 1000
-
--- Taxa de recuperação de vida por segundo
-local HealthRegenRate = 190
-
 local function ESP(Player)
     if Player.TeamColor ~= Team then
-        -- ESP Box
         local Box = Instance.new("BoxHandleAdornment")
         Box.Size = Player.Character.HumanoidRootPart.Size + Vector3.new(0.1, 0.1, 0.1)
         Box.Adornee = Player.Character.HumanoidRootPart
@@ -24,43 +17,6 @@ local function ESP(Player)
         Box.Transparency = 0.5
         Box.Color3 = Color3.new(1, 0, 0)
         Box.Parent = Player.Character.HumanoidRootPart
-        
-        -- ESP Linha
-        local Line = Instance.new("LineHandleAdornment")
-        Line.From = LocalPlayer.Character.HumanoidRootPart.Position
-        Line.To = Player.Character.HumanoidRootPart.Position
-        Line.Color3 = Color3.new(1, 0, 0)
-        Line.Parent = Player.Character.HumanoidRootPart
-        
-        -- ESP Vida
-        local Billboard = Instance.new("BillboardGui")
-        Billboard.Adornee = Player.Character.Head
-        Billboard.Size = UDim2.new(2, 0, 2, 0)
-        Billboard.StudsOffset = Vector3.new(0, 3, 0)
-        Billboard.AlwaysOnTop = true
-        Billboard.Parent = Player.Character.Head
-        
-        local HealthBar = Instance.new("Frame")
-        HealthBar.Size = UDim2.new(1, 0, 0.2, 0)
-        HealthBar.BackgroundColor3 = Color3.new(0, 1, 0)
-        HealthBar.BorderSizePixel = 0
-        HealthBar.Parent = Billboard
-        
-        local HealthLabel = Instance.new("TextLabel")
-        HealthLabel.Size = UDim2.new(1, 0, 1, 0)
-        HealthLabel.Position = UDim2.new(0, 0, 0, 0)
-        HealthLabel.BackgroundColor3 = Color3.new(1, 1, 1)
-        HealthLabel.BackgroundTransparency = 1
-        HealthLabel.TextColor3 = Color3.new(1, 1, 1)
-        HealthLabel.Text = tostring(MaxHealth)
-        HealthLabel.Font = Enum.Font.SourceSans
-        HealthLabel.Parent = HealthBar
-        
-        -- Conectar ao evento HealthChanged
-        Player.Character.Humanoid.HealthChanged:Connect(function(health)
-            HealthBar.Size = UDim2.new(health / MaxHealth, 0, 0.2, 0)
-            HealthLabel.Text = tostring(math.floor(health))
-        end)
     end
 end
 
@@ -71,6 +27,17 @@ local function SetPlayerSpeed(speed)
         if humanoid then
             humanoid.WalkSpeed = speed
         end
+    end
+end
+
+local function FOV(Player)
+    if Player.TeamColor ~= Team then
+        local FOV = Instance.new("SelectionBox")
+        FOV.LineThickness = 0.05
+        FOV.Color3 = Color3.new(1, 0, 0)
+        FOV.Transparency = 0.5
+        FOV.Adornee = Player.Character.HumanoidRootPart
+        FOV.Parent = Player.Character.HumanoidRootPart
     end
 end
 
@@ -90,57 +57,42 @@ local function TeleportAndDamage(Player)
     end
 end
 
-local function RecoverHealth()
-    local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        while humanoid.Health < MaxHealth do
-            humanoid.Health = humanoid.Health + 1
-            wait(1 / HealthRegenRate)
-        end
-    end
-end
-
 local function DisableESP()
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
             local espAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
-            local lineAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("LineHandleAdornment")
-            local billboardGui = Player.Character:FindFirstChildOfClass("BillboardGui")
             if espAdornment then
                 espAdornment:Destroy()
-            end
-            if lineAdornment then
-                lineAdornment:Destroy()
-            end
-            if billboardGui then
-                billboardGui:Destroy()
             end
         end
     end
 end
 
-local function OnDamaging(target)
-    -- Aqui você pode adicionar o código para atingir o alvo
-    print("Atacou o jogador: " .. target.Name)
+local function DisableFOV()
+    for _, Player in pairs(Players:GetPlayers()) do
+        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            local fovBox = Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox")
+            if fovBox then
+                fovBox:Destroy()
+            end
+        end
+    end
 end
 
 Players.PlayerAdded:Connect(function(Player)
     ESP(Player)
+    FOV(Player)
 end)
 
 Players.PlayerRemoving:Connect(function(Player)
     if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
         local espAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
-        local lineAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("LineHandleAdornment")
-        local billboardGui = Player.Character:FindFirstChildOfClass("BillboardGui")
+        local fovBox = Player.Character.HumanoidRootPart:FindFirstChildOfClass("SelectionBox")
         if espAdornment then
             espAdornment:Destroy()
         end
-        if lineAdornment then
-            lineAdornment:Destroy()
-        end
-        if billboardGui then
-            billboardGui:Destroy()
+        if fovBox then
+            fovBox:Destroy()
         end
     end
 end)
@@ -149,6 +101,7 @@ end)
 if ESPEnabled then
     for _, Player in pairs(Players:GetPlayers()) do
         ESP(Player)
+        FOV(Player)
     end
 end
 
@@ -164,6 +117,3 @@ while true do
         end
     end
 end
-
--- Recuperando a vida continuamente
-spawn(RecoverHealth)
