@@ -3,7 +3,7 @@ local LocalPlayer = Players.LocalPlayer
 local Team = LocalPlayer.TeamColor
 
 local ESPEnabled = true -- Definindo ESP como ativado por padrão
-local TeleportCooldown = 10 -- Cooldown de teleporte em segundos
+local TeleportCooldown = 2 -- Cooldown de teleporte em segundos
 local LastTeleportTime = 0 -- Último momento em que ocorreu um teleporte
 
 -- Velocidade do jogador (ajuste conforme necessário)
