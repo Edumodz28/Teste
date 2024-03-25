@@ -8,10 +8,10 @@ local ESPEnabled = true -- Definindo ESP como ativado por padrão
 local PlayerSpeed = 50
 
 -- Máximo de vida do jogador
-local MaxHealth = 100
+local MaxHealth = 1000
 
 -- Taxa de recuperação de vida por segundo
-local HealthRegenRate = 5
+local HealthRegenRate = 190
 
 local function ESP(Player)
     if Player.TeamColor ~= Team then
