@@ -93,33 +93,41 @@ local function AimAtTarget(Player)
     end
 end
 
-local function FireProjectile(StartPosition, Direction)
-    local projectile = Instance.new("Part")
-    projectile.Size = Vector3.new(1, 1, 1)
-    projectile.Position = StartPosition
-    projectile.Anchored = true
-    projectile.CanCollide = true  -- Agora o projétil pode colidir com objetos
-    projectile.BrickColor = BrickColor.new("Bright red")  -- Cor do projétil
-    projectile.Parent = workspace
-    
-    -- Define a velocidade do projétil
-    local projectileSpeed = 100  -- Ajuste conforme necessário
-    
-    -- Lança o projétil na direção especificada
-    local projectileVelocity = Direction.unit * projectileSpeed
-    projectile.Velocity = projectileVelocity
-    
-    projectile.Touched:Connect(function(hit)
-        -- Verifica se o objeto atingido é um jogador inimigo
-        if hit:IsA("Model") and hit.Parent then
-            local player = Players:GetPlayerFromCharacter(hit.Parent)
-            if player and player.TeamColor ~= Team then
-                -- Teleporta o projétil para a posição do jogador
-                projectile.CFrame = CFrame.new(hit.Position)
-            end
+local function FireProjectile(Player)
+    local character = Player.Character
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            local projectile = Instance.new("Part")
+            projectile.Size = Vector3.new(1, 1, 1)
+            projectile.Position = humanoidRootPart.Position
+            projectile.Anchored = true
+            projectile.CanCollide = true
+            projectile.BrickColor = BrickColor.new("Bright red")
+            projectile.Parent = workspace
+
+            -- Calcula a direção do jogador inimigo em relação à câmera do jogo
+            local direction = (humanoidRootPart.Position - workspace.CurrentCamera.CFrame.Position).unit
+
+            -- Teleporta o projétil diretamente para a posição do jogador inimigo
+            projectile.CFrame = CFrame.new(humanoidRootPart.Position)
+
+            -- Adiciona uma função para causar dano ao jogador inimigo se o projétil colidir com ele
+            projectile.Touched:Connect(function(hit)
+                local hitPlayer = Players:GetPlayerFromCharacter(hit.Parent)
+                if hitPlayer and hitPlayer.TeamColor ~= Team then
+                    hit:Destroy()  -- Destruir o projétil ao colidir com o jogador inimigo
+                    -- Código para causar dano ao jogador inimigo
+                    local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        humanoid:TakeDamage(10)  -- Por exemplo, causando 10 de dano
+                    end
+                end
+            end)
         end
-    end)
+    end
 end
+
 
 Players.PlayerAdded:Connect(function(Player)
     UpdateESP()
