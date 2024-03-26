@@ -5,8 +5,9 @@ local Team = LocalPlayer.TeamColor
 local ESPEnabled = true -- Definindo ESP como ativado por padrão
 local TeleportCooldown = 10 -- Cooldown de teleporte em segundos
 local LastTeleportTime = 0 -- Último momento em que ocorreu um teleporte
-local AimCooldown = 5 -- Tempo de espera entre mudanças de alvo em segundos
-local LastAimTime = 0 -- Último momento em que mudou de alvo
+local AimDuration = 5 -- Duração da mira em segundos
+local LastAimTime = 0 -- Último momento em que mirou em um jogador
+local CurrentTarget = nil -- Jogador atualmente mirado
 
 -- Velocidade do jogador (ajuste conforme necessário)
 local PlayerSpeed = 50
@@ -76,9 +77,9 @@ local function CanTeleport()
     return (currentTime - LastTeleportTime) >= TeleportCooldown
 end
 
-local function CanChangeAimTarget()
+local function CanChangeTarget()
     local currentTime = os.time()
-    return (currentTime - LastAimTime) >= AimCooldown
+    return (currentTime - LastAimTime) >= AimDuration
 end
 
 local function AimAtTarget(Player)
@@ -107,6 +108,9 @@ end)
 Players.PlayerRemoving:Connect(function(Player)
     if IsPlayer(Player) then
         DisableESP()
+        if CurrentTarget == Player then
+            CurrentTarget = nil
+        end
     end
 end)
 
@@ -121,14 +125,20 @@ SetPlayerSpeed(PlayerSpeed)
 -- Teleportando e causando dano automaticamente para jogadores (exceto da mesma equipe)
 while true do
     wait(1) -- Espera 1 segundo antes de verificar o teleporte novamente
-    for _, Player in pairs(Players:GetPlayers()) do
-        if Player.TeamColor ~= Team then
-            if CanTeleport() then
-                TeleportAndDamage(Player)
-                LastTeleportTime = os.time()
+    if CanTeleport() then
+        local targetPlayers = {}
+        for _, Player in pairs(Players:GetPlayers()) do
+            if Player.TeamColor ~= Team then
+                table.insert(targetPlayers, Player)
             end
-            if CanChangeAimTarget() then
-                AimAtTarget(Player)
+        end
+        if #targetPlayers > 0 then
+            local randomIndex = math.random(1, #targetPlayers)
+            local newTarget = targetPlayers[randomIndex]
+            if CurrentTarget ~= newTarget or not CanChangeTarget() then
+                TeleportAndDamage(newTarget)
+                LastTeleportTime = os.time()
+                CurrentTarget = newTarget
                 LastAimTime = os.time()
             end
         end
