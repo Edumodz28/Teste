@@ -5,9 +5,6 @@ local Team = LocalPlayer.TeamColor
 local ESPEnabled = true -- Definindo ESP como ativado por padrão
 local TeleportCooldown = 10 -- Cooldown de teleporte em segundos
 local LastTeleportTime = 0 -- Último momento em que ocorreu um teleporte
-local AimDuration = 5 -- Duração da mira em segundos
-local LastAimTime = 0 -- Último momento em que mirou em um jogador
-local CurrentTarget = nil -- Jogador atualmente mirado
 
 -- Velocidade do jogador (ajuste conforme necessário)
 local PlayerSpeed = 50
@@ -77,11 +74,6 @@ local function CanTeleport()
     return (currentTime - LastTeleportTime) >= TeleportCooldown
 end
 
-local function CanChangeTarget()
-    local currentTime = os.time()
-    return (currentTime - LastAimTime) >= AimDuration
-end
-
 local function AimAtTarget(Player)
     local camera = workspace.CurrentCamera
     if camera then
@@ -101,6 +93,34 @@ local function AimAtTarget(Player)
     end
 end
 
+local function FireProjectile(StartPosition, Direction)
+    local projectile = Instance.new("Part")
+    projectile.Size = Vector3.new(1, 1, 1)
+    projectile.Position = StartPosition
+    projectile.Anchored = true
+    projectile.CanCollide = true  -- Agora o projétil pode colidir com objetos
+    projectile.BrickColor = BrickColor.new("Bright red")  -- Cor do projétil
+    projectile.Parent = workspace
+    
+    -- Define a velocidade do projétil
+    local projectileSpeed = 100  -- Ajuste conforme necessário
+    
+    -- Lança o projétil na direção especificada
+    local projectileVelocity = Direction.unit * projectileSpeed
+    projectile.Velocity = projectileVelocity
+    
+    projectile.Touched:Connect(function(hit)
+        -- Verifica se o objeto atingido é um jogador inimigo
+        if hit:IsA("Model") and hit.Parent then
+            local player = Players:GetPlayerFromCharacter(hit.Parent)
+            if player and player.TeamColor ~= Team then
+                -- Teleporta o projétil para a posição do jogador
+                projectile.CFrame = CFrame.new(hit.Position)
+            end
+        end
+    end)
+end
+
 Players.PlayerAdded:Connect(function(Player)
     UpdateESP()
 end)
@@ -108,9 +128,6 @@ end)
 Players.PlayerRemoving:Connect(function(Player)
     if IsPlayer(Player) then
         DisableESP()
-        if CurrentTarget == Player then
-            CurrentTarget = nil
-        end
     end
 end)
 
@@ -125,22 +142,16 @@ SetPlayerSpeed(PlayerSpeed)
 -- Teleportando e causando dano automaticamente para jogadores (exceto da mesma equipe)
 while true do
     wait(1) -- Espera 1 segundo antes de verificar o teleporte novamente
-    if CanTeleport() then
-        local targetPlayers = {}
-        for _, Player in pairs(Players:GetPlayers()) do
-            if Player.TeamColor ~= Team then
-                table.insert(targetPlayers, Player)
-            end
-        end
-        if #targetPlayers > 0 then
-            local randomIndex = math.random(1, #targetPlayers)
-            local newTarget = targetPlayers[randomIndex]
-            if CurrentTarget ~= newTarget or not CanChangeTarget() then
-                TeleportAndDamage(newTarget)
+    for _, Player in pairs(Players:GetPlayers()) do
+        if Player.TeamColor ~= Team then
+            if CanTeleport() then
+                TeleportAndDamage(Player)
                 LastTeleportTime = os.time()
-                CurrentTarget = newTarget
-                LastAimTime = os.time()
             end
+            AimAtTarget(Player)  -- Adiciona a mira ao loop
+            -- Calcula a direção do alvo
+            local direction = (Player.Character.HumanoidRootPart.Position - workspace.CurrentCamera.CFrame.Position).unit
+            FireProjectile(workspace.CurrentCamera.CFrame.Position, direction)
         end
     end
 end
