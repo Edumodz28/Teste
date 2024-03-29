@@ -3,7 +3,7 @@ local LocalPlayer = Players.LocalPlayer
 local Team = LocalPlayer.TeamColor
 
 local ESPEnabled = true -- Definindo ESP como ativado por padrão
-local TeleportCooldown = 10 -- Cooldown de teleporte em segundos
+local TeleportCooldown = 1000 -- Cooldown de teleporte em segundos
 local LastTeleportTime = 0 -- Último momento em que ocorreu um teleporte
 
 -- Velocidade do jogador (ajuste conforme necessário)
@@ -28,6 +28,20 @@ local function SetPlayerSpeed(speed)
         local humanoid = character:FindFirstChildOfClass("Humanoid")
         if humanoid then
             humanoid.WalkSpeed = speed
+        end
+    end
+end
+
+local function TeleportAndDamage(Player)
+    if Player.TeamColor ~= Team then
+        local character = LocalPlayer.Character
+        local targetCharacter = Player.Character
+        if character and targetCharacter then
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart and targetHumanoidRootPart then
+                humanoidRootPart.CFrame = targetHumanoidRootPart.CFrame + Vector3.new(0, 1, 0) -- Teleportar um metro acima
+            end
         end
     end
 end
@@ -60,6 +74,34 @@ local function CanTeleport()
     return (currentTime - LastTeleportTime) >= TeleportCooldown
 end
 
+local function FireProjectile(StartPosition, Direction)
+    local projectile = Instance.new("Part")
+    projectile.Size = Vector3.new(1, 1, 1)
+    projectile.Position = StartPosition
+    projectile.Anchored = true
+    projectile.CanCollide = true  -- Agora o projétil pode colidir com objetos
+    projectile.BrickColor = BrickColor.new("Bright red")  -- Cor do projétil
+    projectile.Parent = workspace
+    
+    -- Define a velocidade do projétil
+    local projectileSpeed = 100  -- Ajuste conforme necessário
+    
+    -- Lança o projétil na direção especificada
+    local projectileVelocity = Direction.unit * projectileSpeed
+    projectile.Velocity = projectileVelocity
+    
+    projectile.Touched:Connect(function(hit)
+        -- Verifica se o objeto atingido é um jogador inimigo
+        if hit:IsA("Model") and hit.Parent then
+            local player = Players:GetPlayerFromCharacter(hit.Parent)
+            if player and player.TeamColor ~= Team then
+                -- Teleporta o projétil para a posição do jogador
+                projectile.CFrame = CFrame.new(hit.Position)
+            end
+        end
+    end)
+end
+
 Players.PlayerAdded:Connect(function(Player)
     UpdateESP()
 end)
@@ -78,22 +120,23 @@ end
 -- Ajustando a velocidade do jogador
 SetPlayerSpeed(PlayerSpeed)
 
--- Teleportando automaticamente para jogadores inimigos (exceto da mesma equipe)
+-- Teleportando e causando dano automaticamente para jogadores (exceto da mesma equipe)
 while true do
     wait(1) -- Espera 1 segundo antes de verificar o teleporte novamente
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.TeamColor ~= Team then
             if CanTeleport() then
-                -- Teleportar o jogador para o inimigo
-                local character = LocalPlayer.Character
-                local targetCharacter = Player.Character
-                if character and targetCharacter then
-                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-                    local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-                    if humanoidRootPart and targetHumanoidRootPart then
-                        humanoidRootPart.CFrame = targetHumanoidRootPart.CFrame + Vector3.new(0, 1, 0) -- Teleportar um metro acima
-                        LastTeleportTime = os.time()
-                    end
+                TeleportAndDamage(Player)
+                LastTeleportTime = os.time()
+            end
+            -- Verifica se o jogador tem a ferramenta de fogo equipada
+            local character = Player.Character
+            if character then
+                local firePos = character:FindFirstChild("FirePos")
+                if firePos then
+                    -- Calcula a direção do alvo
+                    local direction = (Player.Character.HumanoidRootPart.Position - firePos.Position).unit
+                    FireProjectile(firePos.Position, direction)
                 end
             end
         end
