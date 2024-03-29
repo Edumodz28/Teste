@@ -32,20 +32,6 @@ local function SetPlayerSpeed(speed)
     end
 end
 
-local function TeleportAndDamage(Player)
-    if Player.TeamColor ~= Team then
-        local character = LocalPlayer.Character
-        local targetCharacter = Player.Character
-        if character and targetCharacter then
-            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-            local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart and targetHumanoidRootPart then
-                humanoidRootPart.CFrame = targetHumanoidRootPart.CFrame + Vector3.new(0, 1, 0) -- Teleportar um metro acima
-            end
-        end
-    end
-end
-
 local function DisableESP()
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -74,61 +60,6 @@ local function CanTeleport()
     return (currentTime - LastTeleportTime) >= TeleportCooldown
 end
 
-local function AimAtTarget(Player)
-    local camera = workspace.CurrentCamera
-    if camera then
-        local targetCharacter = Player.Character
-        if targetCharacter then
-            local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-            if targetHumanoidRootPart then
-                local ray = Ray.new(camera.CFrame.Position, (targetHumanoidRootPart.Position - camera.CFrame.Position).unit * 1000)
-                local part, hitPos = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
-                if part and part:IsDescendantOf(targetCharacter) then
-                    if part.Transparency == 0 then
-                        camera.CFrame = CFrame.new(camera.CFrame.Position, hitPos)
-                    end
-                end
-            end
-        end
-    end
-end
-
-local function FireProjectile(Player)
-    local character = Player.Character
-    if character then
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            local projectile = Instance.new("Part")
-            projectile.Size = Vector3.new(1, 1, 1)
-            projectile.Position = humanoidRootPart.Position
-            projectile.Anchored = true
-            projectile.CanCollide = true
-            projectile.BrickColor = BrickColor.new("Bright red")
-            projectile.Parent = workspace
-
-            -- Calcula a direção do jogador inimigo em relação à câmera do jogo
-            local direction = (humanoidRootPart.Position - workspace.CurrentCamera.CFrame.Position).unit
-
-            -- Teleporta o projétil diretamente para a posição do jogador inimigo
-            projectile.CFrame = CFrame.new(humanoidRootPart.Position)
-
-            -- Adiciona uma função para causar dano ao jogador inimigo se o projétil colidir com ele
-            projectile.Touched:Connect(function(hit)
-                local hitPlayer = Players:GetPlayerFromCharacter(hit.Parent)
-                if hitPlayer and hitPlayer.TeamColor ~= Team then
-                    hit:Destroy()  -- Destruir o projétil ao colidir com o jogador inimigo
-                    -- Código para causar dano ao jogador inimigo
-                    local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
-                    if humanoid then
-                        humanoid:TakeDamage(10)  -- Por exemplo, causando 10 de dano
-                    end
-                end
-            end)
-        end
-    end
-end
-
-
 Players.PlayerAdded:Connect(function(Player)
     UpdateESP()
 end)
@@ -147,19 +78,24 @@ end
 -- Ajustando a velocidade do jogador
 SetPlayerSpeed(PlayerSpeed)
 
--- Teleportando e causando dano automaticamente para jogadores (exceto da mesma equipe)
+-- Teleportando automaticamente para jogadores inimigos (exceto da mesma equipe)
 while true do
     wait(1) -- Espera 1 segundo antes de verificar o teleporte novamente
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.TeamColor ~= Team then
             if CanTeleport() then
-                TeleportAndDamage(Player)
-                LastTeleportTime = os.time()
+                -- Teleportar o jogador para o inimigo
+                local character = LocalPlayer.Character
+                local targetCharacter = Player.Character
+                if character and targetCharacter then
+                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                    local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
+                    if humanoidRootPart and targetHumanoidRootPart then
+                        humanoidRootPart.CFrame = targetHumanoidRootPart.CFrame + Vector3.new(0, 1, 0) -- Teleportar um metro acima
+                        LastTeleportTime = os.time()
+                    end
+                end
             end
-            AimAtTarget(Player)  -- Adiciona a mira ao loop
-            -- Calcula a direção do alvo
-            local direction = (Player.Character.HumanoidRootPart.Position - workspace.CurrentCamera.CFrame.Position).unit
-            FireProjectile(workspace.CurrentCamera.CFrame.Position, direction)
         end
     end
 end
