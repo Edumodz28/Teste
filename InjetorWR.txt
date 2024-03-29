@@ -53,7 +53,7 @@ local function UpdateESP()
     end
 end
 
-local function GetClosestPlayer()
+local function GetClosestEnemyPlayer()
     local closestPlayer = nil
     local closestDistance = math.huge
     local camera = workspace.CurrentCamera
@@ -121,10 +121,9 @@ SetPlayerSpeed(PlayerSpeed)
 -- Atualizando o ESP e mirando no jogador inimigo mais próximo continuamente
 while true do
     wait(0.1) -- Espera 0.1 segundos antes de atualizar o ESP e a mira
-    local closestPlayer = GetClosestPlayer()
+    local closestPlayer = GetClosestEnemyPlayer()
     if closestPlayer then
-        -- Mira no jogador mais próximo
+        -- Mira no jogador inimigo mais próximo
         AimAtTarget(closestPlayer)
     end
 end
-
