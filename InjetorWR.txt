@@ -84,7 +84,11 @@ local function AimAtTarget(Player)
         if TargetCharacter then
             local TargetHumanoidRootPart = TargetCharacter:FindFirstChild("HumanoidRootPart")
             if TargetHumanoidRootPart then
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, TargetHumanoidRootPart.Position)
+                local Ray = Ray.new(Camera.CFrame.Position, (TargetHumanoidRootPart.Position - Camera.CFrame.Position).unit * 1000)
+                local _, Position = workspace:FindPartOnRayWithIgnoreList(Ray, {LocalPlayer.Character}, false, true)
+                if Position then
+                    Camera.CFrame = CFrame.new(Camera.CFrame.Position, Position)
+                end
             end
         end
     end
@@ -121,4 +125,3 @@ SetPlayerSpeed(PlayerSpeed)
 
 -- Iniciar o AimBot
 AimBot()
-
