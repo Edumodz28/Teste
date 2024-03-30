@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 local ESPEnabled = true -- Definindo ESP como ativado por padrão
+local AimEnabled = true -- Definindo a mira como ativada por padrão
 
 -- Velocidade do jogador (ajuste conforme necessário)
 local PlayerSpeed = 50
@@ -47,6 +48,10 @@ local function IsPlayer(Player)
 end
 
 local function UpdateESP()
+    if not ESPEnabled then
+        DisableESP()
+        return
+    end
     for _, Player in pairs(Players:GetPlayers()) do
         if IsPlayer(Player) then
             ESP(Player)
@@ -55,6 +60,9 @@ local function UpdateESP()
 end
 
 local function AimAtTarget(Player)
+    if not AimEnabled then
+        return
+    end
     local camera = workspace.CurrentCamera
     if camera then
         local targetCharacter = Player.Character
@@ -73,58 +81,56 @@ local function AimAtTarget(Player)
     end
 end
 
-Players.PlayerAdded:Connect(function(Player)
-    UpdateESP()
-end)
-
-Players.PlayerRemoving:Connect(function(Player)
-    if IsPlayer(Player) then
-        DisableESP()
-    end
-end)
-
--- Ativando ESP ao iniciar o script
-if ESPEnabled then
+local function ToggleESP()
+    ESPEnabled = not ESPEnabled
     UpdateESP()
 end
+
+local function ToggleAim()
+    AimEnabled = not AimEnabled
+end
+
+local function SetPlayerSpeed(speed)
+    local character = LocalPlayer.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = speed
+        end
+    end
+end
+
+-- Ativando ESP ao iniciar o script
+UpdateESP()
 
 -- Ajustando a velocidade do jogador
 SetPlayerSpeed(PlayerSpeed)
 
--- Atualizando o ESP e mirando no jogador inimigo mais próximo continuamente
-while true do
-    wait(0.1) -- Espera 0.1 segundos antes de atualizar o ESP e a mira
-    for _, Player in pairs(Players:GetPlayers()) do
-        if IsPlayer(Player) then
-            ESP(Player)
-        end
-    end
-    local closestPlayer = nil
-    local closestDistance = math.huge
-    local camera = workspace.CurrentCamera
-    if camera then
-        for _, Player in pairs(Players:GetPlayers()) do
-            if IsPlayer(Player) then
-                local targetCharacter = Player.Character
-                if targetCharacter then
-                    local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-                    if targetHumanoidRootPart then
-                        local ray = Ray.new(camera.CFrame.Position, (targetHumanoidRootPart.Position - camera.CFrame.Position).unit * 1000)
-                        local part, _ = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
-                        if part and part:IsDescendantOf(targetCharacter) then
-                            local distance = (targetHumanoidRootPart.Position - camera.CFrame.Position).magnitude
-                            if distance < closestDistance then
-                                closestPlayer = Player
-                                closestDistance = distance
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    if closestPlayer then
-        -- Mira no jogador inimigo mais próximo
-        AimAtTarget(closestPlayer)
-    end
-end
+-- Criando um menu simples para ativar/desativar a ESP e a mira automática
+local menu = Instance.new("ScreenGui")
+menu.Parent = game.Players.LocalPlayer.PlayerGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 100, 0, 60)
+frame.Position = UDim2.new(0, 10, 0, 10)
+frame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+frame.BorderSizePixel = 2
+frame.Parent = menu
+
+local espButton = Instance.new("TextButton")
+espButton.Text = "ESP: On"
+espButton.Size = UDim2.new(0, 80, 0, 25)
+espButton.Position = UDim2.new(0, 10, 0, 10)
+espButton.BackgroundColor3 = Color3.new(0.4, 0.4, 0.4)
+espButton.BorderSizePixel = 2
+espButton.Parent = frame
+espButton.MouseButton1Click:Connect(ToggleESP)
+
+local aimButton = Instance.new("TextButton")
+aimButton.Text = "Aim: On"
+aimButton.Size = UDim2.new(0, 80, 0, 25)
+aimButton.Position = UDim2.new(0, 10, 0, 35)
+aimButton.BackgroundColor3 = Color3.new(0.4, 0.4, 0.4)
+aimButton.BorderSizePixel = 2
+aimButton.Parent = frame
+aimButton.MouseButton1Click:Connect(ToggleAim)
