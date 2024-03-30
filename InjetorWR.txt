@@ -6,7 +6,7 @@ local ESPEnabled = true -- Definindo ESP como ativado por padrão
 -- Velocidade do jogador (ajuste conforme necessário)
 local PlayerSpeed = 50
 
-local function ESP(Player)
+local function DrawBoxESP(Player)
     local LocalPlayerTeam = LocalPlayer.Team
     local PlayerTeam = Player.Team
     if LocalPlayerTeam and PlayerTeam and LocalPlayerTeam ~= PlayerTeam then
@@ -18,6 +18,27 @@ local function ESP(Player)
         Box.Transparency = 0.5
         Box.Color3 = Color3.new(1, 0, 0)
         Box.Parent = Player.Character.HumanoidRootPart
+    end
+end
+
+local function DrawNameESP(Player)
+    local LocalPlayerTeam = LocalPlayer.Team
+    local PlayerTeam = Player.Team
+    if LocalPlayerTeam and PlayerTeam and LocalPlayerTeam ~= PlayerTeam then
+        local BillboardGui = Instance.new("BillboardGui")
+        BillboardGui.Adornee = Player.Character.Head
+        BillboardGui.Size = UDim2.new(0, 100, 0, 50)
+        BillboardGui.StudsOffset = Vector3.new(0, 3, 0)
+        BillboardGui.Parent = Player.Character.Head
+
+        local NameLabel = Instance.new("TextLabel")
+        NameLabel.Size = UDim2.new(1, 0, 1, 0)
+        NameLabel.Text = Player.Name
+        NameLabel.TextColor3 = Color3.new(1, 1, 1)
+        NameLabel.TextStrokeTransparency = 0.5
+        NameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+        NameLabel.BackgroundTransparency = 1
+        NameLabel.Parent = BillboardGui
     end
 end
 
@@ -33,37 +54,50 @@ end
 
 local function DisableESP()
     for _, Player in pairs(Players:GetPlayers()) do
-        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            local espAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
-            if espAdornment then
-                espAdornment:Destroy()
+        if Player.Character then
+            for _, obj in pairs(Player.Character:GetChildren()) do
+                if obj:IsA("BoxHandleAdornment") or obj:IsA("BillboardGui") then
+                    obj:Destroy()
+                end
             end
         end
     end
 end
 
 local function IsPlayer(Player)
-    return Player.Name ~= ""
+    return Player.Name ~= "" and Player.Character ~= nil
 end
 
 local function UpdateESP()
     for _, Player in pairs(Players:GetPlayers()) do
         if IsPlayer(Player) then
-            ESP(Player)
+            DrawBoxESP(Player)
+            DrawNameESP(Player)
         end
     end
 end
 
 local function AimAtTarget(Player)
-    local camera = workspace.CurrentCamera
-    if camera then
-        local targetCharacter = Player.Character
-        if targetCharacter then
-            local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-            if targetHumanoidRootPart then
-                camera.CFrame = CFrame.new(camera.CFrame.Position, targetHumanoidRootPart.Position)
+    local Camera = workspace.CurrentCamera
+    if Camera then
+        local TargetCharacter = Player.Character
+        if TargetCharacter then
+            local TargetHumanoidRootPart = TargetCharacter:FindFirstChild("HumanoidRootPart")
+            if TargetHumanoidRootPart then
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, TargetHumanoidRootPart.Position)
             end
         end
+    end
+end
+
+local function AimBot()
+    while true do
+        for _, Player in pairs(Players:GetPlayers()) do
+            if IsPlayer(Player) and Player.TeamColor ~= LocalPlayer.TeamColor then
+                AimAtTarget(Player)
+            end
+        end
+        wait() -- Adiciona um pequeno atraso para não sobrecarregar o sistema
     end
 end
 
@@ -85,35 +119,6 @@ end
 -- Ajustando a velocidade do jogador
 SetPlayerSpeed(PlayerSpeed)
 
--- Atualizando o ESP e mirando no jogador inimigo mais próximo continuamente
-while true do
-    for _, Player in pairs(Players:GetPlayers()) do
-        if IsPlayer(Player) then
-            ESP(Player)
-        end
-    end
-    local closestPlayer = nil
-    local closestDistance = math.huge
-    local camera = workspace.CurrentCamera
-    if camera then
-        for _, Player in pairs(Players:GetPlayers()) do
-            if IsPlayer(Player) then
-                local targetCharacter = Player.Character
-                if targetCharacter then
-                    local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-                    if targetHumanoidRootPart then
-                        local distance = (targetHumanoidRootPart.Position - camera.CFrame.Position).magnitude
-                        if distance < closestDistance then
-                            closestPlayer = Player
-                            closestDistance = distance
-                        end
-                    end
-                end
-            end
-        end
-    end
-    if closestPlayer then
-        -- Mira no jogador inimigo mais próximo
-        AimAtTarget(closestPlayer)
-    end
-end
+-- Iniciar o AimBot
+AimBot()
+
