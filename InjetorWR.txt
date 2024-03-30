@@ -64,7 +64,7 @@ local function AimAtTarget(Player)
                 local ray = Ray.new(camera.CFrame.Position, (targetHumanoidRootPart.Position - camera.CFrame.Position).unit * 1000)
                 local part, hitPos = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
                 if part and part:IsDescendantOf(targetCharacter) then
-                    if part.Transparency == 0 then
+                    if part.Transparency == 0 and Player.TeamColor ~= LocalPlayer.TeamColor then
                         camera.CFrame = CFrame.new(camera.CFrame.Position, hitPos)
                     end
                 end
