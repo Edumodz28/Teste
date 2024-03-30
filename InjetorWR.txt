@@ -77,34 +77,32 @@ local function UpdateESP()
     end
 end
 
+local function IsVisible(TargetPosition)
+    local Camera = workspace.CurrentCamera
+    if Camera then
+        local Ray = Ray.new(Camera.CFrame.Position, (TargetPosition - Camera.CFrame.Position).unit * 1000)
+        local HitPart, _ = workspace:FindPartOnRayWithIgnoreList(Ray, {LocalPlayer.Character}, false, true)
+        return HitPart == nil or HitPart:IsDescendantOf(LocalPlayer.Character)
+    end
+    return false
+end
+
 local function AimAtTarget(Player)
-    local camera = workspace.CurrentCamera
-    if camera then
-        local targetCharacter = Player.Character
-        if targetCharacter then
-            local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-            if targetHumanoidRootPart then
-                local direction = (targetHumanoidRootPart.Position - camera.CFrame.Position).unit
-                local ray = Ray.new(camera.CFrame.Position, direction * 1000)
-                local params = RaycastParams.new()
-                params.FilterType = Enum.RaycastFilterType.Blacklist
-                params.FilterDescendantsInstances = {LocalPlayer.Character}
-                local result = workspace:Raycast(ray, params)
-                if result then
-                    local hitPart = result.Instance
-                    if hitPart then
-                        local hitCharacter = hitPart.Parent
-                        if hitCharacter and hitCharacter == targetCharacter then
-                            camera.CFrame = CFrame.new(camera.CFrame.Position, result.Position)
-                        end
-                    end
+    local Camera = workspace.CurrentCamera
+    if Camera then
+        local TargetCharacter = Player.Character
+        if TargetCharacter then
+            local TargetHumanoidRootPart = TargetCharacter:FindFirstChild("HumanoidRootPart")
+            if TargetHumanoidRootPart and IsVisible(TargetHumanoidRootPart.Position) then
+                local Ray = Ray.new(Camera.CFrame.Position, (TargetHumanoidRootPart.Position - Camera.CFrame.Position).unit * 1000)
+                local _, Position = workspace:FindPartOnRayWithIgnoreList(Ray, {LocalPlayer.Character}, false, true)
+                if Position then
+                    Camera.CFrame = CFrame.new(Camera.CFrame.Position, Position)
                 end
             end
         end
     end
 end
-
-
 
 local function AimBot()
     while true do
