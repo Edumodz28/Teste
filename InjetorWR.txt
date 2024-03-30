@@ -84,14 +84,18 @@ local function AimAtTarget(Player)
         if targetCharacter then
             local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
             if targetHumanoidRootPart then
-                local ray = Ray.new(camera.CFrame.Position, (targetHumanoidRootPart.Position - camera.CFrame.Position).unit * 1000)
-                local ignoreList = {LocalPlayer.Character} -- Ignora o próprio jogador local
-                local hitPart, hitPos = workspace:FindPartOnRayWithIgnoreList(ray, ignoreList, false, true)
-                if hitPart then
-                    local hitCharacter = hitPart.Parent
-                    if hitCharacter and hitCharacter == targetCharacter then
-                        if hitPart.Transparency == 0 then
-                            camera.CFrame = CFrame.new(camera.CFrame.Position, hitPos)
+                local direction = (targetHumanoidRootPart.Position - camera.CFrame.Position).unit
+                local ray = Ray.new(camera.CFrame.Position, direction * 1000)
+                local params = RaycastParams.new()
+                params.FilterType = Enum.RaycastFilterType.Blacklist
+                params.FilterDescendantsInstances = {LocalPlayer.Character}
+                local result = workspace:Raycast(ray, params)
+                if result then
+                    local hitPart = result.Instance
+                    if hitPart then
+                        local hitCharacter = hitPart.Parent
+                        if hitCharacter and hitCharacter == targetCharacter then
+                            camera.CFrame = CFrame.new(camera.CFrame.Position, result.Position)
                         end
                     end
                 end
@@ -99,6 +103,7 @@ local function AimAtTarget(Player)
         end
     end
 end
+
 
 
 local function AimBot()
