@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local Team = LocalPlayer.TeamColor
 
 local ESPEnabled = true -- Definindo ESP como ativado por padrão
 
@@ -8,7 +7,9 @@ local ESPEnabled = true -- Definindo ESP como ativado por padrão
 local PlayerSpeed = 50
 
 local function ESP(Player)
-    if Player.TeamColor ~= Team then
+    local LocalPlayerTeam = LocalPlayer.Team
+    local PlayerTeam = Player.Team
+    if LocalPlayerTeam and PlayerTeam and LocalPlayerTeam ~= PlayerTeam then
         local Box = Instance.new("BoxHandleAdornment")
         Box.Size = Player.Character.HumanoidRootPart.Size + Vector3.new(0.1, 0.1, 0.1)
         Box.Adornee = Player.Character.HumanoidRootPart
@@ -47,38 +48,10 @@ end
 
 local function UpdateESP()
     for _, Player in pairs(Players:GetPlayers()) do
-        if IsPlayer(Player) and Player.TeamColor ~= Team then
+        if IsPlayer(Player) then
             ESP(Player)
         end
     end
-end
-
-local function GetClosestEnemyPlayer()
-    local closestPlayer = nil
-    local closestDistance = math.huge
-    local camera = workspace.CurrentCamera
-    if camera then
-        for _, Player in pairs(Players:GetPlayers()) do
-            if Player.TeamColor ~= Team then
-                local targetCharacter = Player.Character
-                if targetCharacter then
-                    local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-                    if targetHumanoidRootPart then
-                        local ray = Ray.new(camera.CFrame.Position, (targetHumanoidRootPart.Position - camera.CFrame.Position).unit * 1000)
-                        local part, _ = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
-                        if part and part:IsDescendantOf(targetCharacter) then
-                            local distance = (targetHumanoidRootPart.Position - camera.CFrame.Position).magnitude
-                            if distance < closestDistance then
-                                closestPlayer = Player
-                                closestDistance = distance
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    return closestPlayer
 end
 
 local function AimAtTarget(Player)
@@ -121,7 +94,35 @@ SetPlayerSpeed(PlayerSpeed)
 -- Atualizando o ESP e mirando no jogador inimigo mais próximo continuamente
 while true do
     wait(0.1) -- Espera 0.1 segundos antes de atualizar o ESP e a mira
-    local closestPlayer = GetClosestEnemyPlayer()
+    for _, Player in pairs(Players:GetPlayers()) do
+        if IsPlayer(Player) then
+            ESP(Player)
+        end
+    end
+    local closestPlayer = nil
+    local closestDistance = math.huge
+    local camera = workspace.CurrentCamera
+    if camera then
+        for _, Player in pairs(Players:GetPlayers()) do
+            if IsPlayer(Player) then
+                local targetCharacter = Player.Character
+                if targetCharacter then
+                    local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
+                    if targetHumanoidRootPart then
+                        local ray = Ray.new(camera.CFrame.Position, (targetHumanoidRootPart.Position - camera.CFrame.Position).unit * 1000)
+                        local part, _ = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
+                        if part and part:IsDescendantOf(targetCharacter) then
+                            local distance = (targetHumanoidRootPart.Position - camera.CFrame.Position).magnitude
+                            if distance < closestDistance then
+                                closestPlayer = Player
+                                closestDistance = distance
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
     if closestPlayer then
         -- Mira no jogador inimigo mais próximo
         AimAtTarget(closestPlayer)
