@@ -6,39 +6,30 @@ local ESPEnabled = true -- Definindo ESP como ativado por padrão
 -- Velocidade do jogador (ajuste conforme necessário)
 local PlayerSpeed = 50
 
--- Função para verificar se um ponto é visível
-local function IsPointVisible(Point)
-    local Camera = workspace.CurrentCamera
-    if Camera then
-        local Ray = Ray.new(Camera.CFrame.Position, (Point - Camera.CFrame.Position).unit * 1000)
-        local _, Position = workspace:FindPartOnRayWithIgnoreList(Ray, {LocalPlayer.Character}, false, true)
-        return Position == nil or (Position - Point).Magnitude < 0.01
-    end
-    return false
-end
+local DamageRadius = 1000 -- Raio de alcance do dano
 
--- Função para mirar no alvo
-local function AimAtTarget(Player)
-    local TargetCharacter = Player.Character
-    if TargetCharacter then
-        local TargetHumanoidRootPart = TargetCharacter:FindFirstChild("HumanoidRootPart")
-        if TargetHumanoidRootPart then
-            local TargetPosition = TargetHumanoidRootPart.Position
-            if IsPointVisible(TargetPosition) then
-                local Camera = workspace.CurrentCamera
-                if Camera then
-                    local Ray = Ray.new(Camera.CFrame.Position, (TargetPosition - Camera.CFrame.Position).unit * 1000)
-                    local _, Position = workspace:FindPartOnRayWithIgnoreList(Ray, {LocalPlayer.Character}, false, true)
-                    if Position then
-                        Camera.CFrame = CFrame.new(Camera.CFrame.Position, Position)
-                    end
-                end
-            end
-        end
+local function DrawBoxESP(Player)
+    if Player.TeamColor ~= LocalPlayer.TeamColor then
+        local Box = Instance.new("BoxHandleAdornment")
+        Box.Size = Player.Character.HumanoidRootPart.Size + Vector3.new(0.1, 0.1, 0.1)
+        Box.Adornee = Player.Character.HumanoidRootPart
+        Box.AlwaysOnTop = true
+        Box.ZIndex = 5
+        Box.Transparency = 0.5
+        Box.Color3 = Color3.new(1, 0, 0)
+        Box.Parent = Player.Character.HumanoidRootPart
     end
 end
 
--- Função para ajustar a velocidade do jogador
+local function DrawNameESP(Player)
+    -- Lógica para desenhar o ESP do nome aqui
+end
+
+local function DrawESP(Player)
+    DrawBoxESP(Player)
+    DrawNameESP(Player)
+end
+
 local function SetPlayerSpeed(speed)
     local character = LocalPlayer.Character
     if character then
@@ -49,47 +40,47 @@ local function SetPlayerSpeed(speed)
     end
 end
 
--- Função para desativar ESP
 local function DisableESP()
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.Character then
-            for _, obj in pairs(Player.Character:GetChildren()) do
-                if obj:IsA("BoxHandleAdornment") or obj:IsA("BillboardGui") then
-                    obj:Destroy()
+            local espAdornment = Player.Character:FindFirstChildOfClass("BoxHandleAdornment")
+            if espAdornment then
+                espAdornment:Destroy()
+            end
+        end
+    end
+end
+
+local function IsPlayer(Player)
+    return Player.Name ~= ""
+end
+
+local function UpdateESP()
+    for _, Player in pairs(Players:GetPlayers()) do
+        if IsPlayer(Player) then
+            DrawESP(Player)
+        end
+    end
+end
+
+local function DamagePlayersInRadius(Position, Radius)
+    for _, Player in pairs(Players:GetPlayers()) do
+        if IsPlayer(Player) then
+            local Character = Player.Character
+            if Character then
+                local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+                if HumanoidRootPart then
+                    local Distance = (Position - HumanoidRootPart.Position).magnitude
+                    if Distance <= Radius then
+                        -- Se o jogador estiver dentro do raio, você pode adicionar sua lógica de aplicação de dano aqui
+                        print("Player: " .. Player.Name .. " dentro do raio de dano!")
+                    end
                 end
             end
         end
     end
 end
 
--- Função para verificar se um objeto é um jogador válido
-local function IsPlayer(Player)
-    return Player.Name ~= "" and Player.Character ~= nil
-end
-
--- Função para atualizar ESP
-local function UpdateESP()
-    for _, Player in pairs(Players:GetPlayers()) do
-        if IsPlayer(Player) then
-            DrawBoxESP(Player)
-            DrawNameESP(Player)
-        end
-    end
-end
-
--- Função para o AimBot
-local function AimBot()
-    while true do
-        for _, Player in pairs(Players:GetPlayers()) do
-            if IsPlayer(Player) and Player.TeamColor ~= LocalPlayer.TeamColor then
-                AimAtTarget(Player)
-            end
-        end
-        wait() -- Adiciona um pequeno atraso para não sobrecarregar o sistema
-    end
-end
-
--- Conectar eventos de entrada de jogador
 Players.PlayerAdded:Connect(function(Player)
     UpdateESP()
 end)
@@ -100,13 +91,19 @@ Players.PlayerRemoving:Connect(function(Player)
     end
 end)
 
--- Ativar ESP ao iniciar o script
+-- Ativando ESP ao iniciar o script
 if ESPEnabled then
     UpdateESP()
 end
 
--- Ajustar velocidade do jogador
+-- Ajustando a velocidade do jogador
 SetPlayerSpeed(PlayerSpeed)
 
--- Iniciar AimBot
-AimBot()
+-- Exemplo de como chamar a função de dano dentro de um loop
+while true do
+    wait(1) -- Espera 1 segundo antes de verificar novamente
+    local Position = LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart.Position
+    if Position then
+        DamagePlayersInRadius(Position, DamageRadius)
+    end
+end
