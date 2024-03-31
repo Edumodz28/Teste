@@ -77,25 +77,15 @@ local function UpdateESP()
     end
 end
 
-local function IsVisible(TargetPosition)
-    local Camera = workspace.CurrentCamera
-    if Camera then
-        local Ray = Ray.new(Camera.CFrame.Position, (TargetPosition - Camera.CFrame.Position).unit * 1000)
-        local HitPart, _ = workspace:FindPartOnRayWithIgnoreList(Ray, {LocalPlayer.Character}, false, true)
-        return HitPart == nil or HitPart:IsDescendantOf(LocalPlayer.Character)
-    end
-    return false
-end
-
 local function AimAtTarget(Player)
     local Camera = workspace.CurrentCamera
     if Camera then
         local TargetCharacter = Player.Character
         if TargetCharacter then
             local TargetHumanoidRootPart = TargetCharacter:FindFirstChild("HumanoidRootPart")
-            if TargetHumanoidRootPart and IsVisible(TargetHumanoidRootPart.Position) then
+            if TargetHumanoidRootPart then
                 local Ray = Ray.new(Camera.CFrame.Position, (TargetHumanoidRootPart.Position - Camera.CFrame.Position).unit * 1000)
-                local _, Position = workspace:FindPartOnRayWithIgnoreList(Ray, {LocalPlayer.Character}, false, true)
+                local _, Position = workspace:FindPartOnRayWithWhitelist(Ray, {LocalPlayer.Character}, false)
                 if Position then
                     Camera.CFrame = CFrame.new(Camera.CFrame.Position, Position)
                 end
