@@ -77,6 +77,22 @@ local function UpdateESP()
     end
 end
 
+local function IsVisible(Player)
+    local Camera = workspace.CurrentCamera
+    if Camera then
+        local TargetCharacter = Player.Character
+        if TargetCharacter then
+            local TargetHumanoidRootPart = TargetCharacter:FindFirstChild("HumanoidRootPart")
+            if TargetHumanoidRootPart then
+                local Ray = Ray.new(Camera.CFrame.Position, (TargetHumanoidRootPart.Position - Camera.CFrame.Position).unit * 1000)
+                local _, Position = workspace:FindPartOnRayWithWhitelist(Ray, {LocalPlayer.Character}, false)
+                return Position ~= nil
+            end
+        end
+    end
+    return false
+end
+
 local function AimAtTarget(Player)
     local Camera = workspace.CurrentCamera
     if Camera then
@@ -97,7 +113,7 @@ end
 local function AimBot()
     while true do
         for _, Player in pairs(Players:GetPlayers()) do
-            if IsPlayer(Player) and Player.TeamColor ~= LocalPlayer.TeamColor then
+            if IsPlayer(Player) and Player.TeamColor ~= LocalPlayer.TeamColor and IsVisible(Player) then
                 AimAtTarget(Player)
             end
         end
