@@ -82,11 +82,10 @@ local function IsVisible(Player)
     if Camera then
         local TargetCharacter = Player.Character
         if TargetCharacter then
-            local TargetHumanoidRootPart = TargetCharacter:FindFirstChild("HumanoidRootPart")
-            if TargetHumanoidRootPart then
-                local Ray = Ray.new(Camera.CFrame.Position, (TargetHumanoidRootPart.Position - Camera.CFrame.Position).unit * 1000)
-                local _, Position = workspace:FindPartOnRayWithWhitelist(Ray, {LocalPlayer.Character}, false)
-                return Position ~= nil
+            local Head = TargetCharacter:FindFirstChild("Head")
+            if Head then
+                local HeadScreenPosition = Camera:WorldToScreenPoint(Head.Position)
+                return HeadScreenPosition.Z > 0 -- Verifica se a cabeça está na frente da câmera
             end
         end
     end
@@ -98,12 +97,15 @@ local function AimAtTarget(Player)
     if Camera then
         local TargetCharacter = Player.Character
         if TargetCharacter then
-            local TargetHumanoidRootPart = TargetCharacter:FindFirstChild("HumanoidRootPart")
-            if TargetHumanoidRootPart then
-                local Ray = Ray.new(Camera.CFrame.Position, (TargetHumanoidRootPart.Position - Camera.CFrame.Position).unit * 1000)
-                local _, Position = workspace:FindPartOnRayWithWhitelist(Ray, {LocalPlayer.Character}, false)
-                if Position then
-                    Camera.CFrame = CFrame.new(Camera.CFrame.Position, Position)
+            local Head = TargetCharacter:FindFirstChild("Head")
+            if Head then
+                local HeadScreenPosition = Camera:WorldToScreenPoint(Head.Position)
+                if HeadScreenPosition.Z > 0 then
+                    local AimPosition = Vector3.new(HeadScreenPosition.X, HeadScreenPosition.Y, 0)
+                    local MousePosition = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+                    local Delta = AimPosition - MousePosition
+                    local Sensitivity = 0.1
+                    mousemoverel(Delta.X * Sensitivity, Delta.Y * Sensitivity)
                 end
             end
         end
