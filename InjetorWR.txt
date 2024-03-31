@@ -6,42 +6,39 @@ local ESPEnabled = true -- Definindo ESP como ativado por padrão
 -- Velocidade do jogador (ajuste conforme necessário)
 local PlayerSpeed = 50
 
-local function DrawBoxESP(Player)
-    local LocalPlayerTeam = LocalPlayer.Team
-    local PlayerTeam = Player.Team
-    if LocalPlayerTeam and PlayerTeam and LocalPlayerTeam ~= PlayerTeam then
-        local Box = Instance.new("BoxHandleAdornment")
-        Box.Size = Player.Character.HumanoidRootPart.Size + Vector3.new(0.1, 0.1, 0.1)
-        Box.Adornee = Player.Character.HumanoidRootPart
-        Box.AlwaysOnTop = true
-        Box.ZIndex = 5
-        Box.Transparency = 0.5
-        Box.Color3 = Color3.new(1, 0, 0)
-        Box.Parent = Player.Character.HumanoidRootPart
+-- Função para verificar se um ponto é visível
+local function IsPointVisible(Point)
+    local Camera = workspace.CurrentCamera
+    if Camera then
+        local Ray = Ray.new(Camera.CFrame.Position, (Point - Camera.CFrame.Position).unit * 1000)
+        local _, Position = workspace:FindPartOnRayWithIgnoreList(Ray, {LocalPlayer.Character}, false, true)
+        return Position == nil or (Position - Point).Magnitude < 0.01
+    end
+    return false
+end
+
+-- Função para mirar no alvo
+local function AimAtTarget(Player)
+    local TargetCharacter = Player.Character
+    if TargetCharacter then
+        local TargetHumanoidRootPart = TargetCharacter:FindFirstChild("HumanoidRootPart")
+        if TargetHumanoidRootPart then
+            local TargetPosition = TargetHumanoidRootPart.Position
+            if IsPointVisible(TargetPosition) then
+                local Camera = workspace.CurrentCamera
+                if Camera then
+                    local Ray = Ray.new(Camera.CFrame.Position, (TargetPosition - Camera.CFrame.Position).unit * 1000)
+                    local _, Position = workspace:FindPartOnRayWithIgnoreList(Ray, {LocalPlayer.Character}, false, true)
+                    if Position then
+                        Camera.CFrame = CFrame.new(Camera.CFrame.Position, Position)
+                    end
+                end
+            end
+        end
     end
 end
 
-local function DrawNameESP(Player)
-    local LocalPlayerTeam = LocalPlayer.Team
-    local PlayerTeam = Player.Team
-    if LocalPlayerTeam and PlayerTeam and LocalPlayerTeam ~= PlayerTeam then
-        local BillboardGui = Instance.new("BillboardGui")
-        BillboardGui.Adornee = Player.Character.Head
-        BillboardGui.Size = UDim2.new(0, 100, 0, 50)
-        BillboardGui.StudsOffset = Vector3.new(0, 3, 0)
-        BillboardGui.Parent = Player.Character.Head
-
-        local NameLabel = Instance.new("TextLabel")
-        NameLabel.Size = UDim2.new(1, 0, 1, 0)
-        NameLabel.Text = Player.Name
-        NameLabel.TextColor3 = Color3.new(1, 1, 1)
-        NameLabel.TextStrokeTransparency = 0.5
-        NameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-        NameLabel.BackgroundTransparency = 1
-        NameLabel.Parent = BillboardGui
-    end
-end
-
+-- Função para ajustar a velocidade do jogador
 local function SetPlayerSpeed(speed)
     local character = LocalPlayer.Character
     if character then
@@ -52,6 +49,7 @@ local function SetPlayerSpeed(speed)
     end
 end
 
+-- Função para desativar ESP
 local function DisableESP()
     for _, Player in pairs(Players:GetPlayers()) do
         if Player.Character then
@@ -64,10 +62,12 @@ local function DisableESP()
     end
 end
 
+-- Função para verificar se um objeto é um jogador válido
 local function IsPlayer(Player)
     return Player.Name ~= "" and Player.Character ~= nil
 end
 
+-- Função para atualizar ESP
 local function UpdateESP()
     for _, Player in pairs(Players:GetPlayers()) do
         if IsPlayer(Player) then
@@ -77,45 +77,11 @@ local function UpdateESP()
     end
 end
 
-local function IsVisible(Player)
-    local Camera = workspace.CurrentCamera
-    if Camera then
-        local TargetCharacter = Player.Character
-        if TargetCharacter then
-            local Head = TargetCharacter:FindFirstChild("Head")
-            if Head then
-                local HeadScreenPosition = Camera:WorldToScreenPoint(Head.Position)
-                return HeadScreenPosition.Z > 0 -- Verifica se a cabeça está na frente da câmera
-            end
-        end
-    end
-    return false
-end
-
-local function AimAtTarget(Player)
-    local Camera = workspace.CurrentCamera
-    if Camera then
-        local TargetCharacter = Player.Character
-        if TargetCharacter then
-            local Head = TargetCharacter:FindFirstChild("Head")
-            if Head then
-                local HeadScreenPosition = Camera:WorldToScreenPoint(Head.Position)
-                if HeadScreenPosition.Z > 0 then
-                    local AimPosition = Vector3.new(HeadScreenPosition.X, HeadScreenPosition.Y, 0)
-                    local MousePosition = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-                    local Delta = AimPosition - MousePosition
-                    local Sensitivity = 0.1
-                    mousemoverel(Delta.X * Sensitivity, Delta.Y * Sensitivity)
-                end
-            end
-        end
-    end
-end
-
+-- Função para o AimBot
 local function AimBot()
     while true do
         for _, Player in pairs(Players:GetPlayers()) do
-            if IsPlayer(Player) and Player.TeamColor ~= LocalPlayer.TeamColor and IsVisible(Player) then
+            if IsPlayer(Player) and Player.TeamColor ~= LocalPlayer.TeamColor then
                 AimAtTarget(Player)
             end
         end
@@ -123,6 +89,7 @@ local function AimBot()
     end
 end
 
+-- Conectar eventos de entrada de jogador
 Players.PlayerAdded:Connect(function(Player)
     UpdateESP()
 end)
@@ -133,13 +100,13 @@ Players.PlayerRemoving:Connect(function(Player)
     end
 end)
 
--- Ativando ESP ao iniciar o script
+-- Ativar ESP ao iniciar o script
 if ESPEnabled then
     UpdateESP()
 end
 
--- Ajustando a velocidade do jogador
+-- Ajustar velocidade do jogador
 SetPlayerSpeed(PlayerSpeed)
 
--- Iniciar o AimBot
+-- Iniciar AimBot
 AimBot()
