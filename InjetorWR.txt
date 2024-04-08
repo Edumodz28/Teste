@@ -21,27 +21,28 @@ local function CreateDamageSquare()
 
     -- Detectar quando um jogador entra na área do quadrado
     damageSquare.Touched:Connect(function(hit)
-        if hit.Parent and hit.Parent:IsA("Model") and hit.Parent:FindFirstChild("Humanoid") then
-            local humanoid = hit.Parent:FindFirstChild("Humanoid")
-            if humanoid and hit.Parent ~= LocalPlayer.Character then
-                DamageEvent:FireServer(humanoid, LocalPlayer) -- Disparar evento para causar dano ao jogador ou NPC
+        local playerName = ""
+        local playerHealth = 0
+
+        if hit.Parent and hit.Parent:IsA("Model") then
+            local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                playerName = hit.Parent.Name
+                playerHealth = humanoid.Health
+            else
+                -- Se não for um jogador, presume-se que seja um NPC
+                playerName = "NPC"
+                playerHealth = hit.Parent:GetAttribute("Health") or 0 -- Se o NPC tiver um atributo "Health", use-o
             end
         end
+
+        -- Enviar mensagem com informações do jogador ou NPC
+        SendMessage(string.format("%s entrou no quadrado de dano. Nome: %s, Vida: %d", playerName, playerName, playerHealth))
     end)
 end
 
 -- Função para criar o quadrado que causa dano
 CreateDamageSquare()
-
--- Lidar com o dano causado pelo quadrado
-DamageEvent.OnServerEvent:Connect(function(player, humanoid)
-    humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador ou NPC
-    if humanoid.Health > 0 then
-        SendMessage("Dano registrado com sucesso.")
-    else
-        SendMessage("Falha ao registrar dano.")
-    end
-end)
 
 -- Função para enviar mensagem para o chat com tag especial
 local function SendMessage(message)
