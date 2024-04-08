@@ -24,13 +24,20 @@ local function CreateNPC()
 
     -- Registrar NPC para que outros clientes saibam sobre ele
     game.ReplicatedStorage:RegisterNPC:FireAllClients(replicatedNPC)
+
+    -- Enviar mensagem para o servidor
+    game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvent"):FireServer("NPC criado!")
+
+    -- Enviar mensagem para o chat do jogo
+    LocalPlayer:Chat("NPC criado!")
 end
 
 -- Função para criar NPCs a cada 10 segundos
 local function CreateNPCs()
-    while true do
-        wait(10)
-        CreateNPC()
+    local success, errorMessage = pcall(CreateNPC)
+    if not success then
+        -- Se ocorrer um erro ao criar o NPC, exibir mensagem no chat
+        LocalPlayer:Chat("NPC não foi criado: " .. errorMessage)
     end
 end
 
@@ -107,4 +114,3 @@ damagePart.Touched:Connect(function(hit)
         character.Humanoid:TakeDamage(5)  -- Causar 5 de dano ao jogador
     end
 end)
-
