@@ -8,10 +8,12 @@ local AttackEvent = Instance.new("BindableEvent")
 
 -- Função para criar NPCs
 local function CreateNPC()
-    -- Criar um NPC no servidor
+    -- Criar um NPC ao lado do jogador a 50 metros de distância
+    local playerPosition = LocalPlayer.Character.HumanoidRootPart.Position
+    local spawnPosition = playerPosition + Vector3.new(50, 0, 0) -- Posição do jogador + 50 metros para a frente
     local npc = Instance.new("Part")
     npc.Size = Vector3.new(2, 4, 2)
-    npc.Position = Vector3.new(math.random(-50, 50), 10, math.random(-50, 50))
+    npc.Position = spawnPosition
     npc.Anchored = true
     npc.BrickColor = BrickColor.Random()
     npc.Parent = Workspace
@@ -39,82 +41,47 @@ AttackEvent.Event:Connect(function(character)
     end
 end)
 
--- Função para ativar/desativar o modo fantasma
-local ghostMode = false
-local function ToggleGhostMode()
-    ghostMode = not ghostMode
-    if ghostMode then
-        -- Ativar o modo fantasma
-        -- Fazer algo quando o modo fantasma estiver ativado
-        wait(20) -- Aguardar 20 segundos
-        ghostMode = false -- Desativar o modo fantasma após 20 segundos
-    end
-end
+-- Iniciar criação de NPCs em uma thread separada
+coroutine.wrap(CreateNPCs)()
 
--- Função para ativar o Super Pul
-local function SuperJump()
-    LocalPlayer.Character:FindFirstChildOfClass("Humanoid").JumpPower = 100 -- Definir o pulo para 100
-end
-
--- Função para aumentar a velocidade
-local function IncreaseSpeed()
-    LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 100 -- Definir a velocidade para 100
-end
-
--- Função para recuperar vida
-local function RegenerateHealth()
-    while true do
-        wait(1) -- Esperar 1 segundo
-        if LocalPlayer.Character then
-            LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Health = math.min(LocalPlayer.Character:FindFirstChildOfClass("Humanoid").MaxHealth, LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Health + 1) -- Recuperar 1 de vida a cada segundo
+-- Speed
+local function SetPlayerSpeed(speed)
+    local character = LocalPlayer.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = speed
         end
     end
 end
 
--- Função para teleportar para a posição do mouse
-local function TeleportToMouse()
-    local targetPosition = Mouse.Hit.p
-    LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(targetPosition)) -- Teleportar o personagem para a posição do mouse
+-- Ativar o Speed
+SetPlayerSpeed(100) -- Definindo a velocidade do jogador como 100
+
+-- Wall Hack (atravessar paredes)
+LocalPlayer.PlayerGui:SetTopbarTransparency(0) -- Tornar a barra superior do GUI visível
+
+-- Super Pulo
+Mouse.KeyDown:Connect(function(key)
+    if key == "space" then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+-- Áudio para reproduzir no YouTube quando um NPC é criado
+local function PlayAudio()
+    -- Localização do áudio do Roblox
+local audioId = "rbxassetid://123456789"  -- Substitua pelo ID do áudio desejado
+
+-- Criar instância do Sound
+local sound = Instance.new("Sound")
+sound.SoundId = audioId
+
+-- Reproduzir o som
+sound.Parent = workspace  -- Ou outro objeto no jogo onde você deseja que o som seja reproduzido
+sound:Play()
+
 end
 
--- Disparar evento quando um jogador é atingido pelo NPC
-AttackEvent.Event:Connect(function(character)
-    local humanoid = character:FindFirstChild("Humanoid")
-    if humanoid then
-        humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador
-    end
-end)
-
--- Iniciar criação de NPCs em uma thread separada
-coroutine.wrap(CreateNPCs)()
-
--- Ativar modo fantasma quando a tecla F for pressionada
-Mouse.KeyDown:Connect(function(key)
-    if key == "f" then
-        ToggleGhostMode()
-    end
-end)
-
--- Ativar super pulo quando a tecla J for pressionada
-Mouse.KeyDown:Connect(function(key)
-    if key == "j" then
-        SuperJump()
-    end
-end)
-
--- Aumentar a velocidade quando a tecla S for pressionada
-Mouse.KeyDown:Connect(function(key)
-    if key == "s" then
-        IncreaseSpeed()
-    end
-end)
-
--- Recuperar vida continuamente
-coroutine.wrap(RegenerateHealth)()
-
--- Teleportar para a posição do mouse quando a tecla T for pressionada
-Mouse.KeyDown:Connect(function(key)
-    if key == "t" then
-        TeleportToMouse()
-    end
-end)
+-- Conectar a função PlayAudio ao evento de criação de NPC
+AttackEvent.Event:Connect(PlayAudio)
