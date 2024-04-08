@@ -3,19 +3,10 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- Configurações do layout
-local LayoutWidth = 200
+local LayoutWidth = 150
 local LayoutHeight = 150
-
--- Configurações de voo
-local FlySpeed = 50
-local FlyKeys = {
-    w = false,
-    a = false,
-    s = false,
-    d = false,
-    space = false,
-    shift = false
-}
+local ButtonSize = 30
+local ButtonSpacing = 5
 
 -- Criar o ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
@@ -24,85 +15,78 @@ ScreenGui.Parent = PlayerGui
 -- Criar o Frame principal do layout
 local Frame = Instance.new("Frame")
 Frame.Size = UDim2.new(0, LayoutWidth, 0, LayoutHeight)
-Frame.Position = UDim2.new(0.5, -LayoutWidth / 2, 0, 20)
+Frame.Position = UDim2.new(1, -LayoutWidth - 10, 1, -LayoutHeight - 10)
 Frame.BackgroundColor3 = Color3.new(0, 0, 0)
 Frame.BackgroundTransparency = 0.5
 Frame.Parent = ScreenGui
 
--- Função para atualizar o layout
-local function UpdateLayout()
-    -- Atualizar o texto de contagem de jogadores
-    PlayerCountLabel.Text = "Players: " .. #Players:GetPlayers()
+-- Função para criar um botão
+local function CreateButton(name, position)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Text = name
+    button.Size = UDim2.new(0, ButtonSize, 0, ButtonSize)
+    button.Position = position
+    button.BackgroundColor3 = Color3.new(1, 1, 1)
+    button.TextColor3 = Color3.new(0, 0, 0)
+    button.Font = Enum.Font.SourceSans
+    button.TextSize = 14
+    button.Parent = Frame
 
-    -- Atualizar a lista de nomes dos jogadores
-    PlayerNamesLabel.Text = "Players: "
-    for _, player in pairs(Players:GetPlayers()) do
-        PlayerNamesLabel.Text = PlayerNamesLabel.Text .. player.Name .. "\n"
-    end
+    return button
 end
 
--- Criar o rótulo para a contagem de jogadores
-local PlayerCountLabel = Instance.new("TextLabel")
-PlayerCountLabel.Size = UDim2.new(1, 0, 0.5, 0)
-PlayerCountLabel.Position = UDim2.new(0, 0, 0, 0)
-PlayerCountLabel.BackgroundColor3 = Color3.new(1, 1, 1)
-PlayerCountLabel.TextColor3 = Color3.new(1, 1, 1)
-PlayerCountLabel.Font = Enum.Font.SourceSans
-PlayerCountLabel.TextSize = 18
-PlayerCountLabel.Parent = Frame
+-- Criar os botões de controle de voo
+local buttons = {
+    {name = "Frente", position = UDim2.new(0.5, -ButtonSize / 2, 0, ButtonSpacing)},
+    {name = "Trás", position = UDim2.new(0.5, -ButtonSize / 2, 0, 2 * ButtonSpacing + ButtonSize)},
+    {name = "Esquerda", position = UDim2.new(0, ButtonSpacing, 0, ButtonSpacing + ButtonSize)},
+    {name = "Direita", position = UDim2.new(0, 2 * ButtonSpacing + ButtonSize, 0, ButtonSpacing + ButtonSize)},
+    {name = "Cima", position = UDim2.new(0.5, -ButtonSize / 2, 0, 3 * ButtonSpacing + 2 * ButtonSize)},
+    {name = "Baixo", position = UDim2.new(0.5, -ButtonSize / 2, 0, 4 * ButtonSpacing + 3 * ButtonSize)}
+}
 
--- Criar o rótulo para os nomes dos jogadores
-local PlayerNamesLabel = Instance.new("TextLabel")
-PlayerNamesLabel.Size = UDim2.new(1, 0, 0.5, 0)
-PlayerNamesLabel.Position = UDim2.new(0, 0, 0.5, 0)
-PlayerNamesLabel.BackgroundColor3 = Color3.new(1, 1, 1)
-PlayerNamesLabel.TextColor3 = Color3.new(1, 1, 1)
-PlayerNamesLabel.Font = Enum.Font.SourceSans
-PlayerNamesLabel.TextSize = 14
-PlayerNamesLabel.TextWrapped = true
-PlayerNamesLabel.Parent = Frame
+local buttonInstances = {}
+for _, btn in ipairs(buttons) do
+    buttonInstances[btn.name] = CreateButton(btn.name, btn.position)
+end
 
--- Atualizar o layout
-UpdateLayout()
-
--- Função de voo
+-- Função para voar com base nos botões pressionados
 local function Fly()
-    local function updateFly()
-        local forward = (FlyKeys.w and Vector3.new(0, 0, -1) or Vector3.new())
-        local backward = (FlyKeys.s and Vector3.new(0, 0, 1) or Vector3.new())
-        local left = (FlyKeys.a and Vector3.new(-1, 0, 0) or Vector3.new())
-        local right = (FlyKeys.d and Vector3.new(1, 0, 0) or Vector3.new())
-        local up = (FlyKeys.space and Vector3.new(0, 1, 0) or Vector3.new())
-        local down = (FlyKeys.shift and Vector3.new(0, -1, 0) or Vector3.new())
+    local flySpeed = 50
+    local flyKeys = {
+        Frente = false,
+        Trás = false,
+        Esquerda = false,
+        Direita = false,
+        Cima = false,
+        Baixo = false
+    }
 
-        LocalPlayer.Character.HumanoidRootPart.Velocity = (forward + backward + left + right + up + down).unit * FlySpeed
+    local function updateFly()
+        local forward = (flyKeys.Frente and Vector3.new(0, 0, -1) or Vector3.new())
+        local backward = (flyKeys.Trás and Vector3.new(0, 0, 1) or Vector3.new())
+        local left = (flyKeys.Esquerda and Vector3.new(-1, 0, 0) or Vector3.new())
+        local right = (flyKeys.Direita and Vector3.new(1, 0, 0) or Vector3.new())
+        local up = (flyKeys.Cima and Vector3.new(0, 1, 0) or Vector3.new())
+        local down = (flyKeys.Baixo and Vector3.new(0, -1, 0) or Vector3.new())
+
+        LocalPlayer.Character.HumanoidRootPart.Velocity = (forward + backward + left + right + up + down).unit * flySpeed
     end
 
     -- Capturar o input do usuário para voar
-    game:GetService("UserInputService").InputBegan:Connect(function(input)
-        if FlyKeys[input.KeyCode.Name:lower()] ~= nil then
-            FlyKeys[input.KeyCode.Name:lower()] = true
+    for _, button in pairs(buttonInstances) do
+        button.MouseButton1Down:Connect(function()
+            flyKeys[button.Name] = true
             updateFly()
-        end
+        end)
 
-        -- Verificar se o jogador pulou
-        if input.KeyCode == Enum.KeyCode.Space then
-            -- Criar uma placa para o jogador ficar voando
-            local platform = Instance.new("Part")
-            platform.Size = Vector3.new(1, 0.1, 1)
-            platform.Position = LocalPlayer.Character.HumanoidRootPart.Position - Vector3.new(0, 2, 0)
-            platform.Anchored = true
-            platform.CanCollide = false
-            platform.Parent = workspace
-        end
-    end)
-
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if FlyKeys[input.KeyCode.Name:lower()] ~= nil then
-            FlyKeys[input.KeyCode.Name:lower()] = false
+        button.MouseButton1Up:Connect(function()
+            flyKeys[button.Name] = false
             updateFly()
-        end
-    end)
+        end)
+    end
 end
 
 Fly() -- Chamar a função de voo
+
