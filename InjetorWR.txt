@@ -3,106 +3,118 @@ local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local Workspace = game:GetService("Workspace")
 
--- Variável para controlar se o modo fantasma está ativado
-local ghostModeEnabled = false
-
--- Evento para causar dano aos NPCs
+-- Evento para causar dano aos jogadores
 local AttackEvent = Instance.new("BindableEvent")
-AttackEvent.Event:Connect(function(npc)
-    if npc:IsA("Model") then
-        local humanoid = npc:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid:TakeDamage(10) -- Ajuste o valor de dano conforme necessário
+
+-- Função para criar NPCs
+local function CreateNPC()
+    -- Criar um NPC no servidor
+    local npc = Instance.new("Part")
+    npc.Size = Vector3.new(2, 4, 2)
+    npc.Position = Vector3.new(math.random(-50, 50), 10, math.random(-50, 50))
+    npc.Anchored = true
+    npc.BrickColor = BrickColor.Random()
+    npc.Parent = Workspace
+    npc.Touched:Connect(function(hit)
+        local character = hit.Parent
+        if character and character:IsA("Model") and character:FindFirstChild("Humanoid") then
+            AttackEvent:Fire(character) -- Disparar evento para causar dano ao jogador
         end
-    end
-end)
-
--- Função para atravessar paredes
-local function WalkThroughWalls()
-    LocalPlayer.Character.Humanoid:ChangeState(11) -- Muda o estado do jogador para Ghost
-    ghostModeEnabled = true -- Define o modo fantasma como ativado
-end
-
--- Função para recuperar vida automaticamente a cada segundo
-local function RestoreHealthAutomatically()
-    while true do
-        wait(1)
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.Health = LocalPlayer.Character.Humanoid.Health + 10 -- Ajuste o valor de recuperação de vida conforme necessário
-        end
-    end
-end
-
--- Função para aumentar a velocidade
-local function IncreaseSpeed()
-    LocalPlayer.Character.Humanoid.WalkSpeed = 100 -- Ajuste a velocidade conforme necessário
-end
-
--- Função para evitar danos
-local function PreventDamage()
-    LocalPlayer.Character.Humanoid:TakeDamage(0) -- Evita que o jogador tome dano
+    end)
 end
 
 -- Função para criar NPCs a cada 10 segundos
 local function CreateNPCs()
     while true do
-        wait(3)
-        -- Código para criar NPCs aqui
-        local npc = Instance.new("Part")
-        npc.Size = Vector3.new(2, 4, 2)
-        local spawnPosition = LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-20, 20), 0, math.random(-20, 20)) -- Posição aleatória próxima ao jogador
-        npc.Position = spawnPosition
-        npc.Anchored = true
-        npc.BrickColor = BrickColor.Random()
-        npc.Parent = Workspace
-        AttackEvent:Fire(npc) -- Dispara o evento para causar dano ao NPC
+        wait(10)
+        CreateNPC()
     end
 end
 
--- Função para executar um super pulo
-local function SuperJump()
-    LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-end
+-- Disparar evento quando um jogador é atingido pelo NPC
+AttackEvent.Event:Connect(function(character)
+    local humanoid = character:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador
+    end
+end)
 
--- Função para teletransportar para a posição do mouse
-local function TeleportToMouse()
-    LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(Mouse.Hit.p))
-end
-
--- Ativar funcionalidades automaticamente
-coroutine.wrap(WalkThroughWalls)()
-coroutine.wrap(RestoreHealthAutomatically)()
-coroutine.wrap(IncreaseSpeed)()
-coroutine.wrap(PreventDamage)()
-coroutine.wrap(CreateNPCs)()
-coroutine.wrap(SuperJump)()
-
--- Teleportar para a posição do mouse quando o botão direito do mouse é pressionado
-Mouse.Button2Down:Connect(TeleportToMouse)
-
--- Função para ativar/desativar o modo fantasma ao pressionar uma tecla
+-- Função para ativar/desativar o modo fantasma
+local ghostMode = false
 local function ToggleGhostMode()
-    ghostModeEnabled = not ghostModeEnabled
-    if ghostModeEnabled then
-        WalkThroughWalls() -- Ativar modo fantasma
-    else
-        LocalPlayer.Character.Humanoid:ChangeState(12) -- Desativar modo fantasma
+    ghostMode = not ghostMode
+    if ghostMode then
+        -- Ativar o modo fantasma
+        -- Fazer algo quando o modo fantasma estiver ativado
+        wait(20) -- Aguardar 20 segundos
+        ghostMode = false -- Desativar o modo fantasma após 20 segundos
     end
 end
 
--- Função para criar um layout para ativar/desativar o modo fantasma
-local function CreateGhostModeToggleLayout()
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "GhostModeToggleLayout"
-    screenGui.Parent = LocalPlayer.PlayerGui
-
-    local toggleButton = Instance.new("TextButton")
-    toggleButton.Text = "Toggle Ghost Mode"
-    toggleButton.Size = UDim2.new(0, 150, 0, 50)
-    toggleButton.Position = UDim2.new(0, 10, 0, 10)
-    toggleButton.MouseButton1Click:Connect(ToggleGhostMode)
-    toggleButton.Parent = screenGui
+-- Função para ativar o Super Pul
+local function SuperJump()
+    LocalPlayer.Character:FindFirstChildOfClass("Humanoid").JumpPower = 100 -- Definir o pulo para 100
 end
 
--- Criar layout para ativar/desativar o modo fantasma
-CreateGhostModeToggleLayout()
+-- Função para aumentar a velocidade
+local function IncreaseSpeed()
+    LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 100 -- Definir a velocidade para 100
+end
+
+-- Função para recuperar vida
+local function RegenerateHealth()
+    while true do
+        wait(1) -- Esperar 1 segundo
+        if LocalPlayer.Character then
+            LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Health = math.min(LocalPlayer.Character:FindFirstChildOfClass("Humanoid").MaxHealth, LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Health + 1) -- Recuperar 1 de vida a cada segundo
+        end
+    end
+end
+
+-- Função para teleportar para a posição do mouse
+local function TeleportToMouse()
+    local targetPosition = Mouse.Hit.p
+    LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(targetPosition)) -- Teleportar o personagem para a posição do mouse
+end
+
+-- Disparar evento quando um jogador é atingido pelo NPC
+AttackEvent.Event:Connect(function(character)
+    local humanoid = character:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador
+    end
+end)
+
+-- Iniciar criação de NPCs em uma thread separada
+coroutine.wrap(CreateNPCs)()
+
+-- Ativar modo fantasma quando a tecla F for pressionada
+Mouse.KeyDown:Connect(function(key)
+    if key == "f" then
+        ToggleGhostMode()
+    end
+end)
+
+-- Ativar super pulo quando a tecla J for pressionada
+Mouse.KeyDown:Connect(function(key)
+    if key == "j" then
+        SuperJump()
+    end
+end)
+
+-- Aumentar a velocidade quando a tecla S for pressionada
+Mouse.KeyDown:Connect(function(key)
+    if key == "s" then
+        IncreaseSpeed()
+    end
+end)
+
+-- Recuperar vida continuamente
+coroutine.wrap(RegenerateHealth)()
+
+-- Teleportar para a posição do mouse quando a tecla T for pressionada
+Mouse.KeyDown:Connect(function(key)
+    if key == "t" then
+        TeleportToMouse()
+    end
+end)
