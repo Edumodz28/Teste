@@ -1,34 +1,97 @@
-local object = script.Parent
-local health = object:FindFirstChild("Health")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
-if not health then
-    health = Instance.new("IntValue")
-    health.Name = "Health"
-    health.Value = 100
-    health.Parent = object
+local function CreatePlayerESP(Player)
+    if Player ~= LocalPlayer then -- Evita criar uma ESP para o próprio jogador
+        local Box = Instance.new("BoxHandleAdornment")
+        Box.Size = Player.Character:GetExtentsSize() + Vector3.new(0.1, 0.1, 0.1)
+        Box.Adornee = Player.Character
+        Box.AlwaysOnTop = true
+        Box.ZIndex = 5
+        Box.Transparency = 0.5
+        Box.Color3 = Color3.new(1, 0, 0) -- Cor vermelha para jogadores
+        Box.Parent = Player.Character
+    end
 end
 
--- Variável para controlar se o objeto já sofreu dano
-local damageApplied = false
-
--- Função para reduzir a vida do objeto
-local function TakeDamage(damageAmount)
-    if not damageApplied then
-        health.Value = health.Value - damageAmount
-        damageApplied = true
-
-        if health.Value <= 0 then
-            object:Destroy()
+local function UpdatePlayerESP()
+    for _, Player in ipairs(Players:GetPlayers()) do
+        if Player.Character then
+            CreatePlayerESP(Player)
         end
     end
 end
 
--- Conectar a função ao evento Touched do objeto para aplicar dano
-object.Touched:Connect(function(part)
-    if not damageApplied then
-        local damageValue = part:FindFirstChild("damageAmount")
-        if damageValue and typeof(damageValue.Value) == "number" then
-            TakeDamage(damageValue.Value) -- Reduz a vida do objeto com base no dano causado
+Players.PlayerAdded:Connect(function(Player)
+    Player.CharacterAdded:Connect(function(Character)
+        wait(1) -- Espera um momento para garantir que o personagem seja totalmente carregado
+        CreatePlayerESP(Player)
+    end)
+end)
+
+Players.PlayerRemoving:Connect(function(Player)
+    if Player.Character then
+        for _, Adornment in ipairs(Player.Character:GetChildren()) do
+            if Adornment:IsA("BoxHandleAdornment") then
+                Adornment:Destroy()
+            end
         end
     end
 end)
+
+local RemoteEvent = game.ReplicatedStorage:WaitForChild("RemoteEvent")
+
+RemoteEvent.OnClientEvent:Connect(function(PlayerUserId)
+    if PlayerUserId and type(PlayerUserId) == "number" then
+        local player = Players:GetPlayerByUserId(PlayerUserId)
+        if player then
+            -- Aqui você pode adicionar o código para causar dano ao jogador
+            print("Dano causado ao jogador: " .. player.Name)
+            
+            -- Exemplo: Aplicando dano ao jogador usando o código fornecido
+            local object = player.Character -- Objeto que representa o jogador
+            local health = object:FindFirstChild("Health")
+
+            if not health then
+                health = Instance.new("IntValue")
+                health.Name = "Health"
+                health.Value = 100
+                health.Parent = object
+            end
+
+            -- Variável para controlar se o objeto já sofreu dano
+            local damageApplied = false
+
+            -- Função para reduzir a vida do objeto
+            local function TakeDamage(damageAmount)
+                if not damageApplied then
+                    health.Value = health.Value - damageAmount
+                    damageApplied = true
+
+                    if health.Value <= 0 then
+                        object:Destroy()
+                    end
+                end
+            end
+
+            -- Conectar a função ao evento Touched do objeto para aplicar dano
+            object.Touched:Connect(function(part)
+                if not damageApplied then
+                    local damageValue = part:FindFirstChild("damageAmount")
+                    if damageValue and typeof(damageValue.Value) == "number" then
+                        TakeDamage(damageValue.Value) -- Reduz a vida do objeto com base no dano causado
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+while true do
+    wait(1) -- Intervalo de atualização de 1 segundo
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            RemoteEvent:FireServer(player.UserId) -- Dispara o evento para causar dano ao jogador
+        end
+    end
+end
