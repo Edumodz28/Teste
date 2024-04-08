@@ -3,6 +3,9 @@ local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local Workspace = game:GetService("Workspace")
 
+-- Variável para controlar se o modo fantasma está ativado
+local ghostModeEnabled = false
+
 -- Evento para causar dano aos NPCs
 local AttackEvent = Instance.new("BindableEvent")
 AttackEvent.Event:Connect(function(npc)
@@ -17,8 +20,7 @@ end)
 -- Função para atravessar paredes
 local function WalkThroughWalls()
     LocalPlayer.Character.Humanoid:ChangeState(11) -- Muda o estado do jogador para Ghost
-    wait(20) -- Mantém o modo fantasma ativado por 20 segundos
-    LocalPlayer.Character.Humanoid:ChangeState(12) -- Retorna o estado do jogador para o normal após 20 segundos
+    ghostModeEnabled = true -- Define o modo fantasma como ativado
 end
 
 -- Função para recuperar vida automaticamente a cada segundo
@@ -44,11 +46,12 @@ end
 -- Função para criar NPCs a cada 10 segundos
 local function CreateNPCs()
     while true do
-        wait(10)
+        wait(3)
         -- Código para criar NPCs aqui
         local npc = Instance.new("Part")
         npc.Size = Vector3.new(2, 4, 2)
-        npc.Position = Vector3.new(math.random(-50, 50), 10, math.random(-50, 50)) -- Posição aleatória no espaço aéreo
+        local spawnPosition = LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-20, 20), 0, math.random(-20, 20)) -- Posição aleatória próxima ao jogador
+        npc.Position = spawnPosition
         npc.Anchored = true
         npc.BrickColor = BrickColor.Random()
         npc.Parent = Workspace
@@ -67,12 +70,39 @@ local function TeleportToMouse()
 end
 
 -- Ativar funcionalidades automaticamente
-WalkThroughWalls()
+coroutine.wrap(WalkThroughWalls)()
 coroutine.wrap(RestoreHealthAutomatically)()
-IncreaseSpeed()
-PreventDamage()
+coroutine.wrap(IncreaseSpeed)()
+coroutine.wrap(PreventDamage)()
 coroutine.wrap(CreateNPCs)()
-SuperJump()
+coroutine.wrap(SuperJump)()
 
 -- Teleportar para a posição do mouse quando o botão direito do mouse é pressionado
 Mouse.Button2Down:Connect(TeleportToMouse)
+
+-- Função para ativar/desativar o modo fantasma ao pressionar uma tecla
+local function ToggleGhostMode()
+    ghostModeEnabled = not ghostModeEnabled
+    if ghostModeEnabled then
+        WalkThroughWalls() -- Ativar modo fantasma
+    else
+        LocalPlayer.Character.Humanoid:ChangeState(12) -- Desativar modo fantasma
+    end
+end
+
+-- Função para criar um layout para ativar/desativar o modo fantasma
+local function CreateGhostModeToggleLayout()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "GhostModeToggleLayout"
+    screenGui.Parent = LocalPlayer.PlayerGui
+
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Text = "Toggle Ghost Mode"
+    toggleButton.Size = UDim2.new(0, 150, 0, 50)
+    toggleButton.Position = UDim2.new(0, 10, 0, 10)
+    toggleButton.MouseButton1Click:Connect(ToggleGhostMode)
+    toggleButton.Parent = screenGui
+end
+
+-- Criar layout para ativar/desativar o modo fantasma
+CreateGhostModeToggleLayout()
