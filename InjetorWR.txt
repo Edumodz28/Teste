@@ -13,17 +13,23 @@ local lastMessageTime = 0
 -- Evento para causar dano aos jogadores
 local AttackEvent = Instance.new("BindableEvent")
 
--- Função para enviar mensagem para o chat
+-- Função para enviar mensagem para o chat com tag especial
 local function SendMessage(message)
     if messageCount < messageLimit then
-        Chat:Chat(LocalPlayer.Character, message)
+        local tag = "[Admin]"
+        local playerName = LocalPlayer.Name
+        local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
+        Chat:Chat(LocalPlayer.Character, formattedMessage)
         messageCount = messageCount + 1
     else
         local currentTime = tick()
         if currentTime - lastMessageTime >= cooldownTime then
             messageCount = 0
             lastMessageTime = currentTime
-            Chat:Chat(LocalPlayer.Character, message)
+            local tag = "[Admin]"
+            local playerName = LocalPlayer.Name
+            local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
+            Chat:Chat(LocalPlayer.Character, formattedMessage)
             messageCount = messageCount + 1
         end
     end
@@ -43,7 +49,7 @@ local function CreateDamageSquare()
     damageSquare.Touched:Connect(function(hit)
         if hit.Parent and hit.Parent:IsA("Model") and hit.Parent:FindFirstChild("Humanoid") then
             local humanoid = hit.Parent:FindFirstChild("Humanoid")
-            if humanoid then
+            if humanoid and hit.Parent ~= LocalPlayer.Character then
                 AttackEvent:Fire(humanoid) -- Disparar evento para causar dano ao jogador
             end
         end
