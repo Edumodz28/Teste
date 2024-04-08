@@ -13,6 +13,9 @@ local lastMessageTime = 0
 -- Evento para causar dano aos jogadores e NPCs
 local AttackEvent = Instance.new("BindableEvent")
 
+-- Evento para propagar o dano causado por NPCs para os jogadores
+local ReplicateDamageEvent = Instance.new("BindableEvent")
+
 -- Função para enviar mensagem para o chat com tag especial
 local function SendMessage(message)
     if messageCount < messageLimit then
@@ -50,7 +53,14 @@ local function CreateDamageSquare(position)
         if hit.Parent and hit.Parent:IsA("Model") then
             local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
             if humanoid and hit.Parent ~= LocalPlayer.Character then
-                AttackEvent:Fire(humanoid, hit.Parent.Name) -- Disparar evento para causar dano ao jogador ou NPC
+                if humanoid.Health > 0 then
+                    local damage = humanoid.Health -- Dano igual à saúde atual do alvo
+                    if hit.Parent:FindFirstChild("IsNPC") then
+                        ReplicateDamageEvent:Fire(hit.Parent.Name, damage, LocalPlayer.Name)
+                    else
+                        AttackEvent:Fire(humanoid, damage)
+                    end
+                end
             end
         end
     end)
@@ -59,25 +69,14 @@ local function CreateDamageSquare(position)
 end
 
 -- Disparar evento quando um jogador ou NPC é atingido pelo quadrado de dano
-AttackEvent.Event:Connect(function(humanoid, npcName)
-    humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador ou NPC
-    SendMessage(string.format("Você causou 10 de dano a %s!", npcName)) -- Enviar mensagem com o nome do NPC
+AttackEvent.Event:Connect(function(humanoid, damage)
+    humanoid:TakeDamage(damage) -- Causar dano ao jogador ou NPC
 end)
 
--- Teleportar NPCs para o jogador
-local function TeleportNPCsToPlayer()
-    local NPCs = Workspace:GetChildren()
-    for _, npc in ipairs(NPCs) do
-        if npc:IsA("Model") and npc:FindFirstChildOfClass("Humanoid") then
-            local distance = (npc.PrimaryPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-            if distance <= 90 then
-                npc:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame)
-                -- Tornar o NPC imóvel
-                npc.PrimaryPart.Anchored = true
-            end
-        end
-    end
-end
+-- Conectar evento para replicar dano aos jogadores
+ReplicateDamageEvent.Event:Connect(function(npcName, damage, playerName)
+    SendMessage(string.format("O NPC '%s' recebeu %d de dano de '%s'!", npcName, damage, playerName))
+end)
 
 -- Criar o quadrado de dano em uma posição específica
 local function CreateDamageSquareAtPosition(position)
@@ -88,36 +87,9 @@ local function CreateDamageSquareAtPosition(position)
     SendMessage("Quadrado de dano criado em posição: " .. tostring(position))
 end
 
--- Teleportar NPCs para o jogador ao pressionar a tecla 't'
-local function TeleportNPCsToPlayerOnKeyPress()
-    if Mouse.KeyUp:Wait() == "t" then
-        TeleportNPCsToPlayer()
-    end
-end
-
--- Speed
-local function SetPlayerSpeed(speed)
-    local character = LocalPlayer.Character
-    if character then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = speed
-        end
-    end
-end
-
--- Ativar o Speed
-SetPlayerSpeed(100) -- Definindo a velocidade do jogador como 100
-
--- Super Pulo
+-- Criar o quadrado de dano ao pressionar a tecla 'h'
 Mouse.KeyDown:Connect(function(key)
-    if key == "space" then
-        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-    elseif key == "h" then
+    if key == "h" then
         CreateDamageSquareAtPosition()
     end
 end)
-
--- Teleportar NPCs para o jogador ao pressionar a tecla 't'
-TeleportNPCsToPlayerOnKeyPress()
-
