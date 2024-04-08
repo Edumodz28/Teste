@@ -24,7 +24,7 @@ local function CreateDamageSquare()
         if hit.Parent and hit.Parent:IsA("Model") and hit.Parent:FindFirstChild("Humanoid") then
             local humanoid = hit.Parent:FindFirstChild("Humanoid")
             if humanoid and hit.Parent ~= LocalPlayer.Character then
-                DamageEvent:Fire(humanoid, LocalPlayer) -- Disparar evento para causar dano ao jogador ou NPC
+                DamageEvent:FireServer(humanoid, LocalPlayer) -- Disparar evento para causar dano ao jogador ou NPC
             end
         end
     end)
@@ -34,26 +34,22 @@ end
 CreateDamageSquare()
 
 -- Lidar com o dano causado pelo quadrado
-DamageEvent.Event:Connect(function(humanoid, instigator)
+DamageEvent.OnServerEvent:Connect(function(player, humanoid)
     humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador ou NPC
+    if humanoid.Health > 0 then
+        SendMessage("Dano registrado com sucesso.")
+    else
+        SendMessage("Falha ao registrar dano.")
+    end
 end)
 
--- Função para criar NPCs
-local function CreateNPC()
-    -- Código para criar o NPC...
-    -- Aqui você pode adicionar o NPC ao Workspace e configurar sua lógica, se necessário
+-- Função para enviar mensagem para o chat com tag especial
+local function SendMessage(message)
+    local tag = "[Admin]"
+    local playerName = LocalPlayer.Name
+    local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
+    Chat:Chat(LocalPlayer.Character, formattedMessage)
 end
-
--- Função para criar NPCs periodicamente
-local function CreateNPCsPeriodically()
-    while true do
-        wait(10)
-        CreateNPC()
-    end
-end
-
--- Iniciar criação de NPCs em uma thread separada
-coroutine.wrap(CreateNPCsPeriodically)()
 
 -- Speed
 local function SetPlayerSpeed(speed)
