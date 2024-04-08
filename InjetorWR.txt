@@ -2,16 +2,46 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
+-- Configurações do layout
+local LayoutWidth = 200
+local LayoutHeight = 150
+
+-- Configurações de voo
+local FlySpeed = 50
+local FlyKeys = {
+    w = false,
+    a = false,
+    s = false,
+    d = false,
+    space = false,
+    shift = false
+}
+
+-- Criar o ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = PlayerGui
 
+-- Criar o Frame principal do layout
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 200, 0, 150)
-Frame.Position = UDim2.new(0.5, -100, 0, 20)
+Frame.Size = UDim2.new(0, LayoutWidth, 0, LayoutHeight)
+Frame.Position = UDim2.new(0.5, -LayoutWidth / 2, 0, 20)
 Frame.BackgroundColor3 = Color3.new(0, 0, 0)
 Frame.BackgroundTransparency = 0.5
 Frame.Parent = ScreenGui
 
+-- Função para atualizar o layout
+local function UpdateLayout()
+    -- Atualizar o texto de contagem de jogadores
+    PlayerCountLabel.Text = "Players: " .. #Players:GetPlayers()
+
+    -- Atualizar a lista de nomes dos jogadores
+    PlayerNamesLabel.Text = "Players: "
+    for _, player in pairs(Players:GetPlayers()) do
+        PlayerNamesLabel.Text = PlayerNamesLabel.Text .. player.Name .. "\n"
+    end
+end
+
+-- Criar o rótulo para a contagem de jogadores
 local PlayerCountLabel = Instance.new("TextLabel")
 PlayerCountLabel.Size = UDim2.new(1, 0, 0.5, 0)
 PlayerCountLabel.Position = UDim2.new(0, 0, 0, 0)
@@ -19,9 +49,9 @@ PlayerCountLabel.BackgroundColor3 = Color3.new(1, 1, 1)
 PlayerCountLabel.TextColor3 = Color3.new(1, 1, 1)
 PlayerCountLabel.Font = Enum.Font.SourceSans
 PlayerCountLabel.TextSize = 18
-PlayerCountLabel.Text = "Players: " .. #Players:GetPlayers()
 PlayerCountLabel.Parent = Frame
 
+-- Criar o rótulo para os nomes dos jogadores
 local PlayerNamesLabel = Instance.new("TextLabel")
 PlayerNamesLabel.Size = UDim2.new(1, 0, 0.5, 0)
 PlayerNamesLabel.Position = UDim2.new(0, 0, 0.5, 0)
@@ -29,49 +59,50 @@ PlayerNamesLabel.BackgroundColor3 = Color3.new(1, 1, 1)
 PlayerNamesLabel.TextColor3 = Color3.new(1, 1, 1)
 PlayerNamesLabel.Font = Enum.Font.SourceSans
 PlayerNamesLabel.TextSize = 14
-PlayerNamesLabel.Text = "Players: "
-for _, player in pairs(Players:GetPlayers()) do
-    PlayerNamesLabel.Text = PlayerNamesLabel.Text .. player.Name .. "\n"
-end
+PlayerNamesLabel.TextWrapped = true
 PlayerNamesLabel.Parent = Frame
+
+-- Atualizar o layout
+UpdateLayout()
 
 -- Função de voo
 local function Fly()
-    local flySpeed = 50
-    local flyKeys = {
-        w = false,
-        a = false,
-        s = false,
-        d = false,
-        space = false,
-        shift = false
-    }
-
     local function updateFly()
-        local forward = (flyKeys.w and Vector3.new(0, 0, -1) or Vector3.new())
-        local backward = (flyKeys.s and Vector3.new(0, 0, 1) or Vector3.new())
-        local left = (flyKeys.a and Vector3.new(-1, 0, 0) or Vector3.new())
-        local right = (flyKeys.d and Vector3.new(1, 0, 0) or Vector3.new())
-        local up = (flyKeys.space and Vector3.new(0, 1, 0) or Vector3.new())
-        local down = (flyKeys.shift and Vector3.new(0, -1, 0) or Vector3.new())
+        local forward = (FlyKeys.w and Vector3.new(0, 0, -1) or Vector3.new())
+        local backward = (FlyKeys.s and Vector3.new(0, 0, 1) or Vector3.new())
+        local left = (FlyKeys.a and Vector3.new(-1, 0, 0) or Vector3.new())
+        local right = (FlyKeys.d and Vector3.new(1, 0, 0) or Vector3.new())
+        local up = (FlyKeys.space and Vector3.new(0, 1, 0) or Vector3.new())
+        local down = (FlyKeys.shift and Vector3.new(0, -1, 0) or Vector3.new())
 
-        LocalPlayer.Character.HumanoidRootPart.Velocity = (forward + backward + left + right + up + down).unit * flySpeed
+        LocalPlayer.Character.HumanoidRootPart.Velocity = (forward + backward + left + right + up + down).unit * FlySpeed
     end
 
+    -- Capturar o input do usuário para voar
     game:GetService("UserInputService").InputBegan:Connect(function(input)
-        if flyKeys[input.KeyCode.Name:lower()] ~= nil then
-            flyKeys[input.KeyCode.Name:lower()] = true
+        if FlyKeys[input.KeyCode.Name:lower()] ~= nil then
+            FlyKeys[input.KeyCode.Name:lower()] = true
             updateFly()
+        end
+
+        -- Verificar se o jogador pulou
+        if input.KeyCode == Enum.KeyCode.Space then
+            -- Criar uma placa para o jogador ficar voando
+            local platform = Instance.new("Part")
+            platform.Size = Vector3.new(1, 0.1, 1)
+            platform.Position = LocalPlayer.Character.HumanoidRootPart.Position - Vector3.new(0, 2, 0)
+            platform.Anchored = true
+            platform.CanCollide = false
+            platform.Parent = workspace
         end
     end)
 
     game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if flyKeys[input.KeyCode.Name:lower()] ~= nil then
-            flyKeys[input.KeyCode.Name:lower()] = false
+        if FlyKeys[input.KeyCode.Name:lower()] ~= nil then
+            FlyKeys[input.KeyCode.Name:lower()] = false
             updateFly()
         end
     end)
 end
 
-Fly() -- Chama a função de voo
-
+Fly() -- Chamar a função de voo
