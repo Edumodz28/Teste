@@ -2,61 +2,78 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local Workspace = game:GetService("Workspace")
+local Chat = game:GetService("Chat")
+
+-- Variáveis para controle de mensagens no chat
+local messageCount = 0
+local messageLimit = 5
+local cooldownTime = 10
+local lastMessageTime = 0
 
 -- Evento para causar dano aos jogadores
 local AttackEvent = Instance.new("BindableEvent")
 
--- Variáveis para controle do chat
-local chatLimit = 5  -- Limite de mensagens por período de tempo
-local chatCount = 5   -- Contador de mensagens enviadas
-local chatTimer = 0   -- Temporizador para redefinir o contador
-local chatCooldown = 10  -- Tempo de espera antes de redefinir o contador (em segundos)
-
--- Função para criar NPCs
-local function CreateNPC()
-    -- Criar um NPC ao lado do jogador a 50 metros de distância
-    local playerPosition = LocalPlayer.Character.HumanoidRootPart.Position
-    local spawnPosition = playerPosition + Vector3.new(50, 0, 0) -- Posição do jogador + 50 metros para a frente
-    local npc = Instance.new("Part")
-    npc.Size = Vector3.new(2, 4, 2)
-    npc.Position = spawnPosition
-    npc.Anchored = true
-    npc.BrickColor = BrickColor.Random()
-    npc.Parent = Workspace
-
-    -- Verificar limite de mensagens
-    if chatCount > 0 then
-        -- Enviar mensagem para o servidor
-        game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvent"):FireServer("NPC criado!")
-
-        -- Enviar mensagem para o chat do jogo
-        LocalPlayer:Chat("NPC criado!")
-        
-        -- Decrementar contador de mensagens
-        chatCount = chatCount - 1
+-- Função para enviar mensagem para o chat
+local function SendMessage(message)
+    if messageCount < messageLimit then
+        Chat:Chat(LocalPlayer.Character, message)
+        messageCount = messageCount + 1
     else
-        LocalPlayer:Chat("Você não tem permissão para criar mais NPCs.")
+        local currentTime = tick()
+        if currentTime - lastMessageTime >= cooldownTime then
+            messageCount = 0
+            lastMessageTime = currentTime
+            Chat:Chat(LocalPlayer.Character, message)
+            messageCount = messageCount + 1
+        end
     end
 end
 
--- Função para criar NPCs a cada 10 segundos
-local function CreateNPCs()
+-- Função para criar o quadrado que causa dano
+local function CreateDamageSquare()
+    local damageSquare = Instance.new("Part")
+    damageSquare.Size = Vector3.new(2, 2, 2)
+    damageSquare.Anchored = true
+    damageSquare.Position = LocalPlayer.Character.HumanoidRootPart.Position
+    damageSquare.BrickColor = BrickColor.new("Bright red")
+    damageSquare.Transparency = 0.5  -- Definir transparência para 50%
+    damageSquare.Parent = Workspace
+
+    -- Detectar quando um jogador entra na área do quadrado
+    damageSquare.Touched:Connect(function(hit)
+        if hit.Parent and hit.Parent:IsA("Model") and hit.Parent:FindFirstChild("Humanoid") then
+            local humanoid = hit.Parent:FindFirstChild("Humanoid")
+            if humanoid then
+                AttackEvent:Fire(humanoid) -- Disparar evento para causar dano ao jogador
+            end
+        end
+    end)
+end
+
+-- Função para criar o quadrado que causa dano
+CreateDamageSquare()
+
+-- Disparar evento quando um jogador é atingido pelo quadrado
+AttackEvent.Event:Connect(function(humanoid)
+    humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador
+end)
+
+-- Função para criar NPCs
+local function CreateNPC()
+    -- Código para criar o NPC...
+    SendMessage("Um NPC foi criado!") -- Enviar mensagem para o chat
+end
+
+-- Função para criar NPCs periodicamente
+local function CreateNPCsPeriodically()
     while true do
         wait(10)
         CreateNPC()
     end
 end
 
--- Disparar evento quando um jogador é atingido pelo NPC
-AttackEvent.Event:Connect(function(character)
-    local humanoid = character:FindFirstChild("Humanoid")
-    if humanoid then
-        humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador
-    end
-end)
-
 -- Iniciar criação de NPCs em uma thread separada
-coroutine.wrap(CreateNPCs)()
+coroutine.wrap(CreateNPCsPeriodically)()
 
 -- Speed
 local function SetPlayerSpeed(speed)
@@ -72,51 +89,9 @@ end
 -- Ativar o Speed
 SetPlayerSpeed(100) -- Definindo a velocidade do jogador como 100
 
--- Wall Hack (atravessar paredes)
-LocalPlayer.PlayerGui:SetTopbarTransparency(0) -- Tornar a barra superior do GUI visível
-
 -- Super Pulo
 Mouse.KeyDown:Connect(function(key)
     if key == "space" then
         LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end)
-
--- Áudio para reproduzir no YouTube quando um NPC é criado
-local function PlayAudio()
-    -- Localização do áudio do Roblox
-    local audioId = "rbxassetid://6490661033"  -- Substitua pelo ID do áudio desejado
-
-    -- Criar instância do Sound
-    local sound = Instance.new("Sound")
-    sound.SoundId = audioId
-    sound.Volume = 0.5  -- Definir o volume para 50%
-
-    -- Reproduzir o som no workspace para que todos os jogadores possam ouvi-lo
-    sound.Parent = workspace
-    sound:Play()
-
-    -- Conectar o evento Ended para repetir o áudio quando ele terminar
-    sound.Ended:Connect(function()
-        sound:Play()
-    end)
-end
-
--- Conectar a função PlayAudio ao evento de criação de NPC
-AttackEvent.Event:Connect(PlayAudio)
-
--- Criar uma parte invisível como campo de dano
-local damagePart = Instance.new("Part")
-damagePart.Size = Vector3.new(10, 10, 10)  -- Ajuste o tamanho conforme necessário
-damagePart.Transparency = 1  -- Tornar a parte invisível
-damagePart.Anchored = true
-damagePart.CanCollide = false
-damagePart.Parent = workspace
-
--- Conectar um evento Touched para causar dano aos jogadores que colidirem com a parte
-damagePart.Touched:Connect(function(hit)
-    local character = hit.Parent
-    if character and character:IsA("Model") and character:FindFirstChild("Humanoid") then
-        character.Humanoid:TakeDamage(5)  -- Causar 5 de dano ao jogador
     end
 end)
