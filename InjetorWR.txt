@@ -1,60 +1,57 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Remotes = ReplicatedStorage:WaitForChild("NPC_Interaction") -- Suponha que exista um RemoteEvent chamado "NPC_Interaction" para iniciar o ataque no servidor
 
-local function CreateNPC_ESP(NPC)
-    local Box = Instance.new("BoxHandleAdornment")
-    Box.Size = NPC:GetExtentsSize() + Vector3.new(0.1, 0.1, 0.1)
-    Box.Adornee = NPC
-    Box.AlwaysOnTop = true
-    Box.ZIndex = 5
-    Box.Transparency = 0.5
-    Box.Color3 = Color3.new(0, 1, 0) -- Cor verde para NPCs
-    Box.Parent = NPC
+local function CreatePlayerESP(Player)
+    if Player ~= LocalPlayer then -- Evita criar uma ESP para o próprio jogador
+        local Box = Instance.new("BoxHandleAdornment")
+        Box.Size = Player.Character:GetExtentsSize() + Vector3.new(0.1, 0.1, 0.1)
+        Box.Adornee = Player.Character
+        Box.AlwaysOnTop = true
+        Box.ZIndex = 5
+        Box.Transparency = 0.5
+        Box.Color3 = Color3.new(1, 0, 0) -- Cor vermelha para jogadores
+        Box.Parent = Player.Character
+    end
 end
 
-local function FindClosestNPC()
-    local NPCs = {} -- Lista para armazenar os NPCs próximos
-    local PlayerPosition = LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart.Position
-    if PlayerPosition then
-        for _, NPC in ipairs(workspace:GetChildren()) do
-            if NPC:IsA("Model") and NPC:FindFirstChild("Humanoid") and NPC:FindFirstChild("Level") then
-                local NPCPosition = NPC.HumanoidRootPart.Position
-                local distance = (PlayerPosition - NPCPosition).magnitude
-                local NPCLevel = NPC.Level.Value
-                local PlayerLevel = LocalPlayer.Level.Value -- Suponha que o nível do jogador está armazenado em uma propriedade chamada "Level"
-                if distance <= 50 and NPCLevel == PlayerLevel then -- Suponha que 50 seja a distância máxima para considerar um NPC como próximo
-                    table.insert(NPCs, {NPC = NPC, Distance = distance})
-                end
+local function UpdatePlayerESP()
+    for _, Player in ipairs(Players:GetPlayers()) do
+        if Player.Character then
+            CreatePlayerESP(Player)
+        end
+    end
+end
+
+Players.PlayerAdded:Connect(function(Player)
+    Player.CharacterAdded:Connect(function(Character)
+        wait(1) -- Espera um momento para garantir que o personagem seja totalmente carregado
+        CreatePlayerESP(Player)
+    end)
+end)
+
+Players.PlayerRemoving:Connect(function(Player)
+    if Player.Character then
+        for _, Adornment in ipairs(Player.Character:GetChildren()) do
+            if Adornment:IsA("BoxHandleAdornment") then
+                Adornment:Destroy()
             end
         end
     end
+end)
 
-    -- Encontra o NPC mais próximo
-    local closestNPC = nil
-    local minDistance = math.huge
-    for _, data in ipairs(NPCs) do
-        if data.Distance < minDistance then
-            minDistance = data.Distance
-            closestNPC = data.NPC
+local RemoteEvent = game.ReplicatedStorage:WaitForChild("RemoteEvent")
+
+RemoteEvent.OnClientEvent:Connect(function(PlayerUserId)
+    if PlayerUserId and type(PlayerUserId) == "number" then
+        local player = Players:GetPlayerByUserId(PlayerUserId)
+        if player then
+            -- Aqui você pode adicionar o código para causar dano ao jogador
+            print("Dano causado ao jogador: " .. player.Name)
         end
     end
-
-    return closestNPC
-end
-
-local function TeleportAndAttack(NPC)
-    if NPC then
-        -- Teleporta o jogador perto do NPC
-        LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(NPC.HumanoidRootPart.Position + Vector3.new(0, 5, 0)))
-        -- Inicia o ataque ao NPC no servidor
-        Remotes:FireServer(NPC)
-    end
-end
+end)
 
 while true do
-    wait(1) -- Intervalo de verificação de 1 segundo
-    local closestNPC = FindClosestNPC()
-    TeleportAndAttack(closestNPC)
+    wait(1) -- Intervalo de atualização de 1 segundo
+    UpdatePlayerESP()
 end
