@@ -15,7 +15,7 @@ ScreenGui.Parent = PlayerGui
 -- Criar o Frame principal do layout
 local Frame = Instance.new("Frame")
 Frame.Size = UDim2.new(0, LayoutWidth, 0, LayoutHeight)
-Frame.Position = UDim2.new(1, -LayoutWidth - 10, 1, -LayoutHeight - 10)
+Frame.Position = UDim2.new(0.5, -LayoutWidth / 2, 0.5, -LayoutHeight / 2) -- Posicionando no centro da tela
 Frame.BackgroundColor3 = Color3.new(0, 0, 0)
 Frame.BackgroundTransparency = 0.5
 Frame.Parent = ScreenGui
@@ -88,5 +88,12 @@ local function Fly()
     end
 end
 
-Fly() -- Chamar a função de voo
+-- Habilitar a função de voar
+Fly()
 
+-- Ativar a função de atravessar paredes
+game:GetService("RunService").Stepped:Connect(function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character.HumanoidRootPart.CanCollide = false
+    end
+end)
