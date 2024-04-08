@@ -46,6 +46,8 @@ RemoteEvent.OnClientEvent:Connect(function(PlayerUserId)
         local player = Players:GetPlayerByUserId(PlayerUserId)
         if player then
             -- Aqui você pode adicionar o código para causar dano ao jogador
+
+Remotes:FireServer(PlayerUserId)
             print("Dano causado ao jogador: " .. player.Name)
         end
     end
