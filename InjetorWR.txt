@@ -58,19 +58,19 @@ local function CreateDamageSquare(position)
     return damageSquare
 end
 
--- Disparar evento quando um jogador ou NPC é atingido pelo quadrado
+-- Disparar evento quando um jogador ou NPC é atingido pelo quadrado de dano
 AttackEvent.Event:Connect(function(humanoid, npcName)
     humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador ou NPC
     SendMessage(string.format("Você causou 10 de dano a %s!", npcName)) -- Enviar mensagem com o nome do NPC
 end)
 
--- Função para teleportar NPCs para o jogador
+-- Teleportar NPCs para o jogador
 local function TeleportNPCsToPlayer()
-    local NPCs = Workspace:GetDescendants()
+    local NPCs = Workspace:GetChildren()
     for _, npc in ipairs(NPCs) do
         if npc:IsA("Model") and npc:FindFirstChildOfClass("Humanoid") then
-            -- Verificar se o NPC pode receber dano
-            if npc:FindFirstChild("CanTakeDamage") and npc.CanTakeDamage.Value == true then
+            local distance = (npc.PrimaryPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+            if distance <= 90 then
                 npc:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame)
                 -- Tornar o NPC imóvel
                 npc.PrimaryPart.Anchored = true
@@ -88,22 +88,10 @@ local function CreateDamageSquareAtPosition(position)
     SendMessage("Quadrado de dano criado em posição: " .. tostring(position))
 end
 
--- Teleportar NPCs para o jogador
+-- Teleportar NPCs para o jogador ao pressionar a tecla 't'
 local function TeleportNPCsToPlayerOnKeyPress()
-    local NPCs = Workspace:GetDescendants()
-    for _, npc in ipairs(NPCs) do
-        if npc:IsA("Model") and npc:FindFirstChildOfClass("Humanoid") then
-            -- Verificar se a tecla 't' foi pressionada
-            if Mouse.KeyUp:Wait() == "t" then
-                -- Verificar se o NPC pode receber dano
-                if npc:FindFirstChild("CanTakeDamage") and npc.CanTakeDamage.Value == true then
-                    npc:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame)
-                    -- Tornar o NPC imóvel
-                    npc.PrimaryPart.Anchored = true
-                    SendMessage(string.format("%s foi teleportado para você!", npc.Name))
-                end
-            end
-        end
+    if Mouse.KeyUp:Wait() == "t" then
+        TeleportNPCsToPlayer()
     end
 end
 
@@ -132,3 +120,4 @@ end)
 
 -- Teleportar NPCs para o jogador ao pressionar a tecla 't'
 TeleportNPCsToPlayerOnKeyPress()
+
