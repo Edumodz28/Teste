@@ -1,9 +1,8 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 local Workspace = game:GetService("Workspace")
 local Chat = game:GetService("Chat")
-local UserInputService = game:GetService("UserInputService")
-local StarterGui = game:GetService("StarterGui")
 
 -- Variáveis para controle de mensagens no chat
 local messageCount = 0
@@ -36,7 +35,7 @@ local function SendMessage(message)
     end
 end
 
--- Função para criar o quadrado que causa dano em uma posição específica
+-- Função para criar o quadrado que causa dano
 local function CreateDamageSquare(position)
     local damageSquare = Instance.new("Part")
     damageSquare.Size = Vector3.new(10, 1, 10) -- Ajuste o tamanho conforme necessário
@@ -65,33 +64,48 @@ AttackEvent.Event:Connect(function(humanoid, npcName)
     SendMessage(string.format("Você causou 10 de dano a %s!", npcName)) -- Enviar mensagem com o nome do NPC
 end)
 
--- Função para criar o quadrado de dano na posição atual do jogador
-local function CreateDamageSquareAtPlayerPosition()
-    local character = LocalPlayer.Character
-    if character then
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            local currentPosition = humanoidRootPart.Position
-            CreateDamageSquare(currentPosition)
-            SendMessage("Quadrado de dano criado na posição atual do jogador.")
+-- Função para teleportar NPCs para o jogador
+local function TeleportNPCsToPlayer()
+    local NPCs = Workspace:GetDescendants()
+    for _, npc in ipairs(NPCs) do
+        if npc:IsA("Model") and npc:FindFirstChildOfClass("Humanoid") then
+            -- Verificar se o NPC pode receber dano
+            if npc:FindFirstChild("CanTakeDamage") and npc.CanTakeDamage.Value == true then
+                npc:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame)
+                -- Tornar o NPC imóvel
+                npc.PrimaryPart.Anchored = true
+            end
         end
     end
 end
 
--- Criar botão para criar o quadrado de dano na posição atual do jogador
-local function CreateButton()
-    local button = Instance.new("TextButton")
-    button.Text = "Criar Quadrado de Dano"
-    button.Size = UDim2.new(0, 200, 0, 50)
-    button.Position = UDim2.new(0.5, -100, 0.9, 0)
-    button.Parent = game.Players.LocalPlayer.PlayerGui.ScreenGui -- Altere "ScreenGui" para o nome do seu GUI
-    button.MouseButton1Click:Connect(function()
-        CreateDamageSquareAtPlayerPosition()
-    end)
+-- Criar o quadrado de dano em uma posição específica
+local function CreateDamageSquareAtPosition(position)
+    if not position then
+        position = LocalPlayer.Character.HumanoidRootPart.Position
+    end
+    local damageSquare = CreateDamageSquare(position)
+    SendMessage("Quadrado de dano criado em posição: " .. tostring(position))
 end
 
--- Criar o botão na inicialização
-CreateButton()
+-- Teleportar NPCs para o jogador
+local function TeleportNPCsToPlayerOnKeyPress()
+    local NPCs = Workspace:GetDescendants()
+    for _, npc in ipairs(NPCs) do
+        if npc:IsA("Model") and npc:FindFirstChildOfClass("Humanoid") then
+            -- Verificar se a tecla 't' foi pressionada
+            if Mouse.KeyUp:Wait() == "t" then
+                -- Verificar se o NPC pode receber dano
+                if npc:FindFirstChild("CanTakeDamage") and npc.CanTakeDamage.Value == true then
+                    npc:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame)
+                    -- Tornar o NPC imóvel
+                    npc.PrimaryPart.Anchored = true
+                    SendMessage(string.format("%s foi teleportado para você!", npc.Name))
+                end
+            end
+        end
+    end
+end
 
 -- Speed
 local function SetPlayerSpeed(speed)
@@ -106,3 +120,15 @@ end
 
 -- Ativar o Speed
 SetPlayerSpeed(100) -- Definindo a velocidade do jogador como 100
+
+-- Super Pulo
+Mouse.KeyDown:Connect(function(key)
+    if key == "space" then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+    elseif key == "h" then
+        CreateDamageSquareAtPosition()
+    end
+end)
+
+-- Teleportar NPCs para o jogador ao pressionar a tecla 't'
+TeleportNPCsToPlayerOnKeyPress()
