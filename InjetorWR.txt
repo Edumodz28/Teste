@@ -1,8 +1,9 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
 local Workspace = game:GetService("Workspace")
 local Chat = game:GetService("Chat")
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
 
 -- Variáveis para controle de mensagens no chat
 local messageCount = 0
@@ -35,12 +36,12 @@ local function SendMessage(message)
     end
 end
 
--- Função para criar o quadrado que causa dano
-local function CreateDamageSquare()
+-- Função para criar o quadrado que causa dano em uma posição específica
+local function CreateDamageSquare(position)
     local damageSquare = Instance.new("Part")
-    damageSquare.Size = Vector3.new(2, 2, 2)
+    damageSquare.Size = Vector3.new(10, 1, 10) -- Ajuste o tamanho conforme necessário
     damageSquare.Anchored = true
-    damageSquare.Position = LocalPlayer.Character.HumanoidRootPart.Position
+    damageSquare.Position = position
     damageSquare.BrickColor = BrickColor.new("Bright red")
     damageSquare.Transparency = 0.5  -- Definir transparência para 50%
     damageSquare.Parent = Workspace
@@ -54,10 +55,9 @@ local function CreateDamageSquare()
             end
         end
     end)
-end
 
--- Função para criar o quadrado que causa dano
-CreateDamageSquare()
+    return damageSquare
+end
 
 -- Disparar evento quando um jogador ou NPC é atingido pelo quadrado
 AttackEvent.Event:Connect(function(humanoid, npcName)
@@ -65,18 +65,33 @@ AttackEvent.Event:Connect(function(humanoid, npcName)
     SendMessage(string.format("Você causou 10 de dano a %s!", npcName)) -- Enviar mensagem com o nome do NPC
 end)
 
--- Função para teleportar NPCs para o jogador
-local function TeleportNPCsToPlayer()
-    local NPCs = Workspace:GetDescendants()
-    for _, npc in ipairs(NPCs) do
-        if npc:IsA("Model") and npc:FindFirstChildOfClass("Humanoid") then
-            npc:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame)
+-- Função para criar o quadrado de dano na posição atual do jogador
+local function CreateDamageSquareAtPlayerPosition()
+    local character = LocalPlayer.Character
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            local currentPosition = humanoidRootPart.Position
+            CreateDamageSquare(currentPosition)
+            SendMessage("Quadrado de dano criado na posição atual do jogador.")
         end
     end
 end
 
--- Teleportar NPCs para o jogador
-TeleportNPCsToPlayer()
+-- Criar botão para criar o quadrado de dano na posição atual do jogador
+local function CreateButton()
+    local button = Instance.new("TextButton")
+    button.Text = "Criar Quadrado de Dano"
+    button.Size = UDim2.new(0, 200, 0, 50)
+    button.Position = UDim2.new(0.5, -100, 0.9, 0)
+    button.Parent = game.Players.LocalPlayer.PlayerGui.ScreenGui -- Altere "ScreenGui" para o nome do seu GUI
+    button.MouseButton1Click:Connect(function()
+        CreateDamageSquareAtPlayerPosition()
+    end)
+end
+
+-- Criar o botão na inicialização
+CreateButton()
 
 -- Speed
 local function SetPlayerSpeed(speed)
@@ -91,10 +106,3 @@ end
 
 -- Ativar o Speed
 SetPlayerSpeed(100) -- Definindo a velocidade do jogador como 100
-
--- Super Pulo
-Mouse.KeyDown:Connect(function(key)
-    if key == "space" then
-        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end)
