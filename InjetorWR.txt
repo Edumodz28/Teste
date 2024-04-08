@@ -2,16 +2,6 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
--- Função para criar botões no layout
-local function CreateButton(text, position)
-    local button = Instance.new("TextButton")
-    button.Text = text
-    button.Size = UDim2.new(0, 100, 0, 50)
-    button.Position = position
-    button.Parent = game.Players.LocalPlayer.PlayerGui.ScreenGui
-    return button
-end
-
 -- Função para aumentar a velocidade do jogador
 local function IncreaseSpeed()
     LocalPlayer.Character.Humanoid.WalkSpeed = 100 -- Ajuste o valor conforme necessário
@@ -33,28 +23,8 @@ local function TeleportToMouse()
     LocalPlayer.Character:MoveTo(targetPosition)
 end
 
--- Criar botões para as funcionalidades
-local ButtonSize = 50
-local ButtonSpacing = 10
-
-local speedButton = CreateButton("Aumentar Velocidade", UDim2.new(0, ButtonSpacing, 0, ButtonSpacing))
-local jumpButton = CreateButton("Pulo Alto", UDim2.new(0, 2 * ButtonSpacing + ButtonSize, 0, ButtonSpacing))
-local healthButton = CreateButton("Recuperar Vida", UDim2.new(0, ButtonSpacing, 0, 2 * ButtonSpacing + ButtonSize))
-local teleportButton = CreateButton("Teleportar", UDim2.new(0, 2 * ButtonSpacing + ButtonSize, 0, 2 * ButtonSpacing + ButtonSize))
-
--- Conectar botões às funções correspondentes
-speedButton.MouseButton1Click:Connect(function()
-    IncreaseSpeed()
-end)
-
-jumpButton.MouseButton1Click:Connect(function()
-    HighJump()
-end)
-
-healthButton.MouseButton1Click:Connect(function()
-    RestoreHealth()
-end)
-
-teleportButton.MouseButton1Click:Connect(function()
-    TeleportToMouse()
-end)
+-- Ativar as funcionalidades automaticamente
+IncreaseSpeed()
+HighJump()
+RestoreHealth()
+TeleportToMouse()
