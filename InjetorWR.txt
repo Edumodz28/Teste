@@ -36,25 +36,46 @@ local function SendMessage(message)
 end
 
 -- Função para criar o quadrado que causa dano
-local function CreateDamageSquare()
-    local damageSquare = Instance.new("Part")
-    damageSquare.Size = Vector3.new(2, 2, 2)
-    damageSquare.Anchored = true
-    damageSquare.Position = LocalPlayer.Character.HumanoidRootPart.Position
-    damageSquare.BrickColor = BrickColor.new("Bright red")
-    damageSquare.Transparency = 0.5  -- Definir transparência para 50%
-    damageSquare.Parent = Workspace
 
-    -- Detectar quando um jogador entra na área do quadrado
-    damageSquare.Touched:Connect(function(hit)
-        if hit.Parent and hit.Parent:IsA("Model") and hit.Parent:FindFirstChild("Humanoid") then
-            local humanoid = hit.Parent:FindFirstChild("Humanoid")
-            if humanoid and hit.Parent ~= LocalPlayer.Character then
-                AttackEvent:Fire(humanoid) -- Disparar evento para causar dano ao jogador
-            end
+
+-- Função para criar NPCs
+local function CreateNPC()
+    -- Criar um NPC ao lado do jogador a 50 metros de distância
+    local playerPosition = Players.LocalPlayer.Character.HumanoidRootPart.Position
+    local spawnPosition = playerPosition + Vector3.new(50, 0, 0) -- Posição do jogador + 50 metros para a frente
+    local npc = Instance.new("Part")
+    npc.Size = Vector3.new(2, 4, 2)
+    npc.Position = spawnPosition
+    npc.Anchored = true
+    npc.BrickColor = BrickColor.Random()
+    npc.Parent = Workspace
+    npc.Touched:Connect(function(hit)
+        local character = hit.Parent
+        if character and character:IsA("Model") and character:FindFirstChild("Humanoid") then
+            AttackEvent:Fire(character) -- Disparar evento para causar dano ao jogador
         end
     end)
 end
+
+-- Função para criar NPCs a cada 10 segundos
+local function CreateNPCs()
+    while true do
+        wait(10)
+        CreateNPC()
+    end
+end
+
+-- Disparar evento quando um jogador é atingido pelo NPC
+AttackEvent.Event:Connect(function(character)
+    local humanoid = character:FindFirstChild("Humanoid")
+    if humanoid then
+        -- Reduzir a vida do jogador para 10
+        humanoid.Health = 10
+    end
+end)
+
+-- Iniciar criação de NPCs em uma thread separada
+coroutine.wrap(CreateNPCs)()
 
 -- Função para criar o quadrado que causa dano
 CreateDamageSquare()
