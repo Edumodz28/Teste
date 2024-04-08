@@ -1,99 +1,60 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Mouse = LocalPlayer:GetMouse()
 
--- Configurações do layout
-local LayoutWidth = 150
-local LayoutHeight = 150
-local ButtonSize = 30
-local ButtonSpacing = 5
-
--- Criar o ScreenGui
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = PlayerGui
-
--- Criar o Frame principal do layout
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, LayoutWidth, 0, LayoutHeight)
-Frame.Position = UDim2.new(0.5, -LayoutWidth / 2, 0.5, -LayoutHeight / 2) -- Posicionando no centro da tela
-Frame.BackgroundColor3 = Color3.new(0, 0, 0)
-Frame.BackgroundTransparency = 0.5
-Frame.Parent = ScreenGui
-
--- Função para criar um botão
-local function CreateButton(name, position)
+-- Função para criar botões no layout
+local function CreateButton(text, position)
     local button = Instance.new("TextButton")
-    button.Name = name
-    button.Text = name
-    button.Size = UDim2.new(0, ButtonSize, 0, ButtonSize)
+    button.Text = text
+    button.Size = UDim2.new(0, 100, 0, 50)
     button.Position = position
-    button.BackgroundColor3 = Color3.new(1, 1, 1)
-    button.TextColor3 = Color3.new(0, 0, 0)
-    button.Font = Enum.Font.SourceSans
-    button.TextSize = 14
-    button.Parent = Frame
-
+    button.Parent = game.Players.LocalPlayer.PlayerGui.ScreenGui
     return button
 end
 
--- Criar os botões de controle de voo
-local buttons = {
-    {name = "Frente", position = UDim2.new(0.5, -ButtonSize / 2, 0, ButtonSpacing)},
-    {name = "Trás", position = UDim2.new(0.5, -ButtonSize / 2, 0, 2 * ButtonSpacing + ButtonSize)},
-    {name = "Esquerda", position = UDim2.new(0, ButtonSpacing, 0, ButtonSpacing + ButtonSize)},
-    {name = "Direita", position = UDim2.new(0, 2 * ButtonSpacing + ButtonSize, 0, ButtonSpacing + ButtonSize)},
-    {name = "Cima", position = UDim2.new(0.5, -ButtonSize / 2, 0, 3 * ButtonSpacing + 2 * ButtonSize)},
-    {name = "Baixo", position = UDim2.new(0.5, -ButtonSize / 2, 0, 4 * ButtonSpacing + 3 * ButtonSize)}
-}
-
-local buttonInstances = {}
-for _, btn in ipairs(buttons) do
-    buttonInstances[btn.name] = CreateButton(btn.name, btn.position)
+-- Função para aumentar a velocidade do jogador
+local function IncreaseSpeed()
+    LocalPlayer.Character.Humanoid.WalkSpeed = 100 -- Ajuste o valor conforme necessário
 end
 
--- Função para voar com base nos botões pressionados
-local function Fly()
-    local flySpeed = 50
-    local flyKeys = {
-        Frente = false,
-        Trás = false,
-        Esquerda = false,
-        Direita = false,
-        Cima = false,
-        Baixo = false
-    }
-
-    local function updateFly()
-        local forward = (flyKeys.Frente and Vector3.new(0, 0, -1) or Vector3.new())
-        local backward = (flyKeys.Trás and Vector3.new(0, 0, 1) or Vector3.new())
-        local left = (flyKeys.Esquerda and Vector3.new(-1, 0, 0) or Vector3.new())
-        local right = (flyKeys.Direita and Vector3.new(1, 0, 0) or Vector3.new())
-        local up = (flyKeys.Cima and Vector3.new(0, 1, 0) or Vector3.new())
-        local down = (flyKeys.Baixo and Vector3.new(0, -1, 0) or Vector3.new())
-
-        LocalPlayer.Character.HumanoidRootPart.Velocity = (forward + backward + left + right + up + down).unit * flySpeed
-    end
-
-    -- Capturar o input do usuário para voar
-    for _, button in pairs(buttonInstances) do
-        button.MouseButton1Down:Connect(function()
-            flyKeys[button.Name] = true
-            updateFly()
-        end)
-
-        button.MouseButton1Up:Connect(function()
-            flyKeys[button.Name] = false
-            updateFly()
-        end)
-    end
+-- Função para realizar um pulo alto
+local function HighJump()
+    LocalPlayer.Character.Humanoid.JumpHeight = 100 -- Ajuste o valor conforme necessário
 end
 
--- Habilitar a função de voar
-Fly()
+-- Função para recuperar a vida do jogador
+local function RestoreHealth()
+    LocalPlayer.Character.Humanoid.Health = LocalPlayer.Character.Humanoid.MaxHealth
+end
 
--- Ativar a função de atravessar paredes
-game:GetService("RunService").Stepped:Connect(function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.CanCollide = false
-    end
+-- Função para teleportar o jogador para a posição do mouse
+local function TeleportToMouse()
+    local targetPosition = Mouse.Hit.p
+    LocalPlayer.Character:MoveTo(targetPosition)
+end
+
+-- Criar botões para as funcionalidades
+local ButtonSize = 50
+local ButtonSpacing = 10
+
+local speedButton = CreateButton("Aumentar Velocidade", UDim2.new(0, ButtonSpacing, 0, ButtonSpacing))
+local jumpButton = CreateButton("Pulo Alto", UDim2.new(0, 2 * ButtonSpacing + ButtonSize, 0, ButtonSpacing))
+local healthButton = CreateButton("Recuperar Vida", UDim2.new(0, ButtonSpacing, 0, 2 * ButtonSpacing + ButtonSize))
+local teleportButton = CreateButton("Teleportar", UDim2.new(0, 2 * ButtonSpacing + ButtonSize, 0, 2 * ButtonSpacing + ButtonSize))
+
+-- Conectar botões às funções correspondentes
+speedButton.MouseButton1Click:Connect(function()
+    IncreaseSpeed()
+end)
+
+jumpButton.MouseButton1Click:Connect(function()
+    HighJump()
+end)
+
+healthButton.MouseButton1Click:Connect(function()
+    RestoreHealth()
+end)
+
+teleportButton.MouseButton1Click:Connect(function()
+    TeleportToMouse()
 end)
