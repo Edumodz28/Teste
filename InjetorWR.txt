@@ -4,40 +4,13 @@ local Mouse = LocalPlayer:GetMouse()
 local Workspace = game:GetService("Workspace")
 local Chat = game:GetService("Chat")
 
--- Variáveis para controle de mensagens no chat
-local messageCount = 0
-local messageLimit = 5
-local cooldownTime = 10
-local lastMessageTime = 0
-
 -- Evento para causar dano aos jogadores
-local AttackEvent = Instance.new("BindableEvent")
-
--- Função para enviar mensagem para o chat com tag especial
-local function SendMessage(message)
-    if messageCount < messageLimit then
-        local tag = "[Admin]"
-        local playerName = LocalPlayer.Name
-        local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
-        Chat:Chat(LocalPlayer.Character, formattedMessage)
-        messageCount = messageCount + 1
-    else
-        local currentTime = tick()
-        if currentTime - lastMessageTime >= cooldownTime then
-            messageCount = 0
-            lastMessageTime = currentTime
-            local tag = "[Admin]"
-            local playerName = LocalPlayer.Name
-            local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
-            Chat:Chat(LocalPlayer.Character, formattedMessage)
-            messageCount = messageCount + 1
-        end
-    end
-end
+local DamageEvent = Instance.new("BindableEvent")
+DamageEvent.Name = "PlayerDamageEvent"
+DamageEvent.Parent = LocalPlayer
 
 -- Função para criar o quadrado que causa dano
 local function CreateDamageSquare()
-    SendMessage("Criando quadrado de dano...")
     local damageSquare = Instance.new("Part")
     damageSquare.Size = Vector3.new(2, 2, 2)
     damageSquare.Anchored = true
@@ -48,27 +21,10 @@ local function CreateDamageSquare()
 
     -- Detectar quando um jogador entra na área do quadrado
     damageSquare.Touched:Connect(function(hit)
-        SendMessage("Algo tocou no quadrado de dano.")
         if hit.Parent and hit.Parent:IsA("Model") and hit.Parent:FindFirstChild("Humanoid") then
-            SendMessage("É um jogador válido.")
             local humanoid = hit.Parent:FindFirstChild("Humanoid")
             if humanoid and hit.Parent ~= LocalPlayer.Character then
-                if humanoid.Health > 10 then -- Verificar se a vida do jogador é maior que 10 antes de causar dano
-                    SendMessage("Causando dano ao jogador.")
-                    AttackEvent:Fire(humanoid) -- Disparar evento para causar dano ao jogador
-                else
-                    SendMessage("A vida do jogador é menor ou igual a 10. Não causando dano.")
-                    -- Verificar se a vida do jogador (você) é igual a 10
-                    local playerHumanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
-                    if playerHumanoid and playerHumanoid.Health == 10 then
-                        -- Encontrar a direção do jogador que está causando dano
-                        local direction = (humanoid.Parent.Head.Position - LocalPlayer.Character.Head.Position).unit
-                        -- Calcular a posição para teleportar (70 unidades dentro do jogador que está causando dano)
-                        local teleportPosition = humanoid.Parent.Head.Position - direction * 70
-                        -- Teleportar o jogador para a posição calculada
-                        LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(teleportPosition))
-                    end
-                end
+                DamageEvent:Fire(humanoid, LocalPlayer) -- Disparar evento para causar dano ao jogador ou NPC
             end
         end
     end)
@@ -77,19 +33,15 @@ end
 -- Função para criar o quadrado que causa dano
 CreateDamageSquare()
 
--- Disparar evento quando um jogador é atingido pelo quadrado
-AttackEvent.Event:Connect(function(humanoid)
-    if humanoid.Health > 10 then
-        humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador
-    else
-        humanoid.Health = 0 -- Definir a vida do jogador como 0 se for menor ou igual a 10
-    end
+-- Lidar com o dano causado pelo quadrado
+DamageEvent.Event:Connect(function(humanoid, instigator)
+    humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador ou NPC
 end)
 
 -- Função para criar NPCs
 local function CreateNPC()
     -- Código para criar o NPC...
-    SendMessage("Um NPC foi criado!") -- Enviar mensagem para o chat
+    -- Aqui você pode adicionar o NPC ao Workspace e configurar sua lógica, se necessário
 end
 
 -- Função para criar NPCs periodicamente
