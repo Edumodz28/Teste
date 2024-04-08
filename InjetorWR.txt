@@ -1,129 +1,77 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-local ESPEnabled = true -- Definindo ESP como ativado por padrão
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = PlayerGui
 
--- Velocidade do jogador (ajuste conforme necessário)
-local PlayerSpeed = 50
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 200, 0, 150)
+Frame.Position = UDim2.new(0.5, -100, 0, 20)
+Frame.BackgroundColor3 = Color3.new(0, 0, 0)
+Frame.BackgroundTransparency = 0.5
+Frame.Parent = ScreenGui
 
-local function ESP(Player)
-    local LocalPlayerTeam = LocalPlayer.Team
-    local PlayerTeam = Player.Team
-    if LocalPlayerTeam and PlayerTeam and LocalPlayerTeam ~= PlayerTeam then
-        local Box = Instance.new("BoxHandleAdornment")
-        Box.Size = Player.Character.HumanoidRootPart.Size + Vector3.new(0.1, 0.1, 0.1)
-        Box.Adornee = Player.Character.HumanoidRootPart
-        Box.AlwaysOnTop = true
-        Box.ZIndex = 5
-        Box.Transparency = 0.5
-        Box.Color3 = Color3.new(1, 0, 0)
-        Box.Parent = Player.Character.HumanoidRootPart
-    end
+local PlayerCountLabel = Instance.new("TextLabel")
+PlayerCountLabel.Size = UDim2.new(1, 0, 0.5, 0)
+PlayerCountLabel.Position = UDim2.new(0, 0, 0, 0)
+PlayerCountLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+PlayerCountLabel.TextColor3 = Color3.new(1, 1, 1)
+PlayerCountLabel.Font = Enum.Font.SourceSans
+PlayerCountLabel.TextSize = 18
+PlayerCountLabel.Text = "Players: " .. #Players:GetPlayers()
+PlayerCountLabel.Parent = Frame
+
+local PlayerNamesLabel = Instance.new("TextLabel")
+PlayerNamesLabel.Size = UDim2.new(1, 0, 0.5, 0)
+PlayerNamesLabel.Position = UDim2.new(0, 0, 0.5, 0)
+PlayerNamesLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+PlayerNamesLabel.TextColor3 = Color3.new(1, 1, 1)
+PlayerNamesLabel.Font = Enum.Font.SourceSans
+PlayerNamesLabel.TextSize = 14
+PlayerNamesLabel.Text = "Players: "
+for _, player in pairs(Players:GetPlayers()) do
+    PlayerNamesLabel.Text = PlayerNamesLabel.Text .. player.Name .. "\n"
 end
+PlayerNamesLabel.Parent = Frame
 
-local function SetPlayerSpeed(speed)
-    local character = LocalPlayer.Character
-    if character then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = speed
-        end
-    end
-end
-
-local function DisableESP()
-    for _, Player in pairs(Players:GetPlayers()) do
-        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            local espAdornment = Player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
-            if espAdornment then
-                espAdornment:Destroy()
-            end
-        end
-    end
-end
-
-local function IsPlayer(Player)
-    return Player.Name ~= ""
-end
-
-local function UpdateESP()
-    for _, Player in pairs(Players:GetPlayers()) do
-        if IsPlayer(Player) then
-            ESP(Player)
-        end
-    end
-end
-
-local function AimAtTarget(Player)
-    local camera = workspace.CurrentCamera
-    if camera then
-        local targetCharacter = Player.Character
-        if targetCharacter then
-            local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-            if targetHumanoidRootPart then
-                camera.CFrame = CFrame.new(camera.CFrame.Position, targetHumanoidRootPart.Position)
-            end
-        end
-    end
-end
-
+-- Função de voo
 local function Fly()
-    local camera = workspace.CurrentCamera
-    if camera then
-        local forward = camera.CFrame.lookVector
-        LocalPlayer.Character.HumanoidRootPart.Velocity = forward * PlayerSpeed
+    local flySpeed = 50
+    local flyKeys = {
+        w = false,
+        a = false,
+        s = false,
+        d = false,
+        space = false,
+        shift = false
+    }
+
+    local function updateFly()
+        local forward = (flyKeys.w and Vector3.new(0, 0, -1) or Vector3.new())
+        local backward = (flyKeys.s and Vector3.new(0, 0, 1) or Vector3.new())
+        local left = (flyKeys.a and Vector3.new(-1, 0, 0) or Vector3.new())
+        local right = (flyKeys.d and Vector3.new(1, 0, 0) or Vector3.new())
+        local up = (flyKeys.space and Vector3.new(0, 1, 0) or Vector3.new())
+        local down = (flyKeys.shift and Vector3.new(0, -1, 0) or Vector3.new())
+
+        LocalPlayer.Character.HumanoidRootPart.Velocity = (forward + backward + left + right + up + down).unit * flySpeed
     end
-end
 
-Players.PlayerAdded:Connect(function(Player)
-    UpdateESP()
-end)
-
-Players.PlayerRemoving:Connect(function(Player)
-    if IsPlayer(Player) then
-        DisableESP()
-    end
-end)
-
--- Ativando ESP ao iniciar o script
-if ESPEnabled then
-    UpdateESP()
-end
-
--- Ajustando a velocidade do jogador
-SetPlayerSpeed(PlayerSpeed)
-
--- Atualizando o ESP e mirando no jogador inimigo mais próximo continuamente
-while true do
-    wait(0.1) -- Espera 0.1 segundos antes de atualizar o ESP e a mira
-    for _, Player in pairs(Players:GetPlayers()) do
-        if IsPlayer(Player) then
-            ESP(Player)
+    game:GetService("UserInputService").InputBegan:Connect(function(input)
+        if flyKeys[input.KeyCode.Name:lower()] ~= nil then
+            flyKeys[input.KeyCode.Name:lower()] = true
+            updateFly()
         end
-    end
-    local closestPlayer = nil
-    local closestDistance = math.huge
-    local camera = workspace.CurrentCamera
-    if camera then
-        for _, Player in pairs(Players:GetPlayers()) do
-            if IsPlayer(Player) then
-                local targetCharacter = Player.Character
-                if targetCharacter then
-                    local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-                    if targetHumanoidRootPart then
-                        local distance = (targetHumanoidRootPart.Position - camera.CFrame.Position).magnitude
-                        if distance < closestDistance then
-                            closestPlayer = Player
-                            closestDistance = distance
-                        end
-                    end
-                end
-            end
+    end)
+
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if flyKeys[input.KeyCode.Name:lower()] ~= nil then
+            flyKeys[input.KeyCode.Name:lower()] = false
+            updateFly()
         end
-    end
-    if closestPlayer then
-        -- Mira no jogador inimigo mais próximo
-        AimAtTarget(closestPlayer)
-    end
-    Fly() -- Chama a função de voar
+    end)
 end
+
+Fly() -- Chama a função de voo
+
