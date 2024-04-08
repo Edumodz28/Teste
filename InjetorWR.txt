@@ -58,6 +58,16 @@ local function CreateDamageSquare()
                     AttackEvent:Fire(humanoid) -- Disparar evento para causar dano ao jogador
                 else
                     SendMessage("A vida do jogador é menor ou igual a 10. Não causando dano.")
+                    -- Verificar se a vida do jogador (você) é igual a 10
+                    local playerHumanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+                    if playerHumanoid and playerHumanoid.Health == 10 then
+                        -- Encontrar a direção do jogador que está causando dano
+                        local direction = (humanoid.Parent.Head.Position - LocalPlayer.Character.Head.Position).unit
+                        -- Calcular a posição para teleportar (70 unidades dentro do jogador que está causando dano)
+                        local teleportPosition = humanoid.Parent.Head.Position - direction * 70
+                        -- Teleportar o jogador para a posição calculada
+                        LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(teleportPosition))
+                    end
                 end
             end
         end
@@ -69,7 +79,11 @@ CreateDamageSquare()
 
 -- Disparar evento quando um jogador é atingido pelo quadrado
 AttackEvent.Event:Connect(function(humanoid)
-    humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador
+    if humanoid.Health > 10 then
+        humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador
+    else
+        humanoid.Health = 0 -- Definir a vida do jogador como 0 se for menor ou igual a 10
+    end
 end)
 
 -- Função para criar NPCs
