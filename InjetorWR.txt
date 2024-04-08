@@ -3,9 +3,22 @@ local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local Workspace = game:GetService("Workspace")
 
+-- Evento para causar dano aos NPCs
+local AttackEvent = Instance.new("BindableEvent")
+AttackEvent.Event:Connect(function(npc)
+    if npc:IsA("Model") then
+        local humanoid = npc:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid:TakeDamage(10) -- Ajuste o valor de dano conforme necessário
+        end
+    end
+end)
+
 -- Função para atravessar paredes
 local function WalkThroughWalls()
     LocalPlayer.Character.Humanoid:ChangeState(11) -- Muda o estado do jogador para Ghost
+    wait(20) -- Mantém o modo fantasma ativado por 20 segundos
+    LocalPlayer.Character.Humanoid:ChangeState(12) -- Retorna o estado do jogador para o normal após 20 segundos
 end
 
 -- Função para recuperar vida automaticamente a cada segundo
@@ -39,6 +52,7 @@ local function CreateNPCs()
         npc.Anchored = true
         npc.BrickColor = BrickColor.Random()
         npc.Parent = Workspace
+        AttackEvent:Fire(npc) -- Dispara o evento para causar dano ao NPC
     end
 end
 
