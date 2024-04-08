@@ -1,109 +1,60 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remotes = ReplicatedStorage:WaitForChild("NPC_Interaction") -- Suponha que exista um RemoteEvent chamado "NPC_Interaction" para iniciar o ataque no servidor
 
-local ESPEnabled = true -- Definindo ESP como ativado por padrão
-
--- Velocidade do jogador (ajuste conforme necessário)
-local PlayerSpeed = 50
-
-local DamageRadius = 1000 -- Raio de alcance do dano
-
-local function DrawBoxESP(Player)
-    if Player.TeamColor ~= LocalPlayer.TeamColor then
-        local Box = Instance.new("BoxHandleAdornment")
-        Box.Size = Player.Character.HumanoidRootPart.Size + Vector3.new(0.1, 0.1, 0.1)
-        Box.Adornee = Player.Character.HumanoidRootPart
-        Box.AlwaysOnTop = true
-        Box.ZIndex = 5
-        Box.Transparency = 0.5
-        Box.Color3 = Color3.new(1, 0, 0)
-        Box.Parent = Player.Character.HumanoidRootPart
-    end
+local function CreateNPC_ESP(NPC)
+    local Box = Instance.new("BoxHandleAdornment")
+    Box.Size = NPC:GetExtentsSize() + Vector3.new(0.1, 0.1, 0.1)
+    Box.Adornee = NPC
+    Box.AlwaysOnTop = true
+    Box.ZIndex = 5
+    Box.Transparency = 0.5
+    Box.Color3 = Color3.new(0, 1, 0) -- Cor verde para NPCs
+    Box.Parent = NPC
 end
 
-local function DrawNameESP(Player)
-    -- Lógica para desenhar o ESP do nome aqui
-end
-
-local function DrawESP(Player)
-    DrawBoxESP(Player)
-    DrawNameESP(Player)
-end
-
-local function SetPlayerSpeed(speed)
-    local character = LocalPlayer.Character
-    if character then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = speed
-        end
-    end
-end
-
-local function DisableESP()
-    for _, Player in pairs(Players:GetPlayers()) do
-        if Player.Character then
-            local espAdornment = Player.Character:FindFirstChildOfClass("BoxHandleAdornment")
-            if espAdornment then
-                espAdornment:Destroy()
-            end
-        end
-    end
-end
-
-local function IsPlayer(Player)
-    return Player.Name ~= ""
-end
-
-local function UpdateESP()
-    for _, Player in pairs(Players:GetPlayers()) do
-        if IsPlayer(Player) then
-            DrawESP(Player)
-        end
-    end
-end
-
-local function DamagePlayersInRadius(Position, Radius)
-    for _, Player in pairs(Players:GetPlayers()) do
-        if IsPlayer(Player) then
-            local Character = Player.Character
-            if Character then
-                local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
-                if HumanoidRootPart then
-                    local Distance = (Position - HumanoidRootPart.Position).magnitude
-                    if Distance <= Radius then
-                        -- Se o jogador estiver dentro do raio, você pode adicionar sua lógica de aplicação de dano aqui
-                        print("Player: " .. Player.Name .. " dentro do raio de dano!")
-                    end
+local function FindClosestNPC()
+    local NPCs = {} -- Lista para armazenar os NPCs próximos
+    local PlayerPosition = LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart.Position
+    if PlayerPosition then
+        for _, NPC in ipairs(workspace:GetChildren()) do
+            if NPC:IsA("Model") and NPC:FindFirstChild("Humanoid") and NPC:FindFirstChild("Level") then
+                local NPCPosition = NPC.HumanoidRootPart.Position
+                local distance = (PlayerPosition - NPCPosition).magnitude
+                local NPCLevel = NPC.Level.Value
+                local PlayerLevel = LocalPlayer.Level.Value -- Suponha que o nível do jogador está armazenado em uma propriedade chamada "Level"
+                if distance <= 50 and NPCLevel == PlayerLevel then -- Suponha que 50 seja a distância máxima para considerar um NPC como próximo
+                    table.insert(NPCs, {NPC = NPC, Distance = distance})
                 end
             end
         end
     end
-end
 
-Players.PlayerAdded:Connect(function(Player)
-    UpdateESP()
-end)
-
-Players.PlayerRemoving:Connect(function(Player)
-    if IsPlayer(Player) then
-        DisableESP()
+    -- Encontra o NPC mais próximo
+    local closestNPC = nil
+    local minDistance = math.huge
+    for _, data in ipairs(NPCs) do
+        if data.Distance < minDistance then
+            minDistance = data.Distance
+            closestNPC = data.NPC
+        end
     end
-end)
 
--- Ativando ESP ao iniciar o script
-if ESPEnabled then
-    UpdateESP()
+    return closestNPC
 end
 
--- Ajustando a velocidade do jogador
-SetPlayerSpeed(PlayerSpeed)
+local function TeleportAndAttack(NPC)
+    if NPC then
+        -- Teleporta o jogador perto do NPC
+        LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(NPC.HumanoidRootPart.Position + Vector3.new(0, 5, 0)))
+        -- Inicia o ataque ao NPC no servidor
+        Remotes:FireServer(NPC)
+    end
+end
 
--- Exemplo de como chamar a função de dano dentro de um loop
 while true do
-    wait(1) -- Espera 1 segundo antes de verificar novamente
-    local Position = LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart.Position
-    if Position then
-        DamagePlayersInRadius(Position, DamageRadius)
-    end
+    wait(1) -- Intervalo de verificação de 1 segundo
+    local closestNPC = FindClosestNPC()
+    TeleportAndAttack(closestNPC)
 end
