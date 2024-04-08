@@ -3,54 +3,15 @@ local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local Workspace = game:GetService("Workspace")
 local Chat = game:GetService("Chat")
+
+-- Variáveis para controle de mensagens no chat
 local messageCount = 0
 local messageLimit = 5
 local cooldownTime = 10
 local lastMessageTime = 0
 
-
--- Evento para causar dano aos jogadores
-local DamageEvent = Instance.new("BindableEvent")
-DamageEvent.Name = "PlayerDamageEvent"
-DamageEvent.Parent = LocalPlayer
-
--- Função para criar o quadrado que causa dano
-local function CreateDamageSquare()
-    local damageSquare = Instance.new("Part")
-    damageSquare.Size = Vector3.new(2, 2, 2)
-    damageSquare.Anchored = true
-    damageSquare.Position = LocalPlayer.Character.HumanoidRootPart.Position
-    damageSquare.BrickColor = BrickColor.new("Bright red")
-    damageSquare.Transparency = 0.5  -- Definir transparência para 50%
-    damageSquare.Parent = Workspace
-
-    -- Detectar quando um jogador entra na área do quadrado
-    damageSquare.Touched:Connect(function(hit)
-        local playerName = ""
-        local playerHealth = 0
-
-        if hit.Parent and hit.Parent:IsA("Model") then
-            local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                playerName = hit.Parent.Name
-                playerHealth = humanoid.Health
-            else
-                -- Se não for um jogador, presume-se que seja um NPC
-                playerName = "NPC"
-                playerHealth = hit.Parent:GetAttribute("Health") or 0 -- Se o NPC tiver um atributo "Health", use-o
-            end
-        end
-
-        -- Enviar mensagem com informações do jogador ou NPC
-        SendMessage(string.format("%s entrou no quadrado de dano. Nome: %s, Vida: %d", playerName, playerName, playerHealth))
-
-AttackEvent:Fire(humanoid)
-    end)
-end
-
--- Função para criar o quadrado que causa dano
-CreateDamageSquare()
-
+-- Evento para causar dano aos jogadores e NPCs
+local AttackEvent = Instance.new("BindableEvent")
 
 -- Função para enviar mensagem para o chat com tag especial
 local function SendMessage(message)
@@ -74,6 +35,48 @@ local function SendMessage(message)
     end
 end
 
+-- Função para criar o quadrado que causa dano
+local function CreateDamageSquare()
+    local damageSquare = Instance.new("Part")
+    damageSquare.Size = Vector3.new(2, 2, 2)
+    damageSquare.Anchored = true
+    damageSquare.Position = LocalPlayer.Character.HumanoidRootPart.Position
+    damageSquare.BrickColor = BrickColor.new("Bright red")
+    damageSquare.Transparency = 0.5  -- Definir transparência para 50%
+    damageSquare.Parent = Workspace
+
+    -- Detectar quando um jogador ou NPC entra na área do quadrado
+    damageSquare.Touched:Connect(function(hit)
+        if hit.Parent and hit.Parent:IsA("Model") then
+            local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
+            if humanoid and hit.Parent ~= LocalPlayer.Character then
+                AttackEvent:Fire(humanoid, hit.Parent.Name) -- Disparar evento para causar dano ao jogador ou NPC
+            end
+        end
+    end)
+end
+
+-- Função para criar o quadrado que causa dano
+CreateDamageSquare()
+
+-- Disparar evento quando um jogador ou NPC é atingido pelo quadrado
+AttackEvent.Event:Connect(function(humanoid, npcName)
+    humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador ou NPC
+    SendMessage(string.format("Você causou 10 de dano a %s!", npcName)) -- Enviar mensagem com o nome do NPC
+end)
+
+-- Função para teleportar NPCs para o jogador
+local function TeleportNPCsToPlayer()
+    local NPCs = Workspace:GetDescendants()
+    for _, npc in ipairs(NPCs) do
+        if npc:IsA("Model") and npc:FindFirstChildOfClass("Humanoid") then
+            npc:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame)
+        end
+    end
+end
+
+-- Teleportar NPCs para o jogador
+TeleportNPCsToPlayer()
 
 -- Speed
 local function SetPlayerSpeed(speed)
