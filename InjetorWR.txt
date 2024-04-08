@@ -37,6 +37,7 @@ end
 
 -- Função para criar o quadrado que causa dano
 local function CreateDamageSquare()
+    SendMessage("Criando quadrado de dano...")
     local damageSquare = Instance.new("Part")
     damageSquare.Size = Vector3.new(2, 2, 2)
     damageSquare.Anchored = true
@@ -47,11 +48,16 @@ local function CreateDamageSquare()
 
     -- Detectar quando um jogador entra na área do quadrado
     damageSquare.Touched:Connect(function(hit)
+        SendMessage("Algo tocou no quadrado de dano.")
         if hit.Parent and hit.Parent:IsA("Model") and hit.Parent:FindFirstChild("Humanoid") then
+            SendMessage("É um jogador válido.")
             local humanoid = hit.Parent:FindFirstChild("Humanoid")
             if humanoid and hit.Parent ~= LocalPlayer.Character then
                 if humanoid.Health > 10 then -- Verificar se a vida do jogador é maior que 10 antes de causar dano
+                    SendMessage("Causando dano ao jogador.")
                     AttackEvent:Fire(humanoid) -- Disparar evento para causar dano ao jogador
+                else
+                    SendMessage("A vida do jogador é menor ou igual a 10. Não causando dano.")
                 end
             end
         end
