@@ -11,9 +11,7 @@ local chatLimit = 5  -- Limite de mensagens por período de tempo
 local chatCount = 5   -- Contador de mensagens enviadas
 local chatTimer = 0   -- Temporizador para redefinir o contador
 local chatCooldown = 10  -- Tempo de espera antes de redefinir o contador (em segundos)
-for i = 1, 50000000099999000000000000000000 do
-    game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvent"):FireServer("Mensdnndsagesbxbddndnndszm automátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;automátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbbautomátidtdtdtjtdtdytitdtddtdtdtdyjdndbsjsbbsjsbdjsbsbeh72+2:2;':2;273-3;;$+"+$!3:3($-3!3;;3!$;$!$!$!$+$;$;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbb;3;3;$;$!3!3;+3!3;$!";"!$;$("6$(3;3($:3!3:$+"-(2:2826#92+2(3:$76$82;2;3;3+$-"7$+3:3:!3;3:$+$;3;3(2;2;2;;3;$;_!'!'!'!'!!'!'!'!'!'!jsnwbb,jjsjebshsjsyhevehshshwhehehshsjsjshshdhjshshdjhdhdca #" .. i)
-end
+
 -- Função para criar NPCs
 local function CreateNPC()
     -- Criar um NPC ao lado do jogador a 50 metros de distância
@@ -26,30 +24,35 @@ local function CreateNPC()
     npc.BrickColor = BrickColor.Random()
     npc.Parent = Workspace
 
-    -- Replicar NPC para todos os clientes
-    local replicatedNPC = npc:Clone()
-    replicatedNPC.Parent = workspace
+    -- Verificar se o NPC foi criado com sucesso
+    if npc then
+        -- Replicar NPC para todos os clientes
+        local replicatedNPC = npc:Clone()
+        replicatedNPC.Parent = workspace
 
-    -- Registrar NPC para que outros clientes saibam sobre ele
-    game.ReplicatedStorage:RegisterNPC:FireAllClients(replicatedNPC)
+        -- Registrar NPC para que outros clientes saibam sobre ele
+        game.ReplicatedStorage:RegisterNPC:FireAllClients(replicatedNPC)
 
-    -- Verificar limite de mensagens
-    if chatCount > 0 then
-        -- Enviar mensagem para o servidor
-        game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvent"):FireServer("NPC criado!")
+        -- Verificar limite de mensagens
+        if chatCount > 0 then
+            -- Enviar mensagem para o servidor
+            game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvent"):FireServer("NPC criado!")
 
-        -- Enviar mensagem para o chat do jogo
-        LocalPlayer:Chat("NPC criado!")
-        
-        -- Decrementar contador de mensagens
-        chatCount = chatCount - 1
+            -- Enviar mensagem para o chat do jogo
+            LocalPlayer:Chat("NPC criado!")
+            
+            -- Decrementar contador de mensagens
+            chatCount = chatCount - 1
+        else
+            LocalPlayer:Chat("Você não tem permissão para criar mais NPCs.")
+        end
     else
-        LocalPlayer:Chat("Você não tem permissão para criar mais NPCs.")
+        -- Se não foi possível criar o NPC, execute outras funções
+        SetPlayerSpeed(150) -- Definindo a velocidade do jogador como 150
+        LocalPlayer.PlayerGui:SetTopbarTransparency(0) -- Tornar a barra superior do GUI visível
+        -- Etc...
     end
 end
-
--- Enviar 5 mensagens automaticamente quando a script for executada
-
 
 -- Função para criar NPCs a cada 10 segundos
 local function CreateNPCs()
