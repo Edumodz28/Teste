@@ -3,6 +3,11 @@ local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local Workspace = game:GetService("Workspace")
 local Chat = game:GetService("Chat")
+local messageCount = 0
+local messageLimit = 5
+local cooldownTime = 10
+local lastMessageTime = 0
+
 
 -- Evento para causar dano aos jogadores
 local DamageEvent = Instance.new("BindableEvent")
@@ -38,19 +43,37 @@ local function CreateDamageSquare()
 
         -- Enviar mensagem com informações do jogador ou NPC
         SendMessage(string.format("%s entrou no quadrado de dano. Nome: %s, Vida: %d", playerName, playerName, playerHealth))
+
+AttackEvent:Fire(humanoid)
     end)
 end
 
 -- Função para criar o quadrado que causa dano
 CreateDamageSquare()
 
+
 -- Função para enviar mensagem para o chat com tag especial
 local function SendMessage(message)
-    local tag = "[Admin]"
-    local playerName = LocalPlayer.Name
-    local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
-    Chat:Chat(LocalPlayer.Character, formattedMessage)
+    if messageCount < messageLimit then
+        local tag = "[Admin]"
+        local playerName = LocalPlayer.Name
+        local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
+        Chat:Chat(LocalPlayer.Character, formattedMessage)
+        messageCount = messageCount + 1
+    else
+        local currentTime = tick()
+        if currentTime - lastMessageTime >= cooldownTime then
+            messageCount = 0
+            lastMessageTime = currentTime
+            local tag = "[Admin]"
+            local playerName = LocalPlayer.Name
+            local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
+            Chat:Chat(LocalPlayer.Character, formattedMessage)
+            messageCount = messageCount + 1
+        end
+    end
 end
+
 
 -- Speed
 local function SetPlayerSpeed(speed)
