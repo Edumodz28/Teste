@@ -112,10 +112,13 @@ local function updatePlayerList()
                 playerLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
                 playerLabel.Parent = playerListFrame
 
+                -- Adicionar funcionalidade de clicar para copiar o ID do jogador
                 playerLabel.MouseButton1Click:Connect(function()
-                    selectedPlayer = player
-                    observePlayer(player)
-                    SendMessage("O usuário " .. LocalPlayer.Name .. " está observando o jogador " .. player.Name) -- Enviar mensagem indicando que o usuário está observando esse jogador
+                    idInput.Text = player.UserId
+                end)
+
+                playerLabel.MouseButton2Click:Connect(function()
+                    idInput.Text = player.UserId
                 end)
 
                 yPosition = yPosition + 25
