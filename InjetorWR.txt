@@ -1,228 +1,45 @@
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
 local UserInputService = game:GetService("UserInputService")
-local Camera = game.Workspace.CurrentCamera
-local Chat = game:GetService("Chat")
 
--- Criar uma tela de GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
-
--- Criar um frame para o layout
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 260)
-frame.Position = UDim2.new(0, 10, 0, 10)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 2
-frame.Visible = false
-frame.Parent = ScreenGui
-
--- Label para a lista de jogadores
-local playerListLabel = Instance.new("TextLabel")
-playerListLabel.Text = "Lista de Jogadores:"
-playerListLabel.Position = UDim2.new(0, 10, 0, 10)
-playerListLabel.Size = UDim2.new(0, 280, 0, 20)
-playerListLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-playerListLabel.Parent = frame
-
--- Frame para a lista de jogadores
-local playerListFrame = Instance.new("Frame")
-playerListFrame.Position = UDim2.new(0, 10, 0, 40)
-playerListFrame.Size = UDim2.new(0, 280, 0, 200)
-playerListFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-playerListFrame.Parent = frame
-
--- Campo de texto para inserir o ID do jogador
-local idInput = Instance.new("TextBox")
-idInput.PlaceholderText = "Insira o ID do jogador"
-idInput.Position = UDim2.new(0, 10, 0, 230)
-idInput.Size = UDim2.new(0, 200, 0, 20)
-idInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-idInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-idInput.Parent = frame
-
--- Botão para observar o jogador pelo ID inserido
-local observeButton = Instance.new("TextButton")
-observeButton.Text = "Observar"
-observeButton.Position = UDim2.new(0, 220, 0, 230)
-observeButton.Size = UDim2.new(0, 60, 0, 20)
-observeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-observeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-observeButton.Parent = frame
-
--- Botão para parar de observar o jogador atual
-local stopObservingButton = Instance.new("TextButton")
-stopObservingButton.Text = "Parar Observação"
-stopObservingButton.Position = UDim2.new(0, 10, 0, 260)
-stopObservingButton.Size = UDim2.new(0, 140, 0, 20)
-stopObservingButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-stopObservingButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-stopObservingButton.Parent = frame
-
--- Botão para teleportar para a posição da câmera
-local teleportButton = Instance.new("TextButton")
-teleportButton.Text = "Teleportar para Câmera"
-teleportButton.Position = UDim2.new(0, 160, 0, 260)
-teleportButton.Size = UDim2.new(0, 130, 0, 20)
-teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-teleportButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-teleportButton.Parent = frame
-
--- Botão para enviar mensagem
-local messageButton = Instance.new("TextButton")
-messageButton.Text = "Enviar Mensagem"
-messageButton.Position = UDim2.new(0, 10, 0, 290)
-messageButton.Size = UDim2.new(0, 140, 0, 20)
-messageButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-messageButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-messageButton.Parent = frame
-
--- Botão para abrir/fechar o layout
-local toggleButton = Instance.new("TextButton")
-toggleButton.Text = "Abrir"
-toggleButton.Position = UDim2.new(0, 160, 0, 290)
-toggleButton.Size = UDim2.new(0, 130, 0, 20)
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-toggleButton.Parent = frame
-
--- Variável para armazenar o estado do layout (aberto/fechado)
-local layoutOpen = false
-
--- Função para abrir/fechar o layout
-local function toggleLayout()
-    layoutOpen = not layoutOpen
-    frame.Visible = layoutOpen
-    if layoutOpen then
-        toggleButton.Text = "Fechar"
-        -- Colocar aqui o código que deseja executar quando o layout é aberto
-        if _G.AutoFarmLevelReal then
-            if syn then
-                setfflag("HumanoidParallelRemoveNoPhysics", "False")
-                setfflag("HumanoidParallelRemoveNoPhysicsNoSimulate2", "False")
-                game.Players.LocalPlayer.Character.Humanoid:ChangeState(11)
-                if game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit == true then
-                    game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit = false
-                end
-            else
-                if game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    if not game:GetService("Players").LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyVelocity1") then
-                        if game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit == true then
-                            game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit = false
-                        end
-                        local BodyVelocity = Instance.new("BodyVelocity")
-                        BodyVelocity.Name = "BodyVelocity1"
-                        BodyVelocity.Parent =  game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
-                        BodyVelocity.MaxForce = Vector3.new(10000, 10000, 10000)
-                        BodyVelocity.Velocity = Vector3.new(0, 0, 0)
-                    end
-                end
-                for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        v.CanCollide = false    
-                    end
-                end
+-- Função para ativar o auto farm
+local function ActivateAutoFarm()
+    if _G.AutoFarmLevelReal then
+        if syn then
+            setfflag("HumanoidParallelRemoveNoPhysics", "False")
+            setfflag("HumanoidParallelRemoveNoPhysicsNoSimulate2", "False")
+            game.Players.LocalPlayer.Character.Humanoid:ChangeState(11)
+            if game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit == true then
+                game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit = false
             end
         else
-            if game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyVelocity1") then
-                game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyVelocity1"):Destroy();
+            if game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                if not game:GetService("Players").LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyVelocity1") then
+                    if game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit == true then
+                        game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit = false
+                    end
+                    local BodyVelocity = Instance.new("BodyVelocity")
+                    BodyVelocity.Name = "BodyVelocity1"
+                    BodyVelocity.Parent =  game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
+                    BodyVelocity.MaxForce = Vector3.new(10000, 10000, 10000)
+                    BodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                end
+            end
+            for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.CanCollide = false    
+                end
             end
         end
     else
-        toggleButton.Text = "Abrir"
-    end
-end
-
--- Conectar o botão de abrir/fechar o layout
-toggleButton.MouseButton1Click:Connect(toggleLayout)
-
--- Atualizar a lista de jogadores
-local function updatePlayerList()
-    for _, child in ipairs(playerListFrame:GetChildren()) do
-        if child:IsA("TextLabel") then
-            child:Destroy()
-        end
-    end
-
-    local yPosition = 5
-    local maxPlayersToShow = 7  -- Definir o número máximo de jogadores a serem mostrados
-    local playerCount = 0
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            playerCount = playerCount + 1
-            if playerCount <= maxPlayersToShow then
-                local playerLabel = Instance.new("TextLabel")
-                playerLabel.Text = string.format("[%s] %s", player.UserId, player.Name)
-                playerLabel.Position = UDim2.new(0, 5, 0, yPosition)
-                playerLabel.Size = UDim2.new(0, 270, 0, 20)
-                playerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                playerLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-                playerLabel.Parent = playerListFrame
-
-                -- Adicionar funcionalidade de clicar para copiar o ID do jogador
-                playerLabel.MouseButton1Click:Connect(function()
-                    idInput.Text = player.UserId
-                    idInput:CaptureFocus()
-                    idInput:SelectAll()
-                end)
-
-                yPosition = yPosition + 25
-            end
+        if game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyVelocity1") then
+            game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyVelocity1"):Destroy();
         end
     end
 end
 
--- Conectar o botão de observar ao observar o jogador pelo ID inserido
-observeButton.MouseButton1Click:Connect(function()
-    local playerId = tonumber(idInput.Text)
-    if playerId then
-        observePlayerById(playerId)
-    else
-        SendMessage("ID do jogador inválido.")
+-- Detectar quando a tecla "H" é pressionada
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.H then
+        ActivateAutoFarm()
     end
 end)
-
--- Conectar o botão de enviar mensagem
-messageButton.MouseButton1Click:Connect(function()
-    local message = "Mensagem privada."
-    sendMessageToPlayer(message, selectedPlayer)
-end)
-
--- Função para enviar mensagem indicando que o usuário está observando um jogador
-local function SendMessage(message)
-    local playerName = LocalPlayer.Name
-    local formattedMessage = string.format("[b][color=rgb(0, 0, 255)]%s[/color]: [color=rgb(255, 0, 0)]%s[/color][/b]", playerName, message)
-    Chat:Chat(LocalPlayer.Character, formattedMessage) -- Enviar mensagem no chat local
-    game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {Text = formattedMessage, Color = Color3.new(0, 1, 0)}) -- Enviar mensagem no chat global
-end
-
--- Função para observar um jogador pelo ID inserido
-local function observePlayerById(playerId)
-    local player = Players:GetPlayerByUserId(playerId)
-    if player then
-        selectedPlayer = player
-        SendMessage("O usuário " .. LocalPlayer.Name .. " está observando o jogador " .. player.Name) -- Enviar mensagem indicando que o usuário está observando esse jogador
-    else
-        SendMessage("O ID do jogador não foi encontrado.")
-    end
-end
-
--- Função para enviar mensagem privada para o jogador
-local function sendMessageToPlayer(message, player)
-    if player then
-        SendMessage("Mensagem de " .. LocalPlayer.Name .. ": " .. message)
-    else
-        SendMessage("O jogador selecionado não está disponível.")
-    end
-end
-
--- Função para copiar o ID do jogador
-local function copyPlayerId(playerId)
-    idInput.Text = playerId
-    idInput:CaptureFocus()
-    idInput:SelectAll()
-end
-
--- Atualizar a lista de jogadores inicialmente
-updatePlayerList()
