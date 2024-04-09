@@ -1,49 +1,52 @@
-_G.Farm = true --[[ true // start or false // stop]]--
+-- Definir AutoFarm como true
+_G.AutoFarm = true
 
---[[ CHECK QUEST ]]--
-function Quest()
-    local level = game:GetService("Players").LocalPlayer.PlayerStats.lvl.Value
-    local playerPos = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
+-- Função para verificar o nível do jogador e iniciar uma missão adequada
+function MonLevel()
+    local lv = game:GetService("Players").LocalPlayer.PlayerStats.Level.Value
+    
+    if lv >= 1 and lv < 14 then
+        _G.Quest = "Soldier"
+        _G.Ms = "Soldier [Lv. 1]"
+    elseif lv >= 15 and lv <= 30000 then
+        _G.Quest = "Soldvbier"
+        _G.Ms = "Soldvbier [Lv:15]"
+    end
+end
 
-    -- Define o nível máximo para duas vezes o nível do jogador
-    local maxLevel = level + 2
+-- Função para enviar mensagem indicando que está encontrando os monstros
+local function SendMessage(message)
+    local tag = "[AutoFarm]"
+    local formattedMessage = string.format("[%s] %s", tag, message)
+    game:GetService("Chat"):Chat(game.Players.LocalPlayer.Character, formattedMessage)
+end
 
-    -- Loop através dos monstros e encontra um alvo adequado
-    local target = nil
-    local minDistance = math.huge
-
-    for _, monster in ipairs(game:GetService("Workspace").Monster.Mon:GetChildren()) do
-        local monLevel = tonumber(monster.Name:match("%d+")) or 0
-
-        -- Verifica se o nível do monstro está dentro do intervalo adequado
-        if monLevel <= level or monLevel >= maxLevel then
-            local distance = (monster.Position - playerPos).magnitude
-            if distance < minDistance then
-                minDistance = distance
-                target = monster
+-- Função para automatizar o processo de farm
+function AutoFarm()
+    MonLevel()
+    
+    if not game:GetService("Players").LocalPlayer.PlayerGui.QuestGui.Enabled then
+        game:GetService("ReplicatedStorage").FuncQuest:InvokeServer(_G.Quest)
+    else
+        for _, v in pairs(game:GetService("Workspace").Lives:GetChildren()) do
+            if v.Name == _G.Ms and v.Torso.Transparency == 0 then
+                repeat
+                    wait()
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)
+                    game:GetService('VirtualUser'):CaptureController()
+                    game:GetService('VirtualUser'):ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+                    SendMessage("Encontrando monstros...") -- Enviar mensagem indicando que está encontrando os monstros
+                until not _G.AutoFarm or v.Humanoid.Health <= 0
             end
         end
     end
-
-    return target
 end
 
---[[ AUTO FARM + LOOP ]]--
-while wait() do
+-- Loop Auto Farm
+while _G.AutoFarm do
+    wait()
     pcall(function()
-        if _G.Farm then
-            local target = Quest()
-
-            if target then
-                repeat
-                    wait()
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = target.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2) 
-                    game:GetService("VirtualUser"):ClickButton1(Vector2.new(500,0))
-                until _G.Farm == false or not target.Parent or target.Humanoid.Health <= 0
-            else
-                print("Nenhum alvo encontrado.")
-                _G.Farm = false -- Pare o farming se nenhum alvo for encontrado
-            end
-        end
+        AutoFarm()
+        print("POWER X EDIT")
     end)
 end
