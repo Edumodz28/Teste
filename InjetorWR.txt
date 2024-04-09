@@ -3,6 +3,7 @@ local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local UserInputService = game:GetService("UserInputService")
 local Camera = game.Workspace.CurrentCamera
+local Chat = game:GetService("Chat")
 
 -- Criar uma tela de GUI
 local ScreenGui = Instance.new("ScreenGui")
@@ -34,6 +35,14 @@ playerListFrame.Parent = frame
 -- Variável para armazenar o jogador selecionado
 local selectedPlayer = nil
 
+-- Função para enviar mensagem indicando que o usuário está observando um jogador
+local function SendMessage(message)
+    local tag = "[Admin]"
+    local playerName = LocalPlayer.Name
+    local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
+    Chat:Chat(LocalPlayer.Character, formattedMessage)
+end
+
 -- Função para atualizar a lista de jogadores
 local function updatePlayerList()
     for _, child in ipairs(playerListFrame:GetChildren()) do
@@ -56,6 +65,7 @@ local function updatePlayerList()
             playerLabel.MouseButton1Click:Connect(function()
                 selectedPlayer = player
                 observePlayer(player)
+                SendMessage("O usuário " .. LocalPlayer.Name .. " está observando o jogador " .. player.Name) -- Enviar mensagem indicando que o usuário está observando esse jogador
             end)
 
             yPosition = yPosition + 25
