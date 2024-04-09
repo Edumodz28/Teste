@@ -32,6 +32,24 @@ playerListFrame.Size = UDim2.new(0, 280, 0, 120)
 playerListFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 playerListFrame.Parent = frame
 
+-- Campo de texto para inserir o ID do jogador
+local idInput = Instance.new("TextBox")
+idInput.PlaceholderText = "Insira o ID do jogador"
+idInput.Position = UDim2.new(0, 10, 0, 170)
+idInput.Size = UDim2.new(0, 200, 0, 20)
+idInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+idInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+idInput.Parent = frame
+
+-- Botão para observar o jogador pelo ID inserido
+local observeButton = Instance.new("TextButton")
+observeButton.Text = "Observar"
+observeButton.Position = UDim2.new(0, 220, 0, 170)
+observeButton.Size = UDim2.new(0, 60, 0, 20)
+observeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+observeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+observeButton.Parent = frame
+
 -- Variável para armazenar o jogador selecionado
 local selectedPlayer = nil
 
@@ -81,6 +99,28 @@ local function observePlayer(player)
         Camera.CameraSubject = humanoidRootPart
     end
 end
+
+-- Função para observar um jogador pelo ID inserido
+local function observePlayerById(playerId)
+    local player = Players:GetPlayerByUserId(playerId)
+    if player then
+        selectedPlayer = player
+        observePlayer(player)
+        SendMessage("O usuário " .. LocalPlayer.Name .. " está observando o jogador " .. player.Name) -- Enviar mensagem indicando que o usuário está observando esse jogador
+    else
+        SendMessage("O ID do jogador não foi encontrado.")
+    end
+end
+
+-- Conectar o botão de observar ao observar o jogador pelo ID inserido
+observeButton.MouseButton1Click:Connect(function()
+    local playerId = tonumber(idInput.Text)
+    if playerId then
+        observePlayerById(playerId)
+    else
+        SendMessage("ID do jogador inválido.")
+    end
+end)
 
 -- Atualizar a lista de jogadores quando um jogador entra ou sai do jogo
 Players.PlayerAdded:Connect(updatePlayerList)
