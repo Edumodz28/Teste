@@ -1,31 +1,43 @@
--- Função para verificar o nível do jogador e iniciar uma missão adequada
-function MonLevel()
-    local lv = game:GetService("Players").LocalPlayer.PlayerStats.Level.Value
-    
-    if lv >= 1 and lv < 14 then
-        _G.Quest = "macaco"
-        G.Ms = "macaco [Lv:15]"
+
+--[[เอาไปศีกษาได้นะครับอยากให้ทำแมพอะไรอีกเม้นมานะครับ
+ Discord Power x Hub V2 https://discord.gg/KKFya9Jxu4
+]]
+
+_G.AutoFarm = true -- true เปิดฟาร์ม // false ปิดฟาร์ม
+
+
+function MonLevel() -- Check Level
+    lv = game:GetService("Players").LocalPlayer.PlayerStats.Level.Value
+    if lv == 1 or lv <= 14 then
+        _G.Quest = "macacos["
+        _G.Ms = "macacos [Lv:5]"
+    elseif lv == 15 or lv <= 30000 then
+        _G.Quest = "macacos"
+        _G.Ms = "macacos[Lv:15]"
     end
 end
 
--- Função para automatizar o processo de farm
-function AutoFarm()
-    while G.AutoFarm do
-        if not game:GetService("Players").LocalPlayer.PlayerGui.QuestGui.Enabled then
-            game:GetService("ReplicatedStorage").FuncQuest:InvokeServer(_G.Quest)
-        else
-            for _, v in pairs(game:GetService("Workspace").Lives:GetChildren()) do
-                if v.Name == G.Ms and v.Torso.Transparency == 0 then
-                    repeat
-                        wait()
-                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)
-                        game:GetService('VirtualUser'):CaptureController()
-                        game:GetService('VirtualUser'):ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
-                    until not G.AutoFarm or v.Humanoid.Health <= 0
-                end
+
+function AutoFarm() -- Auto Farm
+    MonLevel()
+    if game:GetService("Players").LocalPlayer.PlayerGui.QuestGui.Enabled == false then
+    game:GetService("ReplicatedStorage").FuncQuest:InvokeServer(_G.Quest)
+    elseif game:GetService("Players").LocalPlayer.PlayerGui.QuestGui.Enabled == true then
+        for i,v in pairs(game:GetService("Workspace").Lives:GetChildren()) do
+            if v.Name == _G.Ms and v.Torso.Transparency == 0 then
+                repeat wait()
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0,0,2)
+                game:GetService('VirtualUser'):CaptureController()
+                game:GetService('VirtualUser'):ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+                until _G.AutoFarm == false or v.Humanoid.Health <= 0
             end
         end
-        wait(1) -- Espera um segundo antes de verificar novamente
     end
 end
-
+ 
+while _G.AutoFarm do wait() -- Loop Auto farm
+    pcall(function()
+    AutoFarm()
+    print("POWER X EDIT")
+    end)
+end
