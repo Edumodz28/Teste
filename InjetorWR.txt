@@ -1,8 +1,88 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
-local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
+
+-- Criar uma tela de GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
+
+-- Criar um frame para o layout
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 200, 0, 150)
+frame.Position = UDim2.new(0, 10, 0, 10)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 2
+frame.Parent = ScreenGui
+
+-- Label para a velocidade do jogador
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Text = "Velocidade do Jogador:"
+speedLabel.Position = UDim2.new(0, 10, 0, 10)
+speedLabel.Size = UDim2.new(0, 150, 0, 20)
+speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedLabel.Parent = frame
+
+-- Slider para ajustar a velocidade do jogador
+local speedSlider = Instance.new("TextBox")
+speedSlider.Text = "100"
+speedSlider.Position = UDim2.new(0, 10, 0, 40)
+speedSlider.Size = UDim2.new(0, 180, 0, 20)
+speedSlider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+speedSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedSlider.Parent = frame
+
+-- Label para o super pulo
+local jumpLabel = Instance.new("TextLabel")
+jumpLabel.Text = "Super Pulo:"
+jumpLabel.Position = UDim2.new(0, 10, 0, 70)
+jumpLabel.Size = UDim2.new(0, 100, 0, 20)
+jumpLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpLabel.Parent = frame
+
+-- Slider para ajustar o super pulo
+local jumpSlider = Instance.new("TextButton")
+jumpSlider.Text = "False"
+jumpSlider.Position = UDim2.new(0, 120, 0, 70)
+jumpSlider.Size = UDim2.new(0, 70, 0, 20)
+jumpSlider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+jumpSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpSlider.Parent = frame
+
+-- Função para atualizar a velocidade do jogador
+local function updateSpeed(value)
+    local speed = tonumber(value)
+    if speed then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = speed
+    end
+end
+
+-- Função para atualizar o super pulo
+local function updateJump(value)
+    if value == "True" then
+        UserInputService.JumpEnabled = true
+    else
+        UserInputService.JumpEnabled = false
+    end
+end
+
+-- Atualizar a velocidade do jogador quando o slider for alterado
+speedSlider.FocusLost:Connect(function()
+    updateSpeed(speedSlider.Text)
+end)
+
+-- Atualizar o super pulo quando o slider for alterado
+jumpSlider.MouseButton1Down:Connect(function()
+    if jumpSlider.Text == "True" then
+        jumpSlider.Text = "False"
+    else
+        jumpSlider.Text = "True"
+    end
+    updateJump(jumpSlider.Text)
+end)
+
+-- Configurar a propriedade CollisionGroup do Humanoid do jogador
+LocalPlayer.Character:WaitForChild("Humanoid").CollisionGroupId = tostring(LocalPlayer.UserId)
 
 -- Função para trocar a animação de todos os jogadores para "morto"
 local function PlayDeathAnimation()
@@ -16,20 +96,22 @@ local function PlayDeathAnimation()
 end
 
 -- Função para ativar/desativar a capacidade de atravessar paredes
-local function ToggleWallCollision()
-    for _, part in ipairs(Workspace:GetDescendants()) do
-        if part:IsA("BasePart") then
+local function ToggleWallHack()
+    for _, part in ipairs(game.Workspace:GetDescendants()) do
+        if part:IsA("BasePart") and part.Name ~= "Baseplate" then
             part.CanCollide = not part.CanCollide
         end
     end
 end
 
--- Função para tornar o jogador invisível
+-- Função para tornar o jogador invisível para todos
 local function ToggleInvisibility()
-    for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.Transparency = 1
-            part.Reflectance = 0
+    for _, player in ipairs(Players:GetPlayers()) do
+        for _, part in ipairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 1
+                part.Reflectance = 0
+            end
         end
     end
 end
@@ -39,7 +121,7 @@ local function ClonePickedObjects()
     local pickedObjects = {}  -- Armazenar referências aos objetos pegos pelo jogador
 
     -- Encontrar e armazenar referências aos objetos pegos pelo jogador
-    for _, obj in ipairs(Workspace:GetChildren()) do
+    for _, obj in ipairs(game.Workspace:GetChildren()) do
         if obj:IsA("Model") and obj:IsDescendantOf(LocalPlayer) then
             table.insert(pickedObjects, obj:Clone())
         end
@@ -47,20 +129,42 @@ local function ClonePickedObjects()
 
     -- Clonar os objetos armazenados e colocá-los na mesma posição que o jogador
     for _, obj in ipairs(pickedObjects) do
-        obj.Parent = Workspace
+        obj.Parent = game.Workspace
         obj:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame)
     end
 end
+
+-- Atualizar a velocidade do jogador quando o slider for alterado
+speedSlider.FocusLost:Connect(function()
+    updateSpeed(speedSlider.Text)
+end)
+
+-- Atualizar o super pulo quando o slider for alterado
+jumpSlider.MouseButton1Down:Connect(function()
+    if jumpSlider.Text == "True" then
+        jumpSlider.Text = "False"
+    else
+        jumpSlider.Text = "True"
+    end
+    updateJump(jumpSlider.Text)
+end)
 
 -- Função para executar ações com base na tecla pressionada
 UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.Q then
         PlayDeathAnimation()
     elseif input.KeyCode == Enum.KeyCode.W then
-        ToggleWallCollision()
+        ToggleWallHack()
     elseif input.KeyCode == Enum.KeyCode.E then
         ToggleInvisibility()
     elseif input.KeyCode == Enum.KeyCode.R then
         ClonePickedObjects()
+    end
+end)
+
+-- Configurar as colisões para ignorar o grupo de colisão do jogador
+game.Workspace.ChildAdded:Connect(function(child)
+    if child:IsA("Model") and child:FindFirstChildOfClass("Humanoid") then
+        child:FindFirstChildOfClass("Humanoid").CollisionGroupId = tostring(LocalPlayer.UserId)
     end
 end)
