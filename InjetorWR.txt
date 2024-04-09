@@ -125,13 +125,16 @@ local function observePlayer(player)
 end
 
 -- Função para trazer o jogador selecionado até a posição da sua câmera
+-- Função para trazer o jogador selecionado até a posição da sua câmera
 local function teleportToCamera(player)
     if player and player.Character then
         local playerCharacter = player.Character
         local humanoidRootPart = playerCharacter:FindFirstChild("HumanoidRootPart")
         if humanoidRootPart then
             local cameraPosition = Camera.CFrame.p
-            humanoidRootPart.CFrame = CFrame.new(cameraPosition)
+            local cameraForward = Camera.CFrame.lookVector
+            local offset = Vector3.new(0, 3, 0) -- Ajuste de altura para evitar que o jogador fique preso no chão
+            humanoidRootPart.CFrame = CFrame.new(cameraPosition + (cameraForward * 5) + offset)
             SendMessage("O usuário " .. player.Name .. " foi teleportado para a posição da sua câmera.")
         else
             SendMessage("O jogador selecionado não está disponível para teleportação.")
@@ -140,6 +143,7 @@ local function teleportToCamera(player)
         SendMessage("Selecione um jogador da lista primeiro.")
     end
 end
+
 
 -- Conectar o botão de observar o jogador pelo ID inserido
 observeButton.MouseButton1Click:Connect(function()
