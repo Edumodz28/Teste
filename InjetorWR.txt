@@ -1,8 +1,32 @@
-local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local InputService = game:GetService("InputService")
+
+-- Função para calcular a posição do botão de atirar
+local function CalculateFireButtonPosition()
+    local playerGui = Players.LocalPlayer.PlayerGui
+    local screenWidth = playerGui.AbsoluteSize.X
+    local screenHeight = playerGui.AbsoluteSize.Y
+    
+    -- Digite aqui as coordenadas X e Y aproximadas do botão de atirar na tela
+    local fireButtonX = screenWidth * 0.85
+    local fireButtonY = screenHeight * 0.9
+    
+    return Vector2.new(fireButtonX, fireButtonY)
+end
+
+-- Função para clicar no botão de atirar
+local function ClickFireButton()
+    local fireButtonPosition = CalculateFireButtonPosition()
+    InputService:ClickMouse(Vector2.new(fireButtonPosition.X, fireButtonPosition.Y))
+end
 
 -- Função para ativar o auto farm
 local function ActivateAutoFarm()
+    -- Teleportar o jogador para cima dois metros
+    local humanoidRootPart = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = humanoidRootPart.CFrame + Vector3.new(0, 2, 0)
+    
     if _G.AutoFarmLevelReal then
         if syn then
             setfflag("HumanoidParallelRemoveNoPhysics", "False")
@@ -35,6 +59,9 @@ local function ActivateAutoFarm()
             game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyVelocity1"):Destroy();
         end
     end
+    
+    -- Clicar no botão de atirar
+    ClickFireButton()
 end
 
 -- Detectar quando a tecla "H" é pressionada
@@ -43,3 +70,14 @@ UserInputService.InputBegan:Connect(function(input)
         ActivateAutoFarm()
     end
 end)
+
+-- Função para melhorar a lógica de pegar objetos
+local function ImprovedPickupLogic()
+    local character = game.Players.LocalPlayer.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid:Move(Vector3.new(0, 0.5, 0)) -- Levantar o personagem ligeiramente para garantir que os objetos sejam pegos corretamente
+        end
+    end
+end
