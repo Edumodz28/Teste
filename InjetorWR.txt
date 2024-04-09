@@ -10,7 +10,7 @@ ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
 
 -- Criar um frame para o layout
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 260)
+frame.Size = UDim2.new(0, 300, 0, 320)
 frame.Position = UDim2.new(0, 10, 0, 10)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 2
@@ -24,17 +24,18 @@ playerListLabel.Size = UDim2.new(0, 280, 0, 20)
 playerListLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 playerListLabel.Parent = frame
 
--- Frame para a lista de jogadores
-local playerListFrame = Instance.new("Frame")
-playerListFrame.Position = UDim2.new(0, 10, 0, 40)
-playerListFrame.Size = UDim2.new(0, 280, 0, 200)
-playerListFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-playerListFrame.Parent = frame
+-- Lista de jogadores
+local playerList = Instance.new("ScrollingFrame")
+playerList.Position = UDim2.new(0, 10, 0, 40)
+playerList.Size = UDim2.new(0, 280, 0, 200)
+playerList.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+playerList.ScrollBarThickness = 6
+playerList.Parent = frame
 
 -- Campo de texto para inserir o ID do jogador
 local idInput = Instance.new("TextBox")
 idInput.PlaceholderText = "Insira o ID do jogador"
-idInput.Position = UDim2.new(0, 10, 0, 230)
+idInput.Position = UDim2.new(0, 10, 0, 250)
 idInput.Size = UDim2.new(0, 200, 0, 20)
 idInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 idInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
@@ -43,26 +44,17 @@ idInput.Parent = frame
 -- Botão para observar o jogador pelo ID inserido
 local observeButton = Instance.new("TextButton")
 observeButton.Text = "Observar"
-observeButton.Position = UDim2.new(0, 220, 0, 230)
+observeButton.Position = UDim2.new(0, 220, 0, 250)
 observeButton.Size = UDim2.new(0, 60, 0, 20)
 observeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 observeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 observeButton.Parent = frame
 
--- Botão para parar de observar o jogador atual
-local stopObservingButton = Instance.new("TextButton")
-stopObservingButton.Text = "Parar Observação"
-stopObservingButton.Position = UDim2.new(0, 10, 0, 260)
-stopObservingButton.Size = UDim2.new(0, 140, 0, 20)
-stopObservingButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-stopObservingButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-stopObservingButton.Parent = frame
-
 -- Botão para teleportar para a posição da câmera
 local teleportButton = Instance.new("TextButton")
 teleportButton.Text = "Teleportar para Câmera"
-teleportButton.Position = UDim2.new(0, 160, 0, 260)
-teleportButton.Size = UDim2.new(0, 130, 0, 20)
+teleportButton.Position = UDim2.new(0, 10, 0, 280)
+teleportButton.Size = UDim2.new(0, 140, 0, 20)
 teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 teleportButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 teleportButton.Parent = frame
@@ -70,49 +62,27 @@ teleportButton.Parent = frame
 -- Botão para enviar mensagem privada para o jogador
 local messageButton = Instance.new("TextButton")
 messageButton.Text = "Enviar Mensagem"
-messageButton.Position = UDim2.new(0, 10, 0, 290)
-messageButton.Size = UDim2.new(0, 140, 0, 20)
+messageButton.Position = UDim2.new(0, 160, 0, 280)
+messageButton.Size = UDim2.new(0, 130, 0, 20)
 messageButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 messageButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 messageButton.Parent = frame
 
--- Variável para armazenar o jogador selecionado
-local selectedPlayer = nil
-
--- Função para enviar mensagem indicando que o usuário está observando um jogador
-local function SendMessage(message)
-    local tag = "[Admin]"
-    local playerName = LocalPlayer.Name
-    local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
-    ChatService:Chat(LocalPlayer.Character, formattedMessage) -- Enviar mensagem no chat local
-    ChatService:Chat(nil, formattedMessage, Enum.ChatColor.Blue) -- Enviar mensagem no chat global
-end
-
--- Função para atualizar a lista de jogadores
+-- Atualizar a lista de jogadores
 local function updatePlayerList()
-    for _, child in ipairs(playerListFrame:GetChildren()) do
-        if child:IsA("TextLabel") then
-            child:Destroy()
-        end
-    end
-
+    playerList:ClearAllChildren()
     local yPosition = 5
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
-            local playerLabel = Instance.new("TextLabel")
-            playerLabel.Text = string.format("[%s] %s", player.UserId, player.Name)
-            playerLabel.Position = UDim2.new(0, 5, 0, yPosition)
-            playerLabel.Size = UDim2.new(0, 270, 0, 20)
-            playerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            playerLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            playerLabel.Parent = playerListFrame
+            local playerButton = Instance.new("TextButton")
+            playerButton.Text = string.format("[%s] %s", player.UserId, player.Name)
+            playerButton.Position = UDim2.new(0, 5, 0, yPosition)
+            playerButton.Size = UDim2.new(0, 270, 0, 20)
+            playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            playerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            playerButton.Parent = playerList
 
-            -- Adicionar funcionalidade de clicar para copiar o ID do jogador
-            playerLabel.MouseButton1Click:Connect(function()
-                idInput.Text = player.UserId
-            end)
-
-            playerLabel.MouseButton2Click:Connect(function()
+            playerButton.MouseButton1Click:Connect(function()
                 idInput.Text = player.UserId
             end)
 
@@ -121,74 +91,48 @@ local function updatePlayerList()
     end
 end
 
--- Função para observar um jogador
-local function observePlayer(player)
-    -- Parar de observar o jogador anterior
-    if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local humanoidRootPart = selectedPlayer.Character.HumanoidRootPart
-        Camera.CameraSubject = humanoidRootPart
-    end
-end
-
--- Função para observar um jogador pelo ID inserido
-local function observePlayerById(playerId)
-    local player = Players:GetPlayerByUserId(playerId)
-    if player then
-        selectedPlayer = player
-        observePlayer(player)
-        SendMessage("O usuário " .. LocalPlayer.Name .. " está observando o jogador " .. player.Name) -- Enviar mensagem indicando que o usuário está observando esse jogador
-    else
-        SendMessage("O ID do jogador não foi encontrado.")
-    end
-end
-
--- Função para parar de observar o jogador atual
-local function stopObservingPlayer()
-    selectedPlayer = nil
-    Camera.CameraSubject = nil
-    SendMessage("O usuário " .. LocalPlayer.Name .. " parou de observar o jogador.")
-end
-
--- Função para teleportar para a posição da câmera
-local function teleportToCameraPosition()
-    local cameraPosition = Camera.CFrame.p
-    LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(cameraPosition))
-end
-
--- Função para enviar mensagem privada para o jogador
-local function sendMessageToPlayer(message, player)
-    if player then
-        SendMessage("Mensagem de " .. LocalPlayer.Name .. ": " .. message)
-    else
-        SendMessage("O jogador selecionado não está disponível.")
-    end
-end
-
 -- Conectar o botão de observar ao observar o jogador pelo ID inserido
 observeButton.MouseButton1Click:Connect(function()
     local playerId = tonumber(idInput.Text)
     if playerId then
-        observePlayerById(playerId)
+        local player = Players:GetPlayerByUserId(playerId)
+        if player then
+            local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                Camera.CameraSubject = humanoidRootPart
+                SendMessage("O usuário " .. LocalPlayer.Name .. " está observando o jogador " .. player.Name)
+            else
+                SendMessage("O jogador não está disponível para observação.")
+            end
+        else
+            SendMessage("ID do jogador inválido ou jogador não encontrado.")
+        end
     else
-        SendMessage("ID do jogador inválido.")
+        SendMessage("Insira um ID de jogador válido.")
     end
 end)
 
--- Conectar o botão de parar de observar
-stopObservingButton.MouseButton1Click:Connect(stopObservingPlayer)
-
 -- Conectar o botão de teleportar
-teleportButton.MouseButton1Click:Connect(teleportToCameraPosition)
+teleportButton.MouseButton1Click:Connect(function()
+    local cameraPosition = Camera.CFrame.p
+    LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(cameraPosition))
+end)
 
 -- Conectar o botão de enviar mensagem
 messageButton.MouseButton1Click:Connect(function()
     local message = "Mensagem privada."
-    sendMessageToPlayer(message, selectedPlayer)
+    local playerId = tonumber(idInput.Text)
+    if playerId then
+        local player = Players:GetPlayerByUserId(playerId)
+        if player then
+            SendMessage("Mensagem de " .. LocalPlayer.Name .. ": " .. message)
+        else
+            SendMessage("O jogador selecionado não está disponível.")
+        end
+    else
+        SendMessage("Insira um ID de jogador válido.")
+    end
 end)
-
--- Atualizar a lista de jogadores quando um jogador entra ou sai do jogo
-Players.PlayerAdded:Connect(updatePlayerList)
-Players.PlayerRemoving:Connect(updatePlayerList)
 
 -- Atualizar a lista de jogadores inicialmente
 updatePlayerList()
@@ -199,10 +143,22 @@ UserInputService.InputBegan:Connect(function(input)
         local playerId = tonumber(idInput.Text)
         if playerId then
             idInput:CaptureFocus()
-            idInput.Text = tostring(selectedPlayer.UserId)
+            idInput.Text = tostring(playerId)
             idInput:ReleaseFocus()
         else
             SendMessage("Selecione um jogador da lista primeiro.")
         end
     end
 end)
+
+-- Botão para atualizar a lista de jogadores
+local refreshButton = Instance.new("TextButton")
+refreshButton.Text = "Atualizar Lista"
+refreshButton.Position = UDim2.new(0, 10, 0, 310)
+refreshButton.Size = UDim2.new(0, 140, 0, 20)
+refreshButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+refreshButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+refreshButton.Parent = frame
+
+-- Conectar o botão de atualizar lista
+refreshButton.MouseButton1Click:Connect(updatePlayerList)
