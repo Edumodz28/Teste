@@ -11,7 +11,7 @@ ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
 
 -- Criar um frame para o layout
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 260)  -- Ajuste o tamanho para caber até 7 jogadores na lista
+frame.Size = UDim2.new(0, 300, 0, 260)
 frame.Position = UDim2.new(0, 10, 0, 10)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 2
@@ -28,7 +28,7 @@ playerListLabel.Parent = frame
 -- Frame para a lista de jogadores
 local playerListFrame = Instance.new("Frame")
 playerListFrame.Position = UDim2.new(0, 10, 0, 40)
-playerListFrame.Size = UDim2.new(0, 280, 0, 200)  -- Ajuste o tamanho para caber até 7 jogadores na lista
+playerListFrame.Size = UDim2.new(0, 280, 0, 200)
 playerListFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 playerListFrame.Parent = frame
 
@@ -85,7 +85,8 @@ local function SendMessage(message)
     local tag = "[Admin]"
     local playerName = LocalPlayer.Name
     local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
-    Chat:Chat(LocalPlayer.Character, formattedMessage)
+    Chat:Chat(LocalPlayer.Character, formattedMessage) -- Enviar mensagem no chat local
+    game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {Text = formattedMessage, Color = Color3.new(0, 1, 0)}) -- Enviar mensagem no chat global
 end
 
 -- Função para atualizar a lista de jogadores
@@ -97,23 +98,28 @@ local function updatePlayerList()
     end
 
     local yPosition = 5
+    local maxPlayersToShow = 7  -- Definir o número máximo de jogadores a serem mostrados
+    local playerCount = 0
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
-            local playerLabel = Instance.new("TextLabel")
-            playerLabel.Text = string.format("[%s] %s", player.UserId, player.Name)
-            playerLabel.Position = UDim2.new(0, 5, 0, yPosition)
-            playerLabel.Size = UDim2.new(0, 270, 0, 20)
-            playerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            playerLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            playerLabel.Parent = playerListFrame
+            playerCount = playerCount + 1
+            if playerCount <= maxPlayersToShow then
+                local playerLabel = Instance.new("TextLabel")
+                playerLabel.Text = string.format("[%s] %s", player.UserId, player.Name)
+                playerLabel.Position = UDim2.new(0, 5, 0, yPosition)
+                playerLabel.Size = UDim2.new(0, 270, 0, 20)
+                playerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                playerLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                playerLabel.Parent = playerListFrame
 
-            playerLabel.MouseButton1Click:Connect(function()
-                selectedPlayer = player
-                observePlayer(player)
-                SendMessage("O usuário " .. LocalPlayer.Name .. " está observando o jogador " .. player.Name) -- Enviar mensagem indicando que o usuário está observando esse jogador
-            end)
+                playerLabel.MouseButton1Click:Connect(function()
+                    selectedPlayer = player
+                    observePlayer(player)
+                    SendMessage("O usuário " .. LocalPlayer.Name .. " está observando o jogador " .. player.Name) -- Enviar mensagem indicando que o usuário está observando esse jogador
+                end)
 
-            yPosition = yPosition + 25
+                yPosition = yPosition + 25
+            end
         end
     end
 end
