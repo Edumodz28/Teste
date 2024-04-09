@@ -1,83 +1,43 @@
-local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
-local InputService = game:GetService("InputService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
--- Função para calcular a posição do botão de atirar
-local function CalculateFireButtonPosition()
-    local playerGui = Players.LocalPlayer.PlayerGui
-    local screenWidth = playerGui.AbsoluteSize.X
-    local screenHeight = playerGui.AbsoluteSize.Y
-    
-    -- Digite aqui as coordenadas X e Y aproximadas do botão de atirar na tela
-    local fireButtonX = screenWidth * 0.85
-    local fireButtonY = screenHeight * 0.9
-    
-    return Vector2.new(fireButtonX, fireButtonY)
-end
+local Range = 10  -- Distância máxima para atacar
 
--- Função para clicar no botão de atirar
-local function ClickFireButton()
-    local fireButtonPosition = CalculateFireButtonPosition()
-    InputService:ClickMouse(Vector2.new(fireButtonPosition.X, fireButtonPosition.Y))
-end
-
--- Função para ativar o auto farm
-local function ActivateAutoFarm()
-    -- Teleportar o jogador para cima dois metros
-    local humanoidRootPart = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-    humanoidRootPart.CFrame = humanoidRootPart.CFrame + Vector3.new(0, 2, 0)
-    
-    if _G.AutoFarmLevelReal then
-        if syn then
-            setfflag("HumanoidParallelRemoveNoPhysics", "False")
-            setfflag("HumanoidParallelRemoveNoPhysicsNoSimulate2", "False")
-            game.Players.LocalPlayer.Character.Humanoid:ChangeState(11)
-            if game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit == true then
-                game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit = false
-            end
-        else
-            if game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                if not game:GetService("Players").LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyVelocity1") then
-                    if game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit == true then
-                        game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit = false
-                    end
-                    local BodyVelocity = Instance.new("BodyVelocity")
-                    BodyVelocity.Name = "BodyVelocity1"
-                    BodyVelocity.Parent =  game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
-                    BodyVelocity.MaxForce = Vector3.new(10000, 10000, 10000)
-                    BodyVelocity.Velocity = Vector3.new(0, 0, 0)
-                end
-            end
-            for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.CanCollide = false    
+-- Função para obter partes visíveis no campo de visão do jogador
+local function getPartsInViewport(maxDistance)
+    local partsInViewport = {}
+    for _, part in ipairs(workspace:GetDescendants()) do
+        if part:IsA("BasePart") then
+            local distance = LocalPlayer:DistanceFromCharacter(part.Position)
+            if distance <= maxDistance then
+                local _, isVisible = Camera:WorldToViewportPoint(part.Position)
+                if isVisible then
+                    table.insert(partsInViewport, part)
                 end
             end
         end
-    else
-        if game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyVelocity1") then
-            game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyVelocity1"):Destroy();
-        end
     end
-    
-    -- Clicar no botão de atirar
-    ClickFireButton()
+    return partsInViewport
 end
 
--- Detectar quando a tecla "H" é pressionada
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.H then
-        ActivateAutoFarm()
-    end
-end)
-
--- Função para melhorar a lógica de pegar objetos
-local function ImprovedPickupLogic()
-    local character = game.Players.LocalPlayer.Character
-    if character then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid:Move(Vector3.new(0, 0.5, 0)) -- Levantar o personagem ligeiramente para garantir que os objetos sejam pegos corretamente
+-- Loop principal para detectar e atacar personagens próximos
+while true do
+    wait()  -- Aguarda um intervalo de tempo antes de verificar novamente
+    
+    local Tool = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
+    local Parts = getPartsInViewport(Range)
+    
+    -- Verifica se o jogador tem uma ferramenta equipada
+    if Tool and Tool:FindFirstChild("Handle") then
+        -- Loop através das partes visíveis no campo de visão
+        for _, Part in ipairs(Parts) do
+            -- Verifica se a parte pertence a um personagem e se o personagem está vivo
+            if Part and Part.Parent and Part.Parent ~= LocalPlayer.Character and Part.Parent:FindFirstChild("Humanoid") and Part.Parent.Humanoid.Health > 0 then
+                -- Ativa a ferramenta e ataca a parte
+                Tool:Activate()
+                game:GetService("ReplicatedStorage").MeleeEvent:FireServer(Part)
+            end
         end
     end
 end
