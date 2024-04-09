@@ -39,9 +39,9 @@ local function SendMessage(message)
 end
 
 -- Função para criar o quadrado que causa dano
-local function CreateDamageSquare(position)
+local function CreateDamageSquare(position, playerDamage)
     local damageSquare = Instance.new("Part")
-    damageSquare.Size = Vector3.new(10, 1, 10) -- Ajuste o tamanho conforme necessário
+    damageSquare.Size = Vector3.new(20, 1, 20) -- Aumentando o tamanho do quadrado
     damageSquare.Anchored = true
     damageSquare.Position = position
     damageSquare.BrickColor = BrickColor.new("Bright red")
@@ -54,11 +54,10 @@ local function CreateDamageSquare(position)
             local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
             if humanoid and hit.Parent ~= LocalPlayer.Character then
                 if humanoid.Health > 0 then
-                    local damage = humanoid.Health -- Dano igual à saúde atual do alvo
                     if hit.Parent:FindFirstChild("IsNPC") then
-                        ReplicateDamageEvent:Fire(hit.Parent.Name, damage, LocalPlayer.Name)
+                        ReplicateDamageEvent:Fire(hit.Parent.Name, playerDamage, LocalPlayer.Name)
                     else
-                        AttackEvent:Fire(humanoid, damage)
+                        AttackEvent:Fire(humanoid, playerDamage)
                     end
                 end
             end
@@ -66,6 +65,26 @@ local function CreateDamageSquare(position)
     end)
 
     return damageSquare
+end
+
+-- Função para parar todos os NPCs
+local function StopAllNPCs()
+    local NPCs = {}  -- Lista para armazenar todos os NPCs
+
+    -- Encontrar todos os NPCs no jogo
+    for _, obj in ipairs(game:GetService("Workspace"):GetDescendants()) do
+        if obj:IsA("Model") and obj:FindFirstChild("IsNPC") then
+            table.insert(NPCs, obj)
+        end
+    end
+
+    -- Parar todos os NPCs encontrados
+    for _, npc in ipairs(NPCs) do
+        local humanoid = npc:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 0  -- Definir a velocidade de movimento como zero para parar o NPC
+        end
+    end
 end
 
 -- Disparar evento quando um jogador ou NPC é atingido pelo quadrado de dano
