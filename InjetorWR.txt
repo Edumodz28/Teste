@@ -10,7 +10,7 @@ local messageLimit = 5
 local cooldownTime = 10
 local lastMessageTime = 0
 
--- Evento para causar dano aos jogadores
+-- Evento para causar dano aos jogadores e NPCs
 local AttackEvent = Instance.new("BindableEvent")
 
 -- Função para enviar mensagem para o chat com tag especial
@@ -45,41 +45,46 @@ local function CreateDamageSquare()
     damageSquare.Transparency = 0.5  -- Definir transparência para 50%
     damageSquare.Parent = Workspace
 
-    -- Detectar quando um jogador entra na área do quadrado
+    -- Detectar quando um jogador ou NPC entra na área do quadrado
     damageSquare.Touched:Connect(function(hit)
-        if hit.Parent and hit.Parent:IsA("Model") and hit.Parent:FindFirstChild("Humanoid") then
-            local humanoid = hit.Parent:FindFirstChild("Humanoid")
+        if hit.Parent and hit.Parent:IsA("Model") then
+            local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
             if humanoid and hit.Parent ~= LocalPlayer.Character then
-                AttackEvent:Fire(humanoid) -- Disparar evento para causar dano ao jogador
+                AttackEvent:Fire(humanoid, hit.Parent.Name) -- Disparar evento para causar dano ao jogador ou NPC
             end
         end
     end)
 end
 
--- Função para criar o quadrado que causa dano
-CreateDamageSquare()
-
--- Disparar evento quando um jogador é atingido pelo quadrado
-AttackEvent.Event:Connect(function(humanoid)
-    humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador
+-- Função para criar o quadrado que causa dano quando pressionar "h"
+Mouse.KeyDown:Connect(function(key)
+    if key == "h" then
+        CreateDamageSquare()
+    end
 end)
 
--- Função para criar NPCs
-local function CreateNPC()
-    -- Código para criar o NPC...
-    SendMessage("Um NPC foi criado!") -- Enviar mensagem para o chat
-end
+-- Disparar evento quando um jogador ou NPC é atingido pelo quadrado
+AttackEvent.Event:Connect(function(humanoid, npcName)
+    humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador ou NPC
+    SendMessage(string.format("Você causou 10 de dano a %s!", npcName)) -- Enviar mensagem com o nome do NPC
+end)
 
--- Função para criar NPCs periodicamente
-local function CreateNPCsPeriodically()
-    while true do
-        wait(10)
-        CreateNPC()
+-- Função para teleportar NPCs para o jogador
+local function TeleportNPCsToPlayer()
+    local NPCs = Workspace:GetDescendants()
+    for _, npc in ipairs(NPCs) do
+        if npc:IsA("Model") and npc:FindFirstChildOfClass("Humanoid") then
+            npc:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame)
+        end
     end
 end
 
--- Iniciar criação de NPCs em uma thread separada
-coroutine.wrap(CreateNPCsPeriodically)()
+-- Função para teleportar NPCs quando pressionar "t"
+Mouse.KeyDown:Connect(function(key)
+    if key == "t" then
+        TeleportNPCsToPlayer()
+    end
+end)
 
 -- Speed
 local function SetPlayerSpeed(speed)
