@@ -9,7 +9,7 @@ ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
 
 -- Criar um frame para o layout
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 150)
+frame.Size = UDim2.new(0, 200, 0, 200)
 frame.Position = UDim2.new(0, 10, 0, 10)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 2
@@ -49,6 +49,40 @@ jumpSlider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 jumpSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
 jumpSlider.Parent = frame
 
+-- Label para ativar/desativar o Wall Hack
+local wallHackLabel = Instance.new("TextLabel")
+wallHackLabel.Text = "Wall Hack:"
+wallHackLabel.Position = UDim2.new(0, 10, 0, 100)
+wallHackLabel.Size = UDim2.new(0, 100, 0, 20)
+wallHackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+wallHackLabel.Parent = frame
+
+-- Botão para ativar/desativar o Wall Hack
+local wallHackButton = Instance.new("TextButton")
+wallHackButton.Text = "Desativado"
+wallHackButton.Position = UDim2.new(0, 120, 0, 100)
+wallHackButton.Size = UDim2.new(0, 70, 0, 20)
+wallHackButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+wallHackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+wallHackButton.Parent = frame
+
+-- Label para ativar/desativar a invisibilidade
+local invisibilityLabel = Instance.new("TextLabel")
+invisibilityLabel.Text = "Invisibilidade:"
+invisibilityLabel.Position = UDim2.new(0, 10, 0, 130)
+invisibilityLabel.Size = UDim2.new(0, 100, 0, 20)
+invisibilityLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+invisibilityLabel.Parent = frame
+
+-- Botão para ativar/desativar a invisibilidade
+local invisibilityButton = Instance.new("TextButton")
+invisibilityButton.Text = "Desativada"
+invisibilityButton.Position = UDim2.new(0, 120, 0, 130)
+invisibilityButton.Size = UDim2.new(0, 70, 0, 20)
+invisibilityButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+invisibilityButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+invisibilityButton.Parent = frame
+
 -- Função para atualizar a velocidade do jogador
 local function updateSpeed(value)
     local speed = tonumber(value)
@@ -66,71 +100,26 @@ local function updateJump(value)
     end
 end
 
--- Atualizar a velocidade do jogador quando o slider for alterado
-speedSlider.FocusLost:Connect(function()
-    updateSpeed(speedSlider.Text)
-end)
-
--- Atualizar o super pulo quando o slider for alterado
-jumpSlider.MouseButton1Down:Connect(function()
-    if jumpSlider.Text == "True" then
-        jumpSlider.Text = "False"
-    else
-        jumpSlider.Text = "True"
-    end
-    updateJump(jumpSlider.Text)
-end)
-
--- Configurar a propriedade CollisionGroup do Humanoid do jogador
-LocalPlayer.Character:WaitForChild("Humanoid").CollisionGroupId = tostring(LocalPlayer.UserId)
-
--- Função para trocar a animação de todos os jogadores para "morto"
-local function PlayDeathAnimation()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player.Character and player.Character:FindFirstChild("Humanoid") then
-            player.Character:FindFirstChild("Humanoid"):LoadAnimation(Instance.new("Animation"))
-            player.Character.Humanoid:Move(Vector3.new(0,0,0))
-            player.Character.Humanoid:Move(Vector3.new(0,-1,0))
-        end
-    end
-end
-
--- Função para ativar/desativar a capacidade de atravessar paredes
-local function ToggleWallHack()
+-- Função para ativar/desativar o Wall Hack
+local function toggleWallHack()
     for _, part in ipairs(game.Workspace:GetDescendants()) do
-        if part:IsA("BasePart") and part.Name ~= "Baseplate" then
+        if part:IsA("BasePart") then
             part.CanCollide = not part.CanCollide
         end
     end
 end
 
--- Função para tornar o jogador invisível para todos
-local function ToggleInvisibility()
+-- Função para ativar/desativar a invisibilidade
+local function toggleInvisibility()
     for _, player in ipairs(Players:GetPlayers()) do
-        for _, part in ipairs(player.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.Transparency = 1
-                part.Reflectance = 0
+        if player ~= LocalPlayer then
+            for _, part in ipairs(player.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.Transparency = invisibilityButton.Text == "Ativada" and 1 or 0
+                    part.Reflectance = invisibilityButton.Text == "Ativada" and 0 or 1
+                end
             end
         end
-    end
-end
-
--- Função para clonar objetos que o jogador já pegou
-local function ClonePickedObjects()
-    local pickedObjects = {}  -- Armazenar referências aos objetos pegos pelo jogador
-
-    -- Encontrar e armazenar referências aos objetos pegos pelo jogador
-    for _, obj in ipairs(game.Workspace:GetChildren()) do
-        if obj:IsA("Model") and obj:IsDescendantOf(LocalPlayer) then
-            table.insert(pickedObjects, obj:Clone())
-        end
-    end
-
-    -- Clonar os objetos armazenados e colocá-los na mesma posição que o jogador
-    for _, obj in ipairs(pickedObjects) do
-        obj.Parent = game.Workspace
-        obj:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame)
     end
 end
 
@@ -149,22 +138,22 @@ jumpSlider.MouseButton1Down:Connect(function()
     updateJump(jumpSlider.Text)
 end)
 
--- Função para executar ações com base na tecla pressionada
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.Q then
-        PlayDeathAnimation()
-    elseif input.KeyCode == Enum.KeyCode.W then
-        ToggleWallHack()
-    elseif input.KeyCode == Enum.KeyCode.E then
-        ToggleInvisibility()
-    elseif input.KeyCode == Enum.KeyCode.R then
-        ClonePickedObjects()
+-- Ativar/desativar o Wall Hack quando o botão for clicado
+wallHackButton.MouseButton1Click:Connect(function()
+    if wallHackButton.Text == "Ativado" then
+        wallHackButton.Text = "Desativado"
+    else
+        wallHackButton.Text = "Ativado"
     end
+    toggleWallHack()
 end)
 
--- Configurar as colisões para ignorar o grupo de colisão do jogador
-game.Workspace.ChildAdded:Connect(function(child)
-    if child:IsA("Model") and child:FindFirstChildOfClass("Humanoid") then
-        child:FindFirstChildOfClass("Humanoid").CollisionGroupId = tostring(LocalPlayer.UserId)
+-- Ativar/desativar a invisibilidade quando o botão for clicado
+invisibilityButton.MouseButton1Click:Connect(function()
+    if invisibilityButton.Text == "Ativada" then
+        invisibilityButton.Text = "Desativada"
+    else
+        invisibilityButton.Text = "Ativada"
     end
+    toggleInvisibility()
 end)
