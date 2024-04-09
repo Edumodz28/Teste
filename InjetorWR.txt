@@ -109,28 +109,6 @@ end
 -- Conectar o botão de abrir e fechar o layout
 toggleButton.MouseButton1Click:Connect(toggleLayoutVisibility)
 
--- Atualizar a lista de jogadores
-local function updatePlayerList()
-    playerList:ClearAllChildren()
-    local yPosition = 5
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            local playerButton = Instance.new("TextButton")
-            playerButton.Text = string.format("[%s] %s", player.UserId, player.Name)
-            playerButton.Position = UDim2.new(0, 5, 0, yPosition)
-            playerButton.Size = UDim2.new(0, 270, 0, 20)
-            playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-            playerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            playerButton.Parent = playerList
-
-            playerButton.MouseButton1Click:Connect(function()
-                idInput.Text = player.UserId
-            end)
-
-            yPosition = yPosition + 25
-        end
-    end
-end
 
 -- Função para observar o jogador selecionado
 local function observePlayer(player)
@@ -156,7 +134,50 @@ local function teleportToCamera(player)
         if humanoidRootPart then
             local cameraPosition = Camera.CFrame.p
             local cameraForward = Camera.CFrame.lookVector
-            local offset = Vector3.new(0, 3, 0) -- Ajuste de altura para evitar que o jogador fique preso no chão
+     -- Função para atualizar a lista de jogadores e NPCs
+local function updatePlayerList()
+    playerList:ClearAllChildren()
+    local yPosition = 5
+
+    -- Adicionar jogadores à lista
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local playerButton = Instance.new("TextButton")
+            playerButton.Text = string.format("[%s] %s (Player)", player.UserId, player.Name)
+            playerButton.Position = UDim2.new(0, 5, 0, yPosition)
+            playerButton.Size = UDim2.new(0, 270, 0, 20)
+            playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            playerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            playerButton.Parent = playerList
+
+            playerButton.MouseButton1Click:Connect(function()
+                idInput.Text = player.UserId
+            end)
+
+            yPosition = yPosition + 25
+        end
+    end
+
+    -- Adicionar NPCs à lista
+    for _, npc in ipairs(workspace:GetDescendants()) do
+        if npc:IsA("Model") and npc:FindFirstChildOfClass("Humanoid") then
+            local npcButton = Instance.new("TextButton")
+            npcButton.Text = string.format("[%s] %s (NPC)", npc.Name, npc.Name)
+            npcButton.Position = UDim2.new(0, 5, 0, yPosition)
+            npcButton.Size = UDim2.new(0, 270, 0, 20)
+            npcButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            npcButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            npcButton.Parent = playerList
+
+            npcButton.MouseButton1Click:Connect(function()
+                idInput.Text = npc.Name
+            end)
+
+            yPosition = yPosition + 25
+        end
+    end
+end
+       local offset = Vector3.new(0, 3, 0) -- Ajuste de altura para evitar que o jogador fique preso no chão
             humanoidRootPart.CFrame = CFrame.new(cameraPosition + (cameraForward * 5) + offset)
             SendMessage("O usuário " .. player.Name .. " foi teleportado para a posição da sua câmera.")
         else
