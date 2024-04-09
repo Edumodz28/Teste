@@ -68,7 +68,7 @@ teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 teleportButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 teleportButton.Parent = frame
 
--- Botão para enviar mensagem privada para o jogador
+-- Botão para enviar mensagem
 local messageButton = Instance.new("TextButton")
 messageButton.Text = "Enviar Mensagem"
 messageButton.Position = UDim2.new(0, 10, 0, 290)
@@ -82,14 +82,38 @@ local selectedPlayer = nil
 
 -- Função para enviar mensagem indicando que o usuário está observando um jogador
 local function SendMessage(message)
-    local tag = "[Admin]"
     local playerName = LocalPlayer.Name
-    local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
+    local formattedMessage = string.format("[color=rgb(0, 0, 255)]%s[/color]: [color=rgb(255, 0, 0)]%s[/color]", playerName, message)
     Chat:Chat(LocalPlayer.Character, formattedMessage) -- Enviar mensagem no chat local
     game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {Text = formattedMessage, Color = Color3.new(0, 1, 0)}) -- Enviar mensagem no chat global
 end
 
--- Função para atualizar a lista de jogadores
+-- Função para observar um jogador pelo ID inserido
+local function observePlayerById(playerId)
+    local player = Players:GetPlayerByUserId(playerId)
+    if player then
+        selectedPlayer = player
+        SendMessage("O usuário " .. LocalPlayer.Name .. " está observando o jogador " .. player.Name) -- Enviar mensagem indicando que o usuário está observando esse jogador
+    else
+        SendMessage("O ID do jogador não foi encontrado.")
+    end
+end
+
+-- Função para enviar mensagem privada para o jogador
+local function sendMessageToPlayer(message, player)
+    if player then
+        SendMessage("Mensagem de " .. LocalPlayer.Name .. ": " .. message)
+    else
+        SendMessage("O jogador selecionado não está disponível.")
+    end
+end
+
+-- Função para copiar o ID do jogador
+local function copyPlayerId(playerId)
+    idInput.Text = playerId
+end
+
+-- Atualizar a lista de jogadores
 local function updatePlayerList()
     for _, child in ipairs(playerListFrame:GetChildren()) do
         if child:IsA("TextLabel") then
@@ -114,59 +138,12 @@ local function updatePlayerList()
 
                 -- Adicionar funcionalidade de clicar para copiar o ID do jogador
                 playerLabel.MouseButton1Click:Connect(function()
-                    idInput.Text = player.UserId
-                end)
-
-                playerLabel.MouseButton2Click:Connect(function()
-                    idInput.Text = player.UserId
+                    copyPlayerId(player.UserId)
                 end)
 
                 yPosition = yPosition + 25
             end
         end
-    end
-end
-
--- Função para observar um jogador
-local function observePlayer(player)
-    -- Parar de observar o jogador anterior
-    if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local humanoidRootPart = selectedPlayer.Character.HumanoidRootPart
-        Camera.CameraSubject = humanoidRootPart
-    end
-end
-
--- Função para observar um jogador pelo ID inserido
-local function observePlayerById(playerId)
-    local player = Players:GetPlayerByUserId(playerId)
-    if player then
-        selectedPlayer = player
-        observePlayer(player)
-        SendMessage("O usuário " .. LocalPlayer.Name .. " está observando o jogador " .. player.Name) -- Enviar mensagem indicando que o usuário está observando esse jogador
-    else
-        SendMessage("O ID do jogador não foi encontrado.")
-    end
-end
-
--- Função para parar de observar o jogador atual
-local function stopObservingPlayer()
-    selectedPlayer = nil
-    Camera.CameraSubject = nil
-    SendMessage("O usuário " .. LocalPlayer.Name .. " parou de observar o jogador.")
-end
-
--- Função para teleportar para a posição da câmera
-local function teleportToCameraPosition()
-    local cameraPosition = Camera.CFrame.p
-    LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(cameraPosition))
-end
-
--- Função para enviar mensagem privada para o jogador
-local function sendMessageToPlayer(message, player)
-    if player then
-        SendMessage("Mensagem de " .. LocalPlayer.Name .. ": " .. message)
-    else
-        SendMessage("O jogador selecionado não está disponível.")
     end
 end
 
@@ -180,21 +157,11 @@ observeButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Conectar o botão de parar de observar
-stopObservingButton.MouseButton1Click:Connect(stopObservingPlayer)
-
--- Conectar o botão de teleportar
-teleportButton.MouseButton1Click:Connect(teleportToCameraPosition)
-
 -- Conectar o botão de enviar mensagem
 messageButton.MouseButton1Click:Connect(function()
     local message = "Mensagem privada."
     sendMessageToPlayer(message, selectedPlayer)
 end)
-
--- Atualizar a lista de jogadores quando um jogador entra ou sai do jogo
-Players.PlayerAdded:Connect(updatePlayerList)
-Players.PlayerRemoving:Connect(updatePlayerList)
 
 -- Atualizar a lista de jogadores inicialmente
 updatePlayerList()
