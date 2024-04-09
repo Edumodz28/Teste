@@ -83,7 +83,7 @@ local selectedPlayer = nil
 -- Função para enviar mensagem indicando que o usuário está observando um jogador
 local function SendMessage(message)
     local playerName = LocalPlayer.Name
-    local formattedMessage = string.format("[color=rgb(0, 0, 255)]%s[/color]: [color=rgb(255, 0, 0)]%s[/color]", playerName, message)
+    local formattedMessage = string.format("[b][color=rgb(0, 0, 255)]%s[/color]: [color=rgb(255, 0, 0)]%s[/color][/b]", playerName, message)
     Chat:Chat(LocalPlayer.Character, formattedMessage) -- Enviar mensagem no chat local
     game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {Text = formattedMessage, Color = Color3.new(0, 1, 0)}) -- Enviar mensagem no chat global
 end
@@ -111,6 +111,8 @@ end
 -- Função para copiar o ID do jogador
 local function copyPlayerId(playerId)
     idInput.Text = playerId
+    idInput:CaptureFocus()
+    idInput:SelectAll()
 end
 
 -- Atualizar a lista de jogadores
