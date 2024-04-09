@@ -3,7 +3,7 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
 local MaxDistance = 50  -- Distância máxima para procurar NPCs
-local AttackRange = 10  -- Distância máxima para atacar NPCs
+local AttackRange = 30  -- Distância máxima para atacar NPCs
 
 -- Função para obter partes visíveis no campo de visão do jogador
 local function getPartsInViewport(maxDistance)
@@ -22,11 +22,23 @@ local function getPartsInViewport(maxDistance)
     return partsInViewport
 end
 
+-- Função para encontrar um ponto vazio acima do NPC
+local function findEmptySpaceAboveNPC(npc)
+    local ray = Ray.new(npc.Position, Vector3.new(0, 100, 0))  -- Lança um raio para cima
+    local hitPart, hitPosition = workspace:FindPartOnRayWithIgnoreList(ray, {npc})
+    if hitPart then
+        return hitPosition + Vector3.new(0, 2, 0)  -- Adiciona uma pequena altura para garantir que o jogador não fique dentro do NPC
+    end
+end
+
 -- Função para teleportar o jogador para cima do NPC
 local function teleportToNPC(npc)
-    local humanoidRootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if humanoidRootPart then
-        humanoidRootPart.CFrame = CFrame.new(npc.Position + Vector3.new(0, 10, 0))  -- Teleporta 10 metros acima do NPC
+    local emptySpacePosition = findEmptySpaceAboveNPC(npc)
+    if emptySpacePosition then
+        local humanoidRootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart.CFrame = CFrame.new(emptySpacePosition)
+        end
     end
 end
 
