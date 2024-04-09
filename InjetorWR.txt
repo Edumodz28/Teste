@@ -37,6 +37,28 @@ local function teleportToNPC(npc)
     end
 end
 
+-- Função para criar o quadrado que aparece quando o jogador clica em "h"
+local function createDamageSquare()
+    local damageSquare = Instance.new("Part")
+    damageSquare.Size = Vector3.new(5, 1, 5)  -- Tamanho do quadrado
+    damageSquare.Anchored = true
+    damageSquare.Position = LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart.Position or Vector3.new(0, 0, 0)  -- Posição inicial do quadrado
+    damageSquare.BrickColor = BrickColor.new("Bright red")
+    damageSquare.Transparency = 0.5  -- Transparência
+    damageSquare.Parent = workspace
+    return damageSquare
+end
+
+-- Evento para criar o quadrado quando o jogador clica em "h"
+local function onKeyPress(input)
+    if input.KeyCode == Enum.KeyCode.H then
+        createDamageSquare()
+    end
+end
+
+-- Conectar o evento de pressionar tecla ao teclado do jogador
+game:GetService("UserInputService").InputBegan:Connect(onKeyPress)
+
 -- Loop principal para detectar e atacar NPCs próximos
 while true do
     wait()  -- Aguarda um intervalo de tempo antes de verificar novamente
