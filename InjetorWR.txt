@@ -9,11 +9,11 @@ _G.AutoFarm = true -- true เปิดฟาร์ม // false ปิดฟา�
 function MonLevel() -- Check Level
     lv = game:GetService("Players").LocalPlayer.PlayerStats.Level.Value
     if lv == 1 or lv <= 14 then
-        _G.Quest = "macacos["
-        _G.Ms = "macacos [Lv:5]"
+        _G.Quest = "Monkeys"
+        _G.Ms = "Monkeys [Lv:5]"
     elseif lv == 15 or lv <= 30000 then
-        _G.Quest = "macacos"
-        _G.Ms = "macacos[Lv:15]"
+        _G.Quest = "Gorillas"
+        _G.Ms = "Gorillas[Lv:15]"
     end
 end
 
