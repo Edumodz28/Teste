@@ -6,11 +6,11 @@ function MonLevel()
     local lv = game:GetService("Players").LocalPlayer.PlayerStats.Level.Value
     
     if lv >= 1 and lv < 14 then
-        _G.Quest = "Soldier"
-        _G.Ms = "Soldier [Lv. 1]"
+        _G.Quest = "Bandit"
+        _G.Ms = "Bandit [Lv:5]"
     elseif lv >= 15 and lv <= 30000 then
-        _G.Quest = "Soldvbier"
-        _G.Ms = "Soldvbier [Lv:15]"
+        _G.Quest = "Pirates"
+        _G.Ms = "Pirates [Lv:15]"
     end
 end
 
@@ -18,7 +18,10 @@ end
 local function SendMessage(message)
     local tag = "[AutoFarm]"
     local formattedMessage = string.format("[%s] %s", tag, message)
-    game:GetService("Chat"):Chat(game.Players.LocalPlayer.Character, formattedMessage)
+    game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {
+        Text = formattedMessage,
+        Color = Color3.new(1, 1, 0), -- Cor amarela
+    })
 end
 
 -- Função para automatizar o processo de farm
@@ -28,13 +31,13 @@ function AutoFarm()
     if not game:GetService("Players").LocalPlayer.PlayerGui.QuestGui.Enabled then
         game:GetService("ReplicatedStorage").FuncQuest:InvokeServer(_G.Quest)
     else
-        for _, v in pairs(game:GetService("Workspace").Lives:GetChildren()) do
-            if v.Name == _G.Ms and v.Torso.Transparency == 0 then
+        for _, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+            if v.Name == _G.Ms and v.Humanoid.Health > 0 then
                 repeat
                     wait()
                     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)
                     game:GetService('VirtualUser'):CaptureController()
-                    game:GetService('VirtualUser'):ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+                    game:GetService('VirtualUser'):ClickButton1(Vector2.new(0, 0), game:GetService("Workspace").Camera.CFrame)
                     SendMessage("Encontrando monstros...") -- Enviar mensagem indicando que está encontrando os monstros
                 until not _G.AutoFarm or v.Humanoid.Health <= 0
             end
