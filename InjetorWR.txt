@@ -10,11 +10,8 @@ local messageLimit = 5
 local cooldownTime = 10
 local lastMessageTime = 0
 
--- Evento para causar dano aos jogadores e NPCs
+-- Evento para causar dano aos jogadores
 local AttackEvent = Instance.new("BindableEvent")
-
--- Evento para propagar o dano causado por NPCs para os jogadores
-local ReplicateDamageEvent = Instance.new("BindableEvent")
 
 -- Função para enviar mensagem para o chat com tag especial
 local function SendMessage(message)
@@ -39,79 +36,68 @@ local function SendMessage(message)
 end
 
 -- Função para criar o quadrado que causa dano
-local function CreateDamageSquare(position, playerDamage)
+local function CreateDamageSquare()
     local damageSquare = Instance.new("Part")
-    damageSquare.Size = Vector3.new(20, 1, 20) -- Aumentando o tamanho do quadrado
+    damageSquare.Size = Vector3.new(2, 2, 2)
     damageSquare.Anchored = true
-    damageSquare.Position = position
+    damageSquare.Position = LocalPlayer.Character.HumanoidRootPart.Position
     damageSquare.BrickColor = BrickColor.new("Bright red")
     damageSquare.Transparency = 0.5  -- Definir transparência para 50%
     damageSquare.Parent = Workspace
 
-    -- Detectar quando um jogador ou NPC entra na área do quadrado
+    -- Detectar quando um jogador entra na área do quadrado
     damageSquare.Touched:Connect(function(hit)
-        if hit.Parent and hit.Parent:IsA("Model") then
-            local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
+        if hit.Parent and hit.Parent:IsA("Model") and hit.Parent:FindFirstChild("Humanoid") then
+            local humanoid = hit.Parent:FindFirstChild("Humanoid")
             if humanoid and hit.Parent ~= LocalPlayer.Character then
-                if humanoid.Health > 0 then
-                    if hit.Parent:FindFirstChild("IsNPC") then
-                        ReplicateDamageEvent:Fire(hit.Parent.Name, playerDamage, LocalPlayer.Name)
-                    else
-                        AttackEvent:Fire(humanoid, playerDamage)
-                    end
-                end
+                AttackEvent:Fire(humanoid) -- Disparar evento para causar dano ao jogador
             end
         end
     end)
-
-    return damageSquare
 end
 
--- Função para congelar todos os NPCs
-local function FreezeAllNPCs()
-    for _, obj in ipairs(Workspace:GetDescendants()) do
-        if obj:IsA("Model") and obj:FindFirstChild("IsNPC") then
-            local humanoid = obj:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid.WalkSpeed = 0
-                humanoid:Move(Vector3.new(0,0,0))  -- Parar qualquer movimento atual
-                humanoid.AnimationPlayed:Connect(function(animationTrack)  -- Interromper animações
-                    animationTrack:Stop()
-                end)
-            end
+-- Função para criar o quadrado que causa dano
+CreateDamageSquare()
+
+-- Disparar evento quando um jogador é atingido pelo quadrado
+AttackEvent.Event:Connect(function(humanoid)
+    humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador
+end)
+
+-- Função para criar NPCs
+local function CreateNPC()
+    -- Código para criar o NPC...
+    SendMessage("Um NPC foi criado!") -- Enviar mensagem para o chat
+end
+
+-- Função para criar NPCs periodicamente
+local function CreateNPCsPeriodically()
+    while true do
+        wait(10)
+        CreateNPC()
+    end
+end
+
+-- Iniciar criação de NPCs em uma thread separada
+coroutine.wrap(CreateNPCsPeriodically)()
+
+-- Speed
+local function SetPlayerSpeed(speed)
+    local character = LocalPlayer.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = speed
         end
     end
 end
 
--- Disparar evento quando um jogador ou NPC é atingido pelo quadrado de dano
-AttackEvent.Event:Connect(function(humanoid, damage)
-    humanoid:TakeDamage(damage) -- Causar dano ao jogador ou NPC
-end)
+-- Ativar o Speed
+SetPlayerSpeed(100) -- Definindo a velocidade do jogador como 100
 
--- Conectar evento para replicar dano aos jogadores
-ReplicateDamageEvent.Event:Connect(function(npcName, damage, playerName)
-    SendMessage(string.format("O NPC '%s' recebeu %d de dano de '%s'!", npcName, damage, playerName))
-end)
-
--- Criar o quadrado de dano em uma posição específica
-local function CreateDamageSquareAtPosition(position)
-    if not position then
-        position = LocalPlayer.Character.HumanoidRootPart.Position
-    end
-    local damageSquare = CreateDamageSquare(position)
-    SendMessage("Quadrado de dano criado em posição: " .. tostring(position))
-end
-
--- Criar o quadrado de dano ao pressionar a tecla 'h'
+-- Super Pulo
 Mouse.KeyDown:Connect(function(key)
-    if key == "h" then
-        CreateDamageSquareAtPosition()
-    end
-end)
-
--- Congelar todos os NPCs ao pressionar a tecla 'f'
-Mouse.KeyDown:Connect(function(key)
-    if key == "f" then
-        FreezeAllNPCs()
+    if key == "space" then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
     end
 end)
