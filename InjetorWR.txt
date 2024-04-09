@@ -86,6 +86,29 @@ messageButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 messageButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 messageButton.Parent = frame
 
+
+-- Botão para abrir e fechar o layout
+local toggleButton = Instance.new("TextButton")
+toggleButton.Text = "Abrir Layout"
+toggleButton.Position = UDim2.new(0, 10, 0, 320)
+toggleButton.Size = UDim2.new(0, 140, 0, 20)
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+toggleButton.Parent = frame
+
+-- Função para alternar a visibilidade do layout
+local function toggleLayoutVisibility()
+    ScreenGui.Enabled = not ScreenGui.Enabled
+    if ScreenGui.Enabled then
+        toggleButton.Text = "Fechar Layout"
+    else
+        toggleButton.Text = "Abrir Layout"
+    end
+end
+
+-- Conectar o botão de abrir e fechar o layout
+toggleButton.MouseButton1Click:Connect(toggleLayoutVisibility)
+
 -- Atualizar a lista de jogadores
 local function updatePlayerList()
     playerList:ClearAllChildren()
@@ -206,5 +229,6 @@ updatePlayerList()
 local function SendMessage(message)
     local tag = "[Admin]"
     local formattedMessage = string.format("[%s] %s", tag, message)
-    ChatService:Chat(LocalPlayer.Character, formattedMessage)
+    ChatService:ChatAll(message)
 end
+
