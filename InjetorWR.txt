@@ -1,255 +1,31 @@
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
-local Camera = game.Workspace.CurrentCamera
-local ChatService = game:GetService("Chat")
-
--- Criar uma tela de GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
-
--- Criar um frame para o layout
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 350)
-frame.Position = UDim2.new(0, 10, 0, 10)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 2
-frame.Parent = ScreenGui
-
--- Label para a lista de jogadores
-local playerListLabel = Instance.new("TextLabel")
-playerListLabel.Text = "Lista de Jogadores:"
-playerListLabel.Position = UDim2.new(0, 10, 0, 10)
-playerListLabel.Size = UDim2.new(0, 280, 0, 20)
-playerListLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-playerListLabel.Parent = frame
-
--- Lista de jogadores
-local playerList = Instance.new("ScrollingFrame")
-playerList.Position = UDim2.new(0, 10, 0, 40)
-playerList.Size = UDim2.new(0, 280, 0, 200)
-playerList.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-playerList.ScrollBarThickness = 6
-playerList.Parent = frame
-
--- Campo de texto para inserir o ID do jogador
-local idInput = Instance.new("TextBox")
-idInput.PlaceholderText = "Insira o ID do jogador"
-idInput.Position = UDim2.new(0, 10, 0, 250)
-idInput.Size = UDim2.new(0, 200, 0, 20)
-idInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-idInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-idInput.Parent = frame
-
--- Botão para observar o jogador pelo ID inserido
-local observeButton = Instance.new("TextButton")
-observeButton.Text = "Observar"
-observeButton.Position = UDim2.new(0, 220, 0, 250)
-observeButton.Size = UDim2.new(0, 60, 0, 20)
-observeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-observeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-observeButton.Parent = frame
-
--- Botão para teleportar para a posição da câmera
-local teleportCameraButton = Instance.new("TextButton")
-teleportCameraButton.Text = "Teleportar para Câmera"
-teleportCameraButton.Position = UDim2.new(0, 10, 0, 280)
-teleportCameraButton.Size = UDim2.new(0, 140, 0, 20)
-teleportCameraButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-teleportCameraButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-teleportCameraButton.Parent = frame
-
--- Botão para teleportar o jogador para perto do seu jogador
-local teleportPlayerButton = Instance.new("TextButton")
-teleportPlayerButton.Text = "Teleportar para meu Player"
-teleportPlayerButton.Position = UDim2.new(0, 160, 0, 280)
-teleportPlayerButton.Size = UDim2.new(0, 130, 0, 20)
-teleportPlayerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-teleportPlayerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-teleportPlayerButton.Parent = frame
-
--- Botão para teleportar o jogador para perto da sua câmera
-local teleportToCameraButton = Instance.new("TextButton")
-teleportToCameraButton.Text = "Teleportar para minha Câmera"
-teleportToCameraButton.Position = UDim2.new(0, 10, 0, 310)
-teleportToCameraButton.Size = UDim2.new(0, 140, 0, 20)
-teleportToCameraButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-teleportToCameraButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-teleportToCameraButton.Parent = frame
-
--- Botão para enviar mensagem privada para o jogador
-local messageButton = Instance.new("TextButton")
-messageButton.Text = "Enviar Mensagem"
-messageButton.Position = UDim2.new(0, 160, 0, 310)
-messageButton.Size = UDim2.new(0, 130, 0, 20)
-messageButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-messageButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-messageButton.Parent = frame
-
-
--- Botão para abrir e fechar o layout
-local toggleButton = Instance.new("TextButton")
-toggleButton.Text = "Abrir Layout"
-toggleButton.Position = UDim2.new(0, 10, 0, 320)
-toggleButton.Size = UDim2.new(0, 140, 0, 20)
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-toggleButton.Parent = frame
-
--- Função para alternar a visibilidade do layout
-local function toggleLayoutVisibility()
-    ScreenGui.Enabled = not ScreenGui.Enabled
-    if ScreenGui.Enabled then
-        toggleButton.Text = "Fechar Layout"
-    else
-        toggleButton.Text = "Abrir Layout"
+-- Função para verificar o nível do jogador e iniciar uma missão adequada
+function MonLevel()
+    local lv = game:GetService("Players").LocalPlayer.PlayerStats.Level.Value
+    
+    if lv >= 1 and lv < 14 then
+        _G.Quest = "macaco"
+        G.Ms = "macaco [Lv:15]"
     end
 end
 
--- Conectar o botão de abrir e fechar o layout
-toggleButton.MouseButton1Click:Connect(toggleLayoutVisibility)
-
-
--- Função para observar o jogador selecionado
-local function observePlayer(player)
-    if player and player.Character then
-        local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            Camera.CameraSubject = humanoidRootPart
-            SendMessage("O usuário " .. LocalPlayer.Name .. " está observando o jogador " .. player.Name)
+-- Função para automatizar o processo de farm
+function AutoFarm()
+    while G.AutoFarm do
+        if not game:GetService("Players").LocalPlayer.PlayerGui.QuestGui.Enabled then
+            game:GetService("ReplicatedStorage").FuncQuest:InvokeServer(_G.Quest)
         else
-            SendMessage("O jogador não está disponível para observação.")
+            for _, v in pairs(game:GetService("Workspace").Lives:GetChildren()) do
+                if v.Name == G.Ms and v.Torso.Transparency == 0 then
+                    repeat
+                        wait()
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)
+                        game:GetService('VirtualUser'):CaptureController()
+                        game:GetService('VirtualUser'):ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+                    until not G.AutoFarm or v.Humanoid.Health <= 0
+                end
+            end
         end
-    else
-        SendMessage("ID do jogador inválido ou jogador não encontrado.")
+        wait(1) -- Espera um segundo antes de verificar novamente
     end
-end
-
--- Função para trazer o jogador selecionado até a posição da sua câmera
--- Função para trazer o jogador selecionado até a posição da sua câmera
-local function teleportToCamera(player)
-    if player and player.Character then
-        local playerCharacter = player.Character
-        local humanoidRootPart = playerCharacter:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            local cameraPosition = Camera.CFrame.p
-            local cameraForward = Camera.CFrame.lookVector
-     -- Função para atualizar a lista de jogadores e NPCs
-local function updatePlayerList()
-    playerList:ClearAllChildren()
-    local yPosition = 5
-
-    -- Adicionar jogadores à lista
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            local playerButton = Instance.new("TextButton")
-            playerButton.Text = string.format("[%s] %s (Player)", player.UserId, player.Name)
-            playerButton.Position = UDim2.new(0, 5, 0, yPosition)
-            playerButton.Size = UDim2.new(0, 270, 0, 20)
-            playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-            playerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            playerButton.Parent = playerList
-
-            playerButton.MouseButton1Click:Connect(function()
-                idInput.Text = player.UserId
-            end)
-
-            yPosition = yPosition + 25
-        end
-    end
-
-    -- Adicionar NPCs à lista
-    for _, npc in ipairs(workspace:GetDescendants()) do
-        if npc:IsA("Model") and npc:FindFirstChildOfClass("Humanoid") then
-            local npcButton = Instance.new("TextButton")
-            npcButton.Text = string.format("[%s] %s (NPC)", npc.Name, npc.Name)
-            npcButton.Position = UDim2.new(0, 5, 0, yPosition)
-            npcButton.Size = UDim2.new(0, 270, 0, 20)
-            npcButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-            npcButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            npcButton.Parent = playerList
-
-            npcButton.MouseButton1Click:Connect(function()
-                idInput.Text = npc.Name
-            end)
-
-            yPosition = yPosition + 25
-        end
-    end
-end
-       local offset = Vector3.new(0, 3, 0) -- Ajuste de altura para evitar que o jogador fique preso no chão
-            humanoidRootPart.CFrame = CFrame.new(cameraPosition + (cameraForward * 5) + offset)
-            SendMessage("O usuário " .. player.Name .. " foi teleportado para a posição da sua câmera.")
-        else
-            SendMessage("O jogador selecionado não está disponível para teleportação.")
-        end
-    else
-        SendMessage("Selecione um jogador da lista primeiro.")
-    end
-end
-
-
--- Conectar o botão de observar o jogador pelo ID inserido
-observeButton.MouseButton1Click:Connect(function()
-    local playerId = tonumber(idInput.Text)
-    if playerId then
-        local player = Players:GetPlayerByUserId(playerId)
-        observePlayer(player)
-    else
-        SendMessage("Insira um ID de jogador válido.")
-    end
-end)
-
--- Conectar o botão de teleportar para a posição da câmera
-teleportCameraButton.MouseButton1Click:Connect(function()
-    teleportToCamera(Players.LocalPlayer)
-end)
-
--- Conectar o botão de teleportar o jogador para perto do seu jogador
-teleportPlayerButton.MouseButton1Click:Connect(function()
-    local playerId = tonumber(idInput.Text)
-    if playerId then
-        local player = Players:GetPlayerByUserId(playerId)
-        teleportToCamera(player)
-    else
-        SendMessage("Insira um ID de jogador válido.")
-    end
-end)
-
--- Conectar o botão de teleportar o jogador para perto da sua câmera
-teleportToCameraButton.MouseButton1Click:Connect(function()
-    local playerId = tonumber(idInput.Text)
-    if playerId then
-        local player = Players:GetPlayerByUserId(playerId)
-        teleportToCamera(player)
-    else
-        SendMessage("Insira um ID de jogador válido.")
-    end
-end)
-
--- Conectar o botão de enviar mensagem
-messageButton.MouseButton1Click:Connect(function()
-    local message = "Mensagem privada."
-    local playerId = tonumber(idInput.Text)
-    if playerId then
-        local player = Players:GetPlayerByUserId(playerId)
-        if player then
-            SendMessage("Mensagem de " .. LocalPlayer.Name .. ": " .. message)
-        else
-            SendMessage("O jogador selecionado não está disponível.")
-        end
-    else
-        SendMessage("Insira um ID de jogador válido.")
-    end
-end)
-
--- Atualizar a lista de jogadores inicialmente
-updatePlayerList()
-
--- Função para enviar mensagem para o chat com tag especial
-local function SendMessage(message)
-    local tag = "[Admin]"
-    local formattedMessage = string.format("[%s] %s", tag, message)
-    ChatService:ChatAll(message)
 end
 
