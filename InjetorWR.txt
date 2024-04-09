@@ -10,7 +10,7 @@ ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
 
 -- Criar um frame para o layout
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 320)
+frame.Size = UDim2.new(0, 300, 0, 350)
 frame.Position = UDim2.new(0, 10, 0, 10)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 2
@@ -51,19 +51,28 @@ observeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 observeButton.Parent = frame
 
 -- Botão para teleportar para a posição da câmera
-local teleportButton = Instance.new("TextButton")
-teleportButton.Text = "Teleportar para Câmera"
-teleportButton.Position = UDim2.new(0, 10, 0, 280)
-teleportButton.Size = UDim2.new(0, 140, 0, 20)
-teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-teleportButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-teleportButton.Parent = frame
+local teleportCameraButton = Instance.new("TextButton")
+teleportCameraButton.Text = "Teleportar para Câmera"
+teleportCameraButton.Position = UDim2.new(0, 10, 0, 280)
+teleportCameraButton.Size = UDim2.new(0, 140, 0, 20)
+teleportCameraButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+teleportCameraButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+teleportCameraButton.Parent = frame
+
+-- Botão para teleportar o jogador para perto do seu jogador
+local teleportPlayerButton = Instance.new("TextButton")
+teleportPlayerButton.Text = "Teleportar para meu Player"
+teleportPlayerButton.Position = UDim2.new(0, 160, 0, 280)
+teleportPlayerButton.Size = UDim2.new(0, 130, 0, 20)
+teleportPlayerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+teleportPlayerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+teleportPlayerButton.Parent = frame
 
 -- Botão para enviar mensagem privada para o jogador
 local messageButton = Instance.new("TextButton")
 messageButton.Text = "Enviar Mensagem"
-messageButton.Position = UDim2.new(0, 160, 0, 280)
-messageButton.Size = UDim2.new(0, 130, 0, 20)
+messageButton.Position = UDim2.new(0, 10, 0, 310)
+messageButton.Size = UDim2.new(0, 140, 0, 20)
 messageButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 messageButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 messageButton.Parent = frame
@@ -112,10 +121,33 @@ observeButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Conectar o botão de teleportar
-teleportButton.MouseButton1Click:Connect(function()
+-- Conectar o botão de teleportar para a posição da câmera
+teleportCameraButton.MouseButton1Click:Connect(function()
     local cameraPosition = Camera.CFrame.p
     LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(cameraPosition))
+    SendMessage("O usuário " .. LocalPlayer.Name .. " teleportou para a posição da câmera.")
+end)
+
+-- Conectar o botão de teleportar o jogador para perto do seu jogador
+teleportPlayerButton.MouseButton1Click:Connect(function()
+    local playerId = tonumber(idInput.Text)
+    if playerId then
+        local player = Players:GetPlayerByUserId(playerId)
+        if player then
+            local playerCharacter = player.Character
+            if playerCharacter then
+                local playerPosition = playerCharacter:GetPrimaryPartCFrame().p
+                LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(playerPosition))
+                SendMessage("O usuário " .. player.Name .. " foi teleportado para perto de " .. LocalPlayer.Name)
+            else
+                SendMessage("O jogador não está disponível para teleportação.")
+            end
+        else
+            SendMessage("ID do jogador inválido ou jogador não encontrado.")
+        end
+    else
+        SendMessage("Insira um ID de jogador válido.")
+    end
 end)
 
 -- Conectar o botão de enviar mensagem
@@ -154,11 +186,18 @@ end)
 -- Botão para atualizar a lista de jogadores
 local refreshButton = Instance.new("TextButton")
 refreshButton.Text = "Atualizar Lista"
-refreshButton.Position = UDim2.new(0, 10, 0, 310)
-refreshButton.Size = UDim2.new(0, 140, 0, 20)
+refreshButton.Position = UDim2.new(0, 160, 0, 310)
+refreshButton.Size = UDim2.new(0, 130, 0, 20)
 refreshButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 refreshButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 refreshButton.Parent = frame
 
 -- Conectar o botão de atualizar lista
 refreshButton.MouseButton1Click:Connect(updatePlayerList)
+
+-- Função para enviar mensagem para o chat com tag especial
+local function SendMessage(message)
+    local tag = "[Admin]"
+    local formattedMessage = string.format("[%s] %s", tag, message)
+    ChatService:Chat(LocalPlayer.Character, formattedMessage)
+end
