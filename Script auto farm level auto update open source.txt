@@ -191,6 +191,32 @@ _G.Settings = {
 }
 -- [require module]
 
+
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Text = "Abrir"
+toggleButton.Position = UDim2.new(0, 160, 0, 290)
+toggleButton.Size = UDim2.new(0, 130, 0, 20)
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+toggleButton.Parent = frame
+
+-- Variável para armazenar o estado do layout (aberto/fechado)
+local layoutOpen = false
+
+-- Função para abrir/fechar o layout
+local function toggleLayout()
+    layoutOpen = not layoutOpen
+    frame.Visible = layoutOpen
+    if layoutOpen then
+        toggleButton.Text = "Fechar"
+    else
+        toggleButton.Text = "Abrir"
+    end
+end
+
+
+
 local CombatFramework = require(game:GetService("Players").LocalPlayer.PlayerScripts:WaitForChild("CombatFramework"))
 local CombatFrameworkR = getupvalues(CombatFramework)[2]
 local RigController = require(game:GetService("Players")["LocalPlayer"].PlayerScripts.CombatFramework.RigController)
