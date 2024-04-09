@@ -55,7 +55,7 @@ local function updatePlayerList()
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
             local playerLabel = Instance.new("TextLabel")
-            playerLabel.Text = player.Name
+            playerLabel.Text = string.format("[%s] %s", player.UserId, player.Name)
             playerLabel.Position = UDim2.new(0, 5, 0, yPosition)
             playerLabel.Size = UDim2.new(0, 270, 0, 20)
             playerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
