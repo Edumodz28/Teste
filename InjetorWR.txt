@@ -3,20 +3,15 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
 local MaxDistance = 50  -- Distância máxima para procurar NPCs
-local AttackRange = 30  -- Distância máxima para atacar NPCs
+local AttackRange = 10  -- Distância máxima para atacar NPCs
 
 -- Função para obter partes visíveis no campo de visão do jogador
 local function getPartsInViewport(maxDistance)
     local partsInViewport = {}
-    for _, part in ipairs(workspace:GetDescendants()) do
-        if part:IsA("BasePart") then
-            local distance = LocalPlayer:DistanceFromCharacter(part.Position)
-            if distance <= maxDistance then
-                local _, isVisible = Camera:WorldToViewportPoint(part.Position)
-                if isVisible then
-                    table.insert(partsInViewport, part)
-                end
-            end
+    local ignoreList = {LocalPlayer.Character, Camera}
+    for _, part in ipairs(workspace:FindPartsInRegion3WithIgnoreList(Region3.new(Camera.CFrame.Position - Vector3.new(maxDistance, maxDistance, maxDistance), Camera.CFrame.Position + Vector3.new(maxDistance, maxDistance, maxDistance)), ignoreList, math.huge)) do
+        if part:IsA("BasePart") and part.Parent and part.Parent:FindFirstChildOfClass("Humanoid") then
+            table.insert(partsInViewport, part)
         end
     end
     return partsInViewport
@@ -55,26 +50,23 @@ while true do
         
         -- Loop através das partes visíveis no campo de visão
         for _, Part in ipairs(Parts) do
-            -- Verifica se a parte pertence a um personagem e se o personagem está vivo
-            if Part and Part.Parent and Part.Parent ~= LocalPlayer.Character and Part.Parent:FindFirstChild("Humanoid") and Part.Parent.Humanoid.Health > 0 then
-                -- Verifica se o NPC está dentro do alcance de ataque
-                local distanceToNPC = LocalPlayer:DistanceFromCharacter(Part.Position)
-                if distanceToNPC <= AttackRange then
-                    -- Teleporta o jogador para cima do NPC
-                    teleportToNPC(Part)
-                    
-                    -- Ativa a ferramenta e ataca a parte
-                    Tool:Activate()
-                    game:GetService("ReplicatedStorage").MeleeEvent:FireServer(Part)
-                    
-                    -- Aguarda até que a vida do NPC seja menor ou igual a 0 (ou seja, o NPC morreu)
-                    while Part.Parent:FindFirstChild("Humanoid") and Part.Parent.Humanoid.Health > 0 do
-                        wait()
-                    end
-                    
-                    -- Procura pelo próximo NPC
-                    break
+            -- Verifica se o NPC está dentro do alcance de ataque
+            local distanceToNPC = LocalPlayer:DistanceFromCharacter(Part.Position)
+            if distanceToNPC <= AttackRange then
+                -- Teleporta o jogador para cima do NPC
+                teleportToNPC(Part)
+                
+                -- Ativa a ferramenta e ataca a parte
+                Tool:Activate()
+                game:GetService("ReplicatedStorage").MeleeEvent:FireServer(Part)
+                
+                -- Aguarda até que a vida do NPC seja menor ou igual a 0 (ou seja, o NPC morreu)
+                while Part.Parent:FindFirstChildOfClass("Humanoid") and Part.Parent.Humanoid.Health > 0 do
+                    wait()
                 end
+                
+                -- Procura pelo próximo NPC
+                break
             end
         end
     end
