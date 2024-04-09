@@ -2,107 +2,65 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local Workspace = game:GetService("Workspace")
-local Chat = game:GetService("Chat")
+local UserInputService = game:GetService("UserInputService")
 
--- Variáveis para controle de mensagens no chat
-local messageCount = 0
-local messageLimit = 5
-local cooldownTime = 10
-local lastMessageTime = 0
-
--- Evento para causar dano aos jogadores e NPCs
-local AttackEvent = Instance.new("BindableEvent")
-
--- Função para enviar mensagem para o chat com tag especial
-local function SendMessage(message)
-    if messageCount < messageLimit then
-        local tag = "[Admin]"
-        local playerName = LocalPlayer.Name
-        local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
-        Chat:Chat(LocalPlayer.Character, formattedMessage)
-        messageCount = messageCount + 1
-    else
-        local currentTime = tick()
-        if currentTime - lastMessageTime >= cooldownTime then
-            messageCount = 0
-            lastMessageTime = currentTime
-            local tag = "[Admin]"
-            local playerName = LocalPlayer.Name
-            local formattedMessage = string.format("[%s] %s: %s", tag, playerName, message)
-            Chat:Chat(LocalPlayer.Character, formattedMessage)
-            messageCount = messageCount + 1
+-- Função para trocar a animação de todos os jogadores para "morto"
+local function PlayDeathAnimation()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character:FindFirstChild("Humanoid"):LoadAnimation(Instance.new("Animation"))
+            player.Character.Humanoid:Move(Vector3.new(0,0,0))
+            player.Character.Humanoid:Move(Vector3.new(0,-1,0))
         end
     end
 end
 
--- Função para criar o quadrado que causa dano
-local function CreateDamageSquare()
-    local damageSquare = Instance.new("Part")
-    damageSquare.Size = Vector3.new(2, 2, 2)
-    damageSquare.Anchored = true
-    damageSquare.Position = LocalPlayer.Character.HumanoidRootPart.Position
-    damageSquare.BrickColor = BrickColor.new("Bright red")
-    damageSquare.Transparency = 0.5  -- Definir transparência para 50%
-    damageSquare.Parent = Workspace
-
-    -- Detectar quando um jogador ou NPC entra na área do quadrado
-    damageSquare.Touched:Connect(function(hit)
-        if hit.Parent and hit.Parent:IsA("Model") then
-            local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
-            if humanoid and hit.Parent ~= LocalPlayer.Character then
-                AttackEvent:Fire(humanoid, hit.Parent.Name) -- Disparar evento para causar dano ao jogador ou NPC
-            end
-        end
-    end)
-end
-
--- Função para criar o quadrado que causa dano quando pressionar "h"
-Mouse.KeyDown:Connect(function(key)
-    if key == "h" then
-        CreateDamageSquare()
-    end
-end)
-
--- Disparar evento quando um jogador ou NPC é atingido pelo quadrado
-AttackEvent.Event:Connect(function(humanoid, npcName)
-    humanoid:TakeDamage(10) -- Causar 10 de dano ao jogador ou NPC
-    SendMessage(string.format("Você causou 10 de dano a %s!", npcName)) -- Enviar mensagem com o nome do NPC
-end)
-
--- Função para teleportar NPCs para o jogador
-local function TeleportNPCsToPlayer()
-    local NPCs = Workspace:GetDescendants()
-    for _, npc in ipairs(NPCs) do
-        if npc:IsA("Model") and npc:FindFirstChildOfClass("Humanoid") then
-            npc:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame)
+-- Função para ativar/desativar a capacidade de atravessar paredes
+local function ToggleWallCollision()
+    for _, part in ipairs(Workspace:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = not part.CanCollide
         end
     end
 end
 
--- Função para teleportar NPCs quando pressionar "t"
-Mouse.KeyDown:Connect(function(key)
-    if key == "t" then
-        TeleportNPCsToPlayer()
-    end
-end)
-
--- Speed
-local function SetPlayerSpeed(speed)
-    local character = LocalPlayer.Character
-    if character then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = speed
+-- Função para tornar o jogador invisível
+local function ToggleInvisibility()
+    for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.Transparency = 1
+            part.Reflectance = 0
         end
     end
 end
 
--- Ativar o Speed
-SetPlayerSpeed(100) -- Definindo a velocidade do jogador como 100
+-- Função para clonar objetos que o jogador já pegou
+local function ClonePickedObjects()
+    local pickedObjects = {}  -- Armazenar referências aos objetos pegos pelo jogador
 
--- Super Pulo
-Mouse.KeyDown:Connect(function(key)
-    if key == "space" then
-        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+    -- Encontrar e armazenar referências aos objetos pegos pelo jogador
+    for _, obj in ipairs(Workspace:GetChildren()) do
+        if obj:IsA("Model") and obj:IsDescendantOf(LocalPlayer) then
+            table.insert(pickedObjects, obj:Clone())
+        end
+    end
+
+    -- Clonar os objetos armazenados e colocá-los na mesma posição que o jogador
+    for _, obj in ipairs(pickedObjects) do
+        obj.Parent = Workspace
+        obj:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame)
+    end
+end
+
+-- Função para executar ações com base na tecla pressionada
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Q then
+        PlayDeathAnimation()
+    elseif input.KeyCode == Enum.KeyCode.W then
+        ToggleWallCollision()
+    elseif input.KeyCode == Enum.KeyCode.E then
+        ToggleInvisibility()
+    elseif input.KeyCode == Enum.KeyCode.R then
+        ClonePickedObjects()
     end
 end)
