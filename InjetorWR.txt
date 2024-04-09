@@ -67,22 +67,18 @@ local function CreateDamageSquare(position, playerDamage)
     return damageSquare
 end
 
--- Função para parar todos os NPCs
-local function StopAllNPCs()
-    local NPCs = {}  -- Lista para armazenar todos os NPCs
-
-    -- Encontrar todos os NPCs no jogo
-    for _, obj in ipairs(game:GetService("Workspace"):GetDescendants()) do
+-- Função para congelar todos os NPCs
+local function FreezeAllNPCs()
+    for _, obj in ipairs(Workspace:GetDescendants()) do
         if obj:IsA("Model") and obj:FindFirstChild("IsNPC") then
-            table.insert(NPCs, obj)
-        end
-    end
-
-    -- Parar todos os NPCs encontrados
-    for _, npc in ipairs(NPCs) do
-        local humanoid = npc:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = 0  -- Definir a velocidade de movimento como zero para parar o NPC
+            local humanoid = obj:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 0
+                humanoid:Move(Vector3.new(0,0,0))  -- Parar qualquer movimento atual
+                humanoid.AnimationPlayed:Connect(function(animationTrack)  -- Interromper animações
+                    animationTrack:Stop()
+                end)
+            end
         end
     end
 end
@@ -110,5 +106,12 @@ end
 Mouse.KeyDown:Connect(function(key)
     if key == "h" then
         CreateDamageSquareAtPosition()
+    end
+end)
+
+-- Congelar todos os NPCs ao pressionar a tecla 'f'
+Mouse.KeyDown:Connect(function(key)
+    if key == "f" then
+        FreezeAllNPCs()
     end
 end)
