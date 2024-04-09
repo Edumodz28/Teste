@@ -6,11 +6,11 @@ function MonLevel()
     local lv = game:GetService("Players").LocalPlayer.PlayerStats.Level.Value
     
     if lv >= 1 and lv < 14 then
-        _G.Quest = "Bandit"
-        _G.Ms = "Bandit [Lv:5]"
+        _G.Quest = "Soldier"
+        _G.Ms = "Soldier [Lv:1]"
     elseif lv >= 15 and lv <= 30000 then
-        _G.Quest = "Pirates"
-        _G.Ms = "Pirates [Lv:15]"
+        _G.Quest = "Soldier [Lv:1]"
+        _G.Ms = "Soldier [Lv:1]"
     end
 end
 
