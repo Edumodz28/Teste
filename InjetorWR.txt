@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local UserInputService = game:GetService("UserInputService")
+local Camera = game.Workspace.CurrentCamera
 
 -- Criar uma tela de GUI
 local ScreenGui = Instance.new("ScreenGui")
@@ -9,151 +10,71 @@ ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
 
 -- Criar um frame para o layout
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 200)
+frame.Size = UDim2.new(0, 300, 0, 200)
 frame.Position = UDim2.new(0, 10, 0, 10)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 2
 frame.Parent = ScreenGui
 
--- Label para a velocidade do jogador
-local speedLabel = Instance.new("TextLabel")
-speedLabel.Text = "Velocidade do Jogador:"
-speedLabel.Position = UDim2.new(0, 10, 0, 10)
-speedLabel.Size = UDim2.new(0, 150, 0, 20)
-speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedLabel.Parent = frame
+-- Label para a lista de jogadores
+local playerListLabel = Instance.new("TextLabel")
+playerListLabel.Text = "Lista de Jogadores:"
+playerListLabel.Position = UDim2.new(0, 10, 0, 10)
+playerListLabel.Size = UDim2.new(0, 280, 0, 20)
+playerListLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+playerListLabel.Parent = frame
 
--- Slider para ajustar a velocidade do jogador
-local speedSlider = Instance.new("TextBox")
-speedSlider.Text = "100"
-speedSlider.Position = UDim2.new(0, 10, 0, 40)
-speedSlider.Size = UDim2.new(0, 180, 0, 20)
-speedSlider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-speedSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedSlider.Parent = frame
+-- Frame para a lista de jogadores
+local playerListFrame = Instance.new("Frame")
+playerListFrame.Position = UDim2.new(0, 10, 0, 40)
+playerListFrame.Size = UDim2.new(0, 280, 0, 120)
+playerListFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+playerListFrame.Parent = frame
 
--- Label para o super pulo
-local jumpLabel = Instance.new("TextLabel")
-jumpLabel.Text = "Super Pulo:"
-jumpLabel.Position = UDim2.new(0, 10, 0, 70)
-jumpLabel.Size = UDim2.new(0, 100, 0, 20)
-jumpLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-jumpLabel.Parent = frame
+-- Variável para armazenar o jogador selecionado
+local selectedPlayer = nil
 
--- Slider para ajustar o super pulo
-local jumpSlider = Instance.new("TextButton")
-jumpSlider.Text = "False"
-jumpSlider.Position = UDim2.new(0, 120, 0, 70)
-jumpSlider.Size = UDim2.new(0, 70, 0, 20)
-jumpSlider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-jumpSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
-jumpSlider.Parent = frame
-
--- Label para ativar/desativar o Wall Hack
-local wallHackLabel = Instance.new("TextLabel")
-wallHackLabel.Text = "Wall Hack:"
-wallHackLabel.Position = UDim2.new(0, 10, 0, 100)
-wallHackLabel.Size = UDim2.new(0, 100, 0, 20)
-wallHackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-wallHackLabel.Parent = frame
-
--- Botão para ativar/desativar o Wall Hack
-local wallHackButton = Instance.new("TextButton")
-wallHackButton.Text = "Desativado"
-wallHackButton.Position = UDim2.new(0, 120, 0, 100)
-wallHackButton.Size = UDim2.new(0, 70, 0, 20)
-wallHackButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-wallHackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-wallHackButton.Parent = frame
-
--- Label para ativar/desativar a invisibilidade
-local invisibilityLabel = Instance.new("TextLabel")
-invisibilityLabel.Text = "Invisibilidade:"
-invisibilityLabel.Position = UDim2.new(0, 10, 0, 130)
-invisibilityLabel.Size = UDim2.new(0, 100, 0, 20)
-invisibilityLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-invisibilityLabel.Parent = frame
-
--- Botão para ativar/desativar a invisibilidade
-local invisibilityButton = Instance.new("TextButton")
-invisibilityButton.Text = "Desativada"
-invisibilityButton.Position = UDim2.new(0, 120, 0, 130)
-invisibilityButton.Size = UDim2.new(0, 70, 0, 20)
-invisibilityButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-invisibilityButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-invisibilityButton.Parent = frame
-
--- Função para atualizar a velocidade do jogador
-local function updateSpeed(value)
-    local speed = tonumber(value)
-    if speed then
-        LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = speed
-    end
-end
-
--- Função para atualizar o super pulo
-local function updateJump(value)
-    if value == "True" then
-        UserInputService.JumpEnabled = true
-    else
-        UserInputService.JumpEnabled = false
-    end
-end
-
--- Função para ativar/desativar o Wall Hack
-local function toggleWallHack()
-    for _, part in ipairs(game.Workspace:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = not part.CanCollide
+-- Função para atualizar a lista de jogadores
+local function updatePlayerList()
+    for _, child in ipairs(playerListFrame:GetChildren()) do
+        if child:IsA("TextLabel") then
+            child:Destroy()
         end
     end
-end
 
--- Função para ativar/desativar a invisibilidade
-local function toggleInvisibility()
+    local yPosition = 5
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
-            for _, part in ipairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.Transparency = invisibilityButton.Text == "Ativada" and 1 or 0
-                    part.Reflectance = invisibilityButton.Text == "Ativada" and 0 or 1
-                end
-            end
+            local playerLabel = Instance.new("TextLabel")
+            playerLabel.Text = player.Name
+            playerLabel.Position = UDim2.new(0, 5, 0, yPosition)
+            playerLabel.Size = UDim2.new(0, 270, 0, 20)
+            playerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            playerLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            playerLabel.Parent = playerListFrame
+
+            playerLabel.MouseButton1Click:Connect(function()
+                selectedPlayer = player
+                observePlayer(player)
+            end)
+
+            yPosition = yPosition + 25
         end
     end
 end
 
--- Atualizar a velocidade do jogador quando o slider for alterado
-speedSlider.FocusLost:Connect(function()
-    updateSpeed(speedSlider.Text)
-end)
-
--- Atualizar o super pulo quando o slider for alterado
-jumpSlider.MouseButton1Down:Connect(function()
-    if jumpSlider.Text == "True" then
-        jumpSlider.Text = "False"
-    else
-        jumpSlider.Text = "True"
+-- Função para observar um jogador
+local function observePlayer(player)
+    -- Parar de observar o jogador anterior
+    if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local humanoidRootPart = selectedPlayer.Character.HumanoidRootPart
+        Camera.CameraSubject = humanoidRootPart
     end
-    updateJump(jumpSlider.Text)
-end)
+end
 
--- Ativar/desativar o Wall Hack quando o botão for clicado
-wallHackButton.MouseButton1Click:Connect(function()
-    if wallHackButton.Text == "Ativado" then
-        wallHackButton.Text = "Desativado"
-    else
-        wallHackButton.Text = "Ativado"
-    end
-    toggleWallHack()
-end)
+-- Atualizar a lista de jogadores quando um jogador entra ou sai do jogo
+Players.PlayerAdded:Connect(updatePlayerList)
+Players.PlayerRemoving:Connect(updatePlayerList)
 
--- Ativar/desativar a invisibilidade quando o botão for clicado
-invisibilityButton.MouseButton1Click:Connect(function()
-    if invisibilityButton.Text == "Ativada" then
-        invisibilityButton.Text = "Desativada"
-    else
-        invisibilityButton.Text = "Ativada"
-    end
-    toggleInvisibility()
-end)
+-- Atualizar a lista de jogadores inicialmente
+updatePlayerList()
